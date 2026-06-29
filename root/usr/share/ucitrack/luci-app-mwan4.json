@@ -1,0 +1,5 @@
+{
+	"config": "mwan4",
+	"init": "mwan4",
+	"affects": [ "firewall" ]
+}

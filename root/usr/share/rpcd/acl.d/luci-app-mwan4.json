@@ -1,0 +1,73 @@
+{
+	"luci-app-mwan4-status": {
+		"description": "Grant access for luci-app-mwan4 status information",
+		"read": {
+			"ubus": {
+				"mwan4": [
+					"status"
+				]
+			}
+		}
+	},
+	"luci-app-mwan4": {
+		"description": "Grant access for luci-app-mwan4 configuration",
+		"read": {
+			"file": {
+				"/usr/bin/httping": [
+					"list"
+				],
+				"/usr/bin/nping": [
+					"list"
+				],
+				"/usr/bin/arping": [
+					"list"
+				]
+			},
+			"ubus": {
+				"mwan4": [
+					"capabilities",
+					"status",
+					"validate"
+				]
+			},
+			"uci": [
+				"mwan4",
+				"network"
+			]
+		},
+		"write": {
+			"uci": [
+				"mwan4"
+			]
+		}
+	},
+	"luci-app-mwan4-operator": {
+		"description": "Grant access for luci-app-mwan4 runtime controls",
+		"read": {
+			"ubus": {
+				"mwan4": [
+					"capabilities",
+					"status"
+				]
+			}
+		},
+		"write": {
+			"ubus": {
+				"mwan4": [
+					"control"
+				]
+			}
+		}
+	},
+	"luci-app-mwan4-diagnostics": {
+		"description": "Grant access for luci-app-mwan4 diagnostics",
+		"read": {
+			"ubus": {
+				"mwan4": [
+					"capabilities",
+					"diagnostics"
+				]
+			}
+		}
+	}
+}

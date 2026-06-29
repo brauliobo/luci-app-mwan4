@@ -1,0 +1,113 @@
+{
+	"admin/status/mwan4": {
+		"title": "MultiWAN 4",
+		"order": 600,
+		"action": {
+			"type": "view",
+			"path": "mwan4/status/overview"
+		},
+		"depends": {
+			"acl": [
+				"luci-app-mwan4-status"
+			]
+		}
+	},
+	"admin/network/mwan4": {
+		"title": "MultiWAN 4",
+		"order": 600,
+		"action": {
+			"type": "firstchild"
+		}
+	},
+	"admin/network/mwan4/overview": {
+		"title": "Overview",
+		"order": 1,
+		"action": {
+			"type": "view",
+			"path": "mwan4/network/overview"
+		},
+		"depends": {
+			"acl": [
+				"luci-app-mwan4"
+			]
+		}
+	},
+	"admin/network/mwan4/interfaces": {
+		"order": 100,
+		"firstchild_ineligible": true,
+		"action": {
+			"type": "view",
+			"path": "mwan4/network/interfaces"
+		},
+		"depends": {
+			"acl": [
+				"luci-app-mwan4"
+			]
+		}
+	},
+	"admin/network/mwan4/routes": {
+		"order": 110,
+		"firstchild_ineligible": true,
+		"action": {
+			"type": "view",
+			"path": "mwan4/network/routes"
+		},
+		"depends": {
+			"acl": [
+				"luci-app-mwan4"
+			]
+		}
+	},
+	"admin/network/mwan4/strategies": {
+		"order": 120,
+		"firstchild_ineligible": true,
+		"action": {
+			"type": "view",
+			"path": "mwan4/network/strategies"
+		},
+		"depends": {
+			"acl": [
+				"luci-app-mwan4"
+			]
+		}
+	},
+	"admin/network/mwan4/rules": {
+		"order": 130,
+		"firstchild_ineligible": true,
+		"action": {
+			"type": "view",
+			"path": "mwan4/network/rules"
+		},
+		"depends": {
+			"acl": [
+				"luci-app-mwan4"
+			]
+		}
+	},
+	"admin/network/mwan4/globals": {
+		"order": 140,
+		"firstchild_ineligible": true,
+		"action": {
+			"type": "view",
+			"path": "mwan4/network/globals"
+		},
+		"depends": {
+			"acl": [
+				"luci-app-mwan4"
+			]
+		}
+	},
+	"admin/network/mwan4/diagnostics": {
+		"order": 150,
+		"firstchild_ineligible": true,
+		"action": {
+			"type": "view",
+			"path": "mwan4/status/diagnostics"
+		},
+		"depends": {
+			"acl": [
+				"luci-app-mwan4-diagnostics"
+			]
+		}
+	}
+}

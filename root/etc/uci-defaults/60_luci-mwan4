@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if [ -f /etc/config/mwan4 ] && grep -qE "^config[[:space:]]+(member|policy)[[:space:]]" /etc/config/mwan4; then
+	cp -p /etc/config/mwan4 /etc/config/mwan4.pre-luci-app-mwan4-migration
+	sed -i \
+		-e "s/^config[[:space:]]\\+member[[:space:]]/config route /" \
+		-e "s/^config[[:space:]]\\+policy[[:space:]]/config strategy /" \
+		/etc/config/mwan4
+fi
+
+[ -x /etc/init.d/rpcd ] && /etc/init.d/rpcd restart || true
+[ -x /etc/init.d/uhttpd ] && /etc/init.d/uhttpd restart || true
+[ -x /etc/init.d/mwan4 ] && /etc/init.d/mwan4 restart || true
+
+exit 0

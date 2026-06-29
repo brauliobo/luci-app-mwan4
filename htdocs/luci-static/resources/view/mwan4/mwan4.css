@@ -1,0 +1,1040 @@
+.mwan4-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 12px;
+	margin: 12px 0;
+}
+
+.mwan4-card {
+	border: 1px solid var(--border-color-medium);
+	border-radius: 6px;
+	padding: 12px;
+	background: var(--background-color-high);
+}
+
+.mwan4-card h3 {
+	margin: 0 0 8px;
+	font-size: 16px;
+}
+
+.mwan4-kv {
+	display: grid;
+	grid-template-columns: 110px minmax(0, 1fr);
+	gap: 4px 10px;
+}
+
+.mwan4-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 10px;
+}
+
+.mwan4-pill {
+	display: inline-block;
+	border-radius: 999px;
+	padding: 2px 8px;
+	font-weight: 600;
+}
+
+.mwan4-online { background: #d9f0df; color: #155724; }
+.mwan4-offline { background: #f8d7da; color: #721c24; }
+.mwan4-warning { background: #fff3cd; color: #856404; }
+.mwan4-muted { background: #e9ecef; color: #495057; }
+.mwan4-output { white-space: pre-wrap; overflow: auto; max-height: 70vh; }
+
+.mwan4-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.mwan4-alert {
+	border: 1px solid transparent;
+	border-radius: 6px;
+	margin: 0 0 14px;
+	padding: 12px 14px;
+}
+
+.mwan4-alert p {
+	margin: 6px 0;
+}
+
+.mwan4-alert ul {
+	margin: 8px 0 0 18px;
+	padding: 0;
+}
+
+.mwan4-alert li {
+	margin: 6px 0;
+}
+
+.mwan4-alert small {
+	display: block;
+	margin-top: 2px;
+}
+
+.mwan4-alert-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.mwan4-alert-heading span {
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.52);
+	font-size: 11px;
+	font-weight: 700;
+	padding: 2px 7px;
+	white-space: nowrap;
+}
+
+.mwan4-alert-action {
+	font-weight: 700;
+}
+
+.mwan4-muted-line {
+	color: var(--text-color-medium);
+}
+
+.mwan4-alert-warning {
+	background: #fff8e1;
+	border-color: #ffe08a;
+	color: #5f4700;
+}
+
+.mwan4-alert-info {
+	background: #e8f2ff;
+	border-color: #b7d8ff;
+	color: #0b4778;
+}
+
+.mwan4-alert-compact {
+	padding: 10px 12px;
+}
+
+.mwan4-alert-compact p {
+	margin: 4px 0 0;
+}
+
+.mwan4-next-steps {
+	border: 1px solid var(--border-color-medium);
+	border-radius: 6px;
+	background: var(--background-color-high);
+	margin: 0 0 14px;
+	padding: 12px 14px;
+}
+
+.mwan4-next-steps h3 {
+	margin: 0 0 8px;
+	font-size: 16px;
+}
+
+.mwan4-next-steps ol {
+	display: grid;
+	gap: 8px;
+	margin: 0 0 0 18px;
+	padding: 0;
+}
+
+.mwan4-next-steps li {
+	line-height: 1.38;
+}
+
+.mwan4-next-steps span,
+.mwan4-next-steps code {
+	display: block;
+	margin-top: 2px;
+}
+
+.mwan4-diag-result {
+	display: grid;
+	gap: 12px;
+	margin-top: 12px;
+}
+
+.mwan4-diag-section,
+.mwan4-raw {
+	border: 1px solid var(--border-color-medium);
+	border-radius: 6px;
+	background: var(--background-color-high);
+	padding: 12px;
+}
+
+.mwan4-diag-section > h3 {
+	margin: 0 0 10px;
+}
+
+.mwan4-diag-section > summary,
+.mwan4-raw > summary {
+	cursor: pointer;
+	font-weight: 700;
+	margin-bottom: 8px;
+}
+
+.mwan4-counter-table td:nth-child(2),
+.mwan4-counter-table td:nth-child(3),
+.mwan4-counter-table th:nth-child(2),
+.mwan4-counter-table th:nth-child(3) {
+	text-align: right;
+}
+
+.mwan4-app {
+	--mwan4-radius: 8px;
+	--mwan4-radius-sm: 6px;
+	max-width: 1440px;
+	margin: 0 auto;
+}
+
+.mwan4-eyebrow {
+	color: var(--primary-color);
+	font-size: 11px;
+	font-weight: 800;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.mwan4-command-center {
+	border: 1px solid var(--border-color-medium);
+	border-radius: var(--mwan4-radius);
+	background: linear-gradient(135deg, rgba(38, 132, 255, 0.12), var(--background-color-high) 48%);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+	margin-bottom: 14px;
+	padding: 16px;
+}
+
+.mwan4-command-center.is-warning,
+.mwan4-command-center.is-setup {
+	background: linear-gradient(135deg, rgba(255, 193, 7, 0.16), var(--background-color-high) 50%);
+}
+
+.mwan4-command-center.is-ready {
+	background: linear-gradient(135deg, rgba(46, 160, 67, 0.12), var(--background-color-high) 50%);
+}
+
+.mwan4-command-main {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 14px;
+	align-items: start;
+}
+
+.mwan4-command-copy,
+.mwan4-next-action {
+	display: grid;
+	gap: 8px;
+}
+
+.mwan4-command-title {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.mwan4-command-title h2 {
+	margin: 0;
+	font-size: 30px;
+	font-weight: 800;
+}
+
+.mwan4-command-copy p {
+	color: var(--text-color-medium);
+	line-height: 1.42;
+	margin: 0;
+}
+
+.mwan4-next-action {
+	justify-items: start;
+	min-width: 220px;
+	padding-top: 2px;
+}
+
+.mwan4-next-action > strong {
+	font-size: 17px;
+}
+
+.mwan4-primary-action {
+	justify-self: start;
+}
+
+.mwan4-state-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 0.95fr) minmax(0, 0.95fr) minmax(280px, 1.1fr);
+	gap: 10px;
+	margin-top: 12px;
+}
+
+.mwan4-compact-metrics {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.mwan4-compact-metrics .mwan4-command-metric {
+	border: 1px solid var(--border-color-low);
+	border-radius: var(--mwan4-radius-sm);
+	background: rgba(255, 255, 255, 0.28);
+	padding: 10px;
+}
+
+.mwan4-command-metric span {
+	display: block;
+	color: var(--text-color-medium);
+	font-size: 11px;
+	font-weight: 800;
+	letter-spacing: 0.04em;
+	margin-bottom: 5px;
+	text-transform: uppercase;
+}
+
+.mwan4-command-metric strong {
+	display: block;
+	font-size: 18px;
+	overflow-wrap: anywhere;
+}
+
+.mwan4-command-metric small {
+	color: var(--text-color-medium);
+	display: block;
+	line-height: 1.3;
+	margin-top: 3px;
+}
+
+.mwan4-command-footer {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 12px;
+	align-items: start;
+	margin-top: 12px;
+}
+
+.mwan4-command-notices {
+	display: grid;
+	gap: 8px;
+}
+
+.mwan4-command-footer .mwan4-actions {
+	justify-content: flex-end;
+	margin-top: 0;
+}
+
+.mwan4-service-controls {
+	display: grid;
+	gap: 8px;
+	justify-self: end;
+	min-width: max-content;
+}
+
+.mwan4-service-controls .mwan4-advanced-fields {
+	background: transparent;
+	padding: 8px;
+}
+
+.mwan4-service-controls summary {
+	cursor: pointer;
+	font-weight: 700;
+}
+
+.mwan4-service-controls .mwan4-advanced-fields[open] summary {
+	margin-bottom: 8px;
+}
+
+.mwan4-guide-next {
+	color: var(--text-color);
+}
+
+.mwan4-counter-strip {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px;
+	margin-top: 12px;
+}
+
+.mwan4-counter-strip .mwan4-command-metric {
+	border: 1px solid var(--border-color-low);
+	border-radius: 8px;
+	background: rgba(255, 255, 255, 0.28);
+	padding: 12px;
+}
+
+.mwan4-first-run {
+	display: grid;
+	grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
+	gap: 16px;
+	align-items: stretch;
+	border: 1px solid var(--border-color-medium);
+	border-radius: 8px;
+	background: linear-gradient(135deg, rgba(38, 132, 255, 0.14), var(--background-color-high) 58%);
+	margin-bottom: 16px;
+	padding: 16px;
+}
+
+.mwan4-first-run-copy {
+	display: grid;
+	gap: 8px;
+}
+
+.mwan4-first-run-copy h3 {
+	margin: 0;
+	font-size: 22px;
+}
+
+.mwan4-first-run-copy p {
+	max-width: 680px;
+	margin: 0;
+	color: var(--text-color-medium);
+	line-height: 1.45;
+}
+
+.mwan4-first-run-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 4px;
+}
+
+.mwan4-setup-steps {
+	display: grid;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.mwan4-setup-steps li {
+	display: grid;
+	gap: 4px;
+	border: 1px solid var(--border-color-low);
+	border-radius: 6px;
+	background: rgba(255, 255, 255, 0.42);
+	padding: 10px;
+}
+
+.mwan4-setup-step.is-done {
+	border-color: rgba(46, 160, 67, 0.45);
+}
+
+.mwan4-setup-step.is-current {
+	border-color: var(--primary-color);
+	background: rgba(38, 132, 255, 0.08);
+}
+
+.mwan4-setup-step.is-disabled {
+	opacity: 0.72;
+}
+
+.mwan4-setup-steps span {
+	color: var(--text-color-medium);
+	line-height: 1.35;
+}
+
+.mwan4-step-status {
+	justify-self: start;
+	border-radius: 999px;
+	background: var(--background-color-low);
+	color: var(--text-color-medium);
+	font-size: 11px;
+	font-weight: 700;
+	padding: 2px 7px;
+	text-transform: uppercase;
+}
+
+.mwan4-setup-step.is-done .mwan4-step-status {
+	background: #d9f0df;
+	color: #155724;
+}
+
+.mwan4-setup-step.is-current .mwan4-step-status {
+	background: var(--primary-color);
+	color: #fff;
+}
+
+.mwan4-summary {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 10px;
+	margin-bottom: 16px;
+}
+
+.mwan4-metric {
+	border: 1px solid var(--border-color-medium);
+	border-radius: 6px;
+	background: var(--background-color-high);
+	padding: 14px;
+}
+
+.mwan4-metric span {
+	display: block;
+	color: var(--text-color-medium);
+	font-size: 12px;
+	text-transform: uppercase;
+}
+
+.mwan4-metric strong {
+	display: block;
+	font-size: 26px;
+	margin-top: 6px;
+}
+
+.mwan4-panel {
+	border: 1px solid var(--border-color-medium);
+	border-radius: var(--mwan4-radius);
+	background: var(--background-color-high);
+	margin-bottom: 14px;
+	padding: 14px;
+}
+
+.mwan4-panel > h3 {
+	margin: 0 0 12px;
+	font-size: 18px;
+}
+
+.mwan4-table {
+	display: grid;
+	gap: 8px;
+}
+
+.mwan4-row {
+	display: grid;
+	grid-template-columns: 1.1fr 0.9fr 1.2fr 1.2fr auto;
+	gap: 10px;
+	align-items: center;
+	border-top: 1px solid var(--border-color-low);
+	padding-top: 8px;
+	min-width: 0;
+}
+
+.mwan4-cell {
+	min-width: 0;
+}
+
+.mwan4-head {
+	border-top: 0;
+	padding-top: 0;
+	color: var(--text-color-medium);
+	font-size: 12px;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+.mwan4-cell::before {
+	display: none;
+}
+
+.mwan4-mode-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 10px;
+}
+
+.mwan4-mode {
+	border: 1px solid var(--border-color-low);
+	border-radius: var(--mwan4-radius-sm);
+	padding: 12px;
+	background: var(--background-color);
+	display: grid;
+	gap: 10px;
+	align-content: start;
+}
+
+.mwan4-mode-current {
+	background: var(--background-color-low);
+}
+
+.mwan4-mode h3 {
+	margin: 0;
+	font-size: 16px;
+}
+
+.mwan4-route-preview {
+	min-height: 32px;
+	color: var(--text-color-medium);
+	overflow-wrap: anywhere;
+}
+
+.mwan4-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	justify-content: flex-end;
+	margin-top: 6px;
+}
+
+.mwan4-advanced {
+	margin-top: 12px;
+}
+
+.mwan4-advanced summary {
+	cursor: pointer;
+	font-weight: 700;
+}
+
+.mwan4-link-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 10px;
+}
+
+.mwan4-link {
+	display: inline-flex;
+	align-items: center;
+	border: 1px solid var(--border-color-medium);
+	border-radius: 6px;
+	padding: 6px 10px;
+	background: var(--background-color-high);
+}
+
+.mwan4-empty {
+	color: var(--text-color-medium);
+	padding: 16px;
+	background: var(--background-color-low);
+	border-radius: 6px;
+}
+
+.mwan4-empty-state {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	border: 1px dashed var(--border-color-medium);
+	border-radius: 6px;
+	background: var(--background-color-low);
+	padding: 14px;
+}
+
+.mwan4-empty-copy {
+	display: grid;
+	gap: 4px;
+	min-width: 0;
+}
+
+.mwan4-empty-copy strong {
+	font-size: 15px;
+}
+
+.mwan4-empty-copy span {
+	color: var(--text-color-medium);
+	line-height: 1.4;
+}
+
+.mwan4-empty-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	justify-content: flex-end;
+	min-width: fit-content;
+}
+
+.mwan4-health-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 10px;
+}
+
+.mwan4-health-card {
+	border: 1px solid var(--border-color-low);
+	border-radius: var(--mwan4-radius-sm);
+	background: var(--background-color);
+	padding: 12px;
+	min-width: 0;
+}
+
+.mwan4-health-title {
+	display: flex;
+	justify-content: space-between;
+	gap: 8px;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+.mwan4-health-bars {
+	display: grid;
+	gap: 6px;
+	margin-bottom: 10px;
+}
+
+.mwan4-health-bars span {
+	position: relative;
+	display: block;
+	overflow: hidden;
+	border-radius: 4px;
+	background: var(--background-color-low);
+	padding: 4px 8px;
+	font-size: 12px;
+}
+
+.mwan4-health-bars span::before {
+	content: "";
+	position: absolute;
+	inset: 0 auto 0 0;
+	width: var(--mwan4-bar);
+	background: rgba(46, 160, 67, 0.18);
+}
+
+.mwan4-targets {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: grid;
+	gap: 4px;
+}
+
+.mwan4-targets li {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 78px 64px 54px;
+	gap: 8px;
+	font-size: 12px;
+	color: var(--text-color-medium);
+}
+
+.mwan4-link:hover {
+	border-color: var(--primary-color);
+	text-decoration: none;
+}
+
+.mwan4-link:focus-visible,
+.mwan4-primary-action:focus-visible,
+.mwan4-modal-actions .btn:focus-visible {
+	outline: 2px solid var(--primary-color);
+	outline-offset: 2px;
+}
+
+.mwan4-link-row {
+	grid-template-columns: 1.1fr 0.9fr 1.35fr auto;
+}
+
+.modal.mwan4-modal,
+.mwan4-modal {
+	max-width: min(880px, calc(100vw - 28px));
+	max-height: calc(100vh - 28px);
+	overflow: auto;
+}
+
+.mwan4-modal-grid {
+	display: grid;
+	gap: 12px;
+	min-width: min(720px, calc(100vw - 64px));
+}
+
+.mwan4-modal-title {
+	display: grid;
+	gap: 4px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid var(--border-color-low);
+}
+
+.mwan4-modal-title strong {
+	font-size: 16px;
+}
+
+.mwan4-modal-title span {
+	color: var(--text-color-medium);
+}
+
+.mwan4-modal-title .mwan4-eyebrow {
+	color: var(--primary-color);
+}
+
+.mwan4-builder-steps {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 8px;
+}
+
+.mwan4-rule-summary {
+	border: 1px solid rgba(38, 132, 255, 0.28);
+	border-radius: 6px;
+	background: rgba(38, 132, 255, 0.08);
+	display: grid;
+	gap: 4px;
+	padding: 10px;
+}
+
+.mwan4-rule-summary strong {
+	font-size: 14px;
+}
+
+.mwan4-rule-summary span {
+	color: var(--text-color-medium);
+	line-height: 1.4;
+}
+
+.mwan4-builder-step,
+.mwan4-builder-section {
+	border: 1px solid var(--border-color-low);
+	border-radius: 6px;
+	background: var(--background-color);
+	padding: 10px;
+}
+
+.mwan4-builder-step {
+	display: grid;
+	gap: 4px;
+}
+
+.mwan4-builder-step span {
+	color: var(--text-color-medium);
+	font-size: 12px;
+	line-height: 1.35;
+}
+
+.mwan4-builder-section {
+	display: grid;
+	gap: 10px;
+}
+
+.mwan4-builder-title {
+	display: grid;
+	gap: 3px;
+}
+
+.mwan4-builder-title span,
+.mwan4-modal-help {
+	color: var(--text-color-medium);
+	font-size: 12px;
+	line-height: 1.35;
+}
+
+.mwan4-modal-help {
+	display: block;
+}
+
+.mwan4-rule-validation {
+	border: 1px solid #f5c6cb;
+	border-radius: 6px;
+	background: #f8d7da;
+	color: #721c24;
+	font-weight: 600;
+	padding: 10px;
+}
+
+.mwan4-advanced-fields {
+	border: 1px dashed var(--border-color-medium);
+	border-radius: 6px;
+	background: var(--background-color-low);
+	padding: 10px;
+}
+
+.mwan4-advanced-fields summary {
+	cursor: pointer;
+	font-weight: 700;
+}
+
+.mwan4-advanced-fields .mwan4-modal-columns {
+	margin-top: 10px;
+}
+
+.mwan4-change-preview-slot[hidden] {
+	display: none;
+}
+
+.mwan4-change-preview {
+	border: 1px solid #f0c36d;
+	border-radius: 6px;
+	background: rgba(255, 193, 7, 0.12);
+	padding: 12px;
+}
+
+.mwan4-change-preview-title {
+	display: grid;
+	gap: 4px;
+	margin-bottom: 10px;
+}
+
+.mwan4-change-preview-title strong {
+	font-size: 15px;
+}
+
+.mwan4-change-preview-title span,
+.mwan4-change-preview-note {
+	color: var(--text-color-medium);
+	line-height: 1.35;
+}
+
+.mwan4-change-preview dl {
+	display: grid;
+	grid-template-columns: minmax(120px, 0.35fr) minmax(0, 1fr);
+	gap: 6px 12px;
+	margin: 0;
+}
+
+.mwan4-change-preview dt {
+	color: var(--text-color-medium);
+	font-size: 12px;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+.mwan4-change-preview dd {
+	margin: 0;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.mwan4-change-preview-note {
+	margin: 10px 0 0;
+	font-size: 12px;
+}
+
+.mwan4-modal-field {
+	display: grid;
+	gap: 4px;
+	min-width: 0;
+}
+
+.mwan4-modal-field span,
+.mwan4-modal-check span {
+	color: var(--text-color-medium);
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.mwan4-modal-field input,
+.mwan4-modal-field select {
+	width: 100%;
+	box-sizing: border-box;
+	min-height: 34px;
+}
+
+.mwan4-modal-grid input:disabled,
+.mwan4-modal-grid select:disabled,
+.mwan4-modal-grid textarea:disabled,
+.mwan4-actions .btn[disabled] {
+	cursor: not-allowed;
+	opacity: 0.68;
+}
+
+.mwan4-modal-columns {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: 10px;
+}
+
+.mwan4-modal-check {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 34px;
+}
+
+.mwan4-modal-check input {
+	width: auto;
+}
+
+.mwan4-modal-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	justify-content: flex-end;
+	margin-top: 14px;
+}
+
+.mwan4-rules .mwan4-row {
+	grid-template-columns: 0.8fr 1.3fr 1.4fr 1.1fr auto;
+}
+
+@media (max-width: 900px) {
+	.mwan4-row {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+
+	.mwan4-command-main,
+	.mwan4-state-grid,
+	.mwan4-command-footer,
+	.mwan4-first-run,
+	.mwan4-counter-strip,
+	.mwan4-builder-steps {
+		grid-template-columns: 1fr;
+	}
+
+	.mwan4-command-center {
+		padding: 12px;
+	}
+
+	.mwan4-command-title {
+		align-items: flex-start;
+	}
+
+	.mwan4-command-title h2 {
+		font-size: 26px;
+	}
+
+	.mwan4-primary-action {
+		justify-self: stretch;
+		text-align: center;
+	}
+
+	.mwan4-service-controls {
+		justify-self: start;
+		min-width: 0;
+	}
+
+	.mwan4-empty-state {
+		display: grid;
+	}
+
+	.mwan4-head {
+		display: none;
+	}
+
+	.mwan4-row:not(.mwan4-head) {
+		border: 1px solid var(--border-color-low);
+		border-radius: 6px;
+		padding: 10px;
+	}
+
+	.mwan4-cell {
+		display: grid;
+		gap: 2px;
+		min-width: 0;
+	}
+
+	.mwan4-cell::before {
+		content: attr(data-label);
+		display: block;
+		color: var(--text-color-medium);
+		font-size: 11px;
+		font-weight: 800;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+
+	.mwan4-actions {
+		justify-content: flex-start;
+	}
+
+	.mwan4-cell.mwan4-actions {
+		display: grid;
+	}
+
+	.mwan4-cell.mwan4-actions .btn {
+		justify-self: start;
+	}
+
+	.mwan4-targets li {
+		grid-template-columns: 1fr 70px;
+	}
+
+	.mwan4-modal-grid {
+		min-width: 0;
+	}
+
+	.mwan4-change-preview dl {
+		grid-template-columns: 1fr;
+	}
+
+	.mwan4-toolbar,
+	.mwan4-empty-actions,
+	.mwan4-command-footer .mwan4-actions,
+	.mwan4-modal-actions {
+		justify-content: flex-start;
+	}
+}

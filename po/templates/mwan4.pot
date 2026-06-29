@@ -1,0 +1,2435 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:76
+msgid "%d / %d"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1381
+msgid "%d configured"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1404
+msgid "%d enabled in config"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:131
+msgid "%d more counter(s) hidden; open Raw RPC response for the full list."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1548
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:133
+msgid "%d ms"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1332
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1347
+msgid "%d of %d runtime WAN links are online."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1405
+msgid "%d paths"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1405
+msgid "%d strategies"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1666
+msgid "%d strategies, %d paths"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:106
+msgid "%d warning(s)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1549
+msgid "%d%%"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:135
+msgid "%d%% loss"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1380
+msgid "%d/%d online"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:47
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:801
+msgid "%s (%s)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:939
+msgid "%s -> %s; Policy path: %s."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:50
+msgid "%s: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1086
+msgid "1. Match traffic"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:514
+msgid "1.1.1.1 8.8.8.8"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/globals.js:60
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1196
+msgid "100 200 vpn"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1090
+msgid "2. Describe the destination"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1094
+msgid "3. Choose path"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1111
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:83
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:96
+msgid "443 or 1000-2000"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:440
+msgid "A WAN link with that name already exists."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1075
+msgid ""
+"A policy path is a mwan4 strategy: a saved set of WAN routes. Use presets "
+"for common failover or load-balance paths."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:987
+msgid "A traffic policy with that name already exists."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:101
+msgid "ARP nping probe"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:103
+msgid "ARP probe"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:116
+msgid "Action: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1585
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1624
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1690
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1713
+msgid "Actions"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:213
+msgid "Active strategies"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:493
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1512
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1582
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1630
+msgid "Add WAN link"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1462
+msgid "Add a WAN link"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1516
+msgid ""
+"Add a WAN link with health check targets so mwan4 can decide when it is "
+"healthy."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1581
+msgid ""
+"Add each internet uplink once, then mwan4 can track health and build "
+"strategies from it."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1227
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1439
+msgid "Add first WAN link"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1109
+msgid ""
+"Add only the destination constraints you need. Empty fields keep the "
+"destination broad."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1231
+msgid "Add the first WAN link"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1071
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1275
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1442
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1686
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1721
+msgid "Add traffic policy"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/globals.js:57
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1196
+msgid "Additional routing tables"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1174
+msgid "Additional tables"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:64
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:52
+msgid "Address families"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:512
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1105
+msgid "Address family"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1670
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1730
+msgid "Advanced"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1056
+msgid "Advanced match and logging"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1001
+msgid "Advanced options"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1245
+msgid "All WAN links disabled"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1058
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1059
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:70
+msgid "Any"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:932
+msgid "Any destination"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1107
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:76
+msgid "Any interface"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1110
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:91
+msgid "Any or 203.0.113.0/24"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:749
+msgid "Any protocol"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:927
+msgid "Any traffic"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:376
+msgid "Apply pending changes"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:437
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1598
+msgid "Availability only"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/globals.js:10
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:11
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/routes.js:10
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:10
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/strategies.js:10
+msgid "Back to overview."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1564
+msgid "Balance traffic across healthy WAN links with equal priority."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/globals.js:31
+msgid ""
+"Bit mask used to keep mwan4 policy marks separate from other firewall marks. "
+"Use enough set bits for all interface IDs plus reserved fallback marks."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1602
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:85
+msgid "Bring WAN link %s up"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:87
+msgid "Bring up"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1279
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1468
+msgid "Build a traffic policy"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1452
+msgid "Build a working MultiWAN setup"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:140
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:150
+msgid "Bytes"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:333
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:367
+msgid "Cancel"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:77
+msgid "Chains missing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:77
+msgid "Chains present"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1299
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1319
+msgid "Check diagnostics"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:117
+msgid "Check: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:846
+msgid "Choose TCP or UDP before adding source or destination ports."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:60
+msgid "Choose TCP or UDP before matching source or destination ports."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:262
+msgid "Choose a diagnostic command."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:108
+msgid ""
+"Choose a mwan4 policy path, the main routing table, or a fail-closed action."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1114
+msgid "Choose a policy path"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1645
+msgid ""
+"Choose a preset after at least one WAN link exists. Presets create paths, a "
+"strategy, and default traffic policies for you."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1263
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1465
+msgid "Choose routing mode"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/strategies.js:37
+msgid ""
+"Choose whether traffic should fail closed or use the main routing table when "
+"every path in this strategy is unhealthy or unavailable."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1104
+msgid ""
+"Choose who or what this traffic policy applies to. Leave fields empty for "
+"any source."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1386
+msgid "Command center"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:99
+msgid "Configuration"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1324
+msgid "Configuration is complete; live health data is still catching up."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1304
+msgid ""
+"Configuration is present, but the running mwan4 service needs attention "
+"before the policy can be trusted."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1656
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1661
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1768
+msgid "Configure"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1259
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1441
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1647
+msgid "Configure failover"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1441
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1647
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1656
+msgid "Configure failover routing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1768
+msgid "Configure global MultiWAN settings"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1446
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1648
+msgid "Configure load balancing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1446
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1648
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1661
+msgid "Configure load-balancing routing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1558
+msgid "Configure reliability-first routing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1562
+msgid "Configure throughput-first routing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:74
+msgid "Configured"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:79
+msgid "Configured WAN links"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1244
+msgid "Configured WAN links exist, but each one is disabled in mwan4."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:198
+msgid "Connected %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:215
+msgid "Connected networks"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:100
+msgid "Contract"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:172
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:71
+msgid "Control failed: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:168
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:67
+msgid "Control request failed"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:150
+msgid "Counter"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:137
+msgid "Counter totals"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:142
+msgid "Counter types"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:135
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:232
+msgid "Counters"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1278
+msgid ""
+"Create a default or targeted traffic policy so mwan4 knows which strategy "
+"should handle matching traffic."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1466
+msgid "Create a failover or load-balancing strategy from the overview presets."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/globals.js:46
+msgid "Create source-based rules in addition to traffic policy marks."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1664
+msgid "Current"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1019
+msgid "Current policy path"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1401
+msgid "Current state"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1567
+msgid "Custom strategy"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1060
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:102
+msgid "DNS or nft set"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:934
+msgid "DNS/IP set %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1113
+msgid "Decide what happens when all match conditions are true."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1174
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1746
+msgid "Default tables"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:654
+msgid "Default traffic policies"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1339
+msgid "Degraded"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1081
+msgid ""
+"Describe the traffic exception and choose the policy path it should use."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:999
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1018
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1690
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1705
+msgid "Destination"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1110
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:90
+msgid "Destination address"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1109
+msgid "Destination match"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1111
+msgid "Destination port"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:95
+msgid "Destination ports"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:247
+msgid ""
+"Diagnostic commands are disabled because this session lacks the mwan4 "
+"diagnostics ACL."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:169
+msgid "Diagnostic error"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1737
+#: luci-app-mwan4/root/usr/share/luci/menu.d/luci-app-mwan4.json:101
+msgid "Diagnostics"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:212
+msgid "Diagnostics failed: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:453
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1173
+msgid "Disabled"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1249
+msgid "Disabled links cannot carry failover or policy-routed traffic."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:55
+msgid ""
+"Disabled links stay configured but are ignored by mwan4 routing and health "
+"checks."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1433
+msgid "Done"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1603
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:156
+msgid "Down"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1622
+msgid "Down after %s failures, up after %s successes"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:754
+msgid "ESP"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:373
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1594
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1714
+msgid "Edit"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1594
+msgid "Edit WAN link %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:368
+msgid "Edit pending change"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1714
+msgid "Edit traffic policy %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:138
+msgid ""
+"Enable SLA checks so high latency or packet loss can mark the link unhealthy."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1247
+msgid "Enable a WAN link"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:631
+msgid "Enable at least one WAN link first."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/globals.js:63
+msgid "Enable logging for policies that also have per-policy logging enabled."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1198
+msgid "Enable source routing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1246
+msgid "Enable the link that should carry traffic, then verify health checks."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:53
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:453
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:505
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1173
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:80
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:107
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:155
+msgid "Enabled"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1660
+msgid "Equal-priority paths across healthy WAN links."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1060
+msgid "Expert field for dnsmasq or nftables sets that already exist."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/globals.js:58
+msgid ""
+"Extra routing tables mwan4 should inspect in addition to the main routing "
+"table."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:799
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:114
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/strategies.js:40
+msgid "Fail closed (drop traffic)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:797
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:113
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/strategies.js:39
+msgid "Fail closed (reject traffic)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1654
+msgid "Failover"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1301
+msgid ""
+"Failover strategies and traffic policies may not be fully enforced until the "
+"runtime warning is cleared."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:155
+msgid "Failure interval (seconds)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:141
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:523
+msgid "Failure latency (ms)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:142
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:524
+msgid "Failure packet loss (%)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:149
+msgid ""
+"Failure values take the link down; recovery values bring it back after "
+"conditions improve."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:157
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:518
+msgid "Failures before down"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1189
+msgid "Firewall and routing behavior"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:82
+msgid "Firewall mark"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/globals.js:30
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1172
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1193
+msgid "Firewall mark mask"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1750
+msgid "Firewall marks"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1451
+msgid "First-run setup"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:231
+msgid "Full diagnostics"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1736
+#: luci-app-mwan4/root/usr/share/luci/menu.d/luci-app-mwan4.json:88
+msgid "Global Settings"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1186
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1804
+msgid "Global settings"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/globals.js:26
+msgid ""
+"Global settings affect all WAN links, strategies, paths, and traffic "
+"policies."
+msgstr ""
+
+#: luci-app-mwan4/root/usr/share/rpcd/acl.d/luci-app-mwan4.json:13
+msgid "Grant access for luci-app-mwan4 configuration"
+msgstr ""
+
+#: luci-app-mwan4/root/usr/share/rpcd/acl.d/luci-app-mwan4.json:63
+msgid "Grant access for luci-app-mwan4 diagnostics"
+msgstr ""
+
+#: luci-app-mwan4/root/usr/share/rpcd/acl.d/luci-app-mwan4.json:45
+msgid "Grant access for luci-app-mwan4 runtime controls"
+msgstr ""
+
+#: luci-app-mwan4/root/usr/share/rpcd/acl.d/luci-app-mwan4.json:3
+msgid "Grant access for luci-app-mwan4 status information"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:96
+msgid "HTTP probe"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:106
+msgid "HTTPS health checks"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:451
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1585
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1616
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:157
+msgid "Health check"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:92
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:513
+msgid "Health check method"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:88
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:514
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:164
+msgid "Health check targets"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:81
+msgid "Health checks"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:497
+msgid "Health checks decide when this WAN link can carry traffic."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1515
+msgid "Health checks start after the first WAN link."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1533
+msgid "Health score %d of 10"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:154
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:517
+msgid "Healthy interval (seconds)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:89
+msgid "Hosts or addresses used to decide whether this WAN link is healthy."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:125
+msgid "How long a sticky source mapping is kept after the last match."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:752
+msgid "ICMP"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:100
+msgid "ICMP nping probe"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:95
+msgid "ICMP ping"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:844
+msgid "ICMP policies must use IPv4."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:753
+msgid "ICMPv6"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:842
+msgid "ICMPv6 policies must use IPv6."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:65
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:744
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1105
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:54
+msgid "IPv4"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:654
+msgid "IPv4 and IPv6 default traffic will use %s."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1105
+msgid "IPv4 and IPv6 policies are evaluated separately."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:53
+msgid ""
+"IPv4 and IPv6 traffic policies are evaluated separately. Add both only for "
+"equivalent dual-stack matches."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:86
+msgid "IPv4 rules"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:66
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:744
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1105
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:55
+msgid "IPv6"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:102
+msgid "IPv6 disabled"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:87
+msgid "IPv6 rules"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:74
+msgid "Ingress interface"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:58
+msgid "Initial health state before the first health check result is available."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:57
+msgid "Initial state"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1334
+msgid ""
+"Inspect the offline WAN link, health check targets, and SLA thresholds "
+"before changing traffic policies."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1788
+msgid "Intent presets"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:105
+msgid "Inventory"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:166
+msgid "Keep failure interval while down"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:118
+msgid "Keep matching flows on the same policy path for the timeout period."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:167
+msgid "Keep probing at the failure interval until the WAN link recovers."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:840
+msgid ""
+"Keep traffic policy names 15 characters or less so mwan4 can build nftables "
+"rule names."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:73
+msgid ""
+"Keeps generated firewall marks and routing tables stable across section "
+"reordering."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:436
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1597
+msgid "Latency %sms / loss %s%%"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1110
+msgid ""
+"Leave empty for any destination, or enter a CIDR, single IP, or host address."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1107
+msgid "Limit matches to traffic entering from this network interface."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:131
+msgid "Limited access"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1333
+msgid "Link risk detected"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1784
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1839
+msgid "Live health"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1659
+msgid "Load balancing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/globals.js:66
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1194
+msgid "Log level"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:952
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1063
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:129
+msgid "Log matches"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/globals.js:62
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1199
+msgid "Log matching traffic policies"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1175
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1762
+msgid "Logging"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1707
+msgid "Logging enabled"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1534
+msgid "Loss %d"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:162
+msgid "Lost"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1353
+msgid "Low immediate risk"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/routes.js:37
+msgid "Lower metrics are preferred. Equal metrics are balanced by weight."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:101
+msgid "Mark mask"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:128
+msgid "Max TTL"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:132
+msgid "Maximum hop count for ping health check probes."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:112
+msgid ""
+"Minimum number of targets that must pass before the WAN link is considered "
+"healthy."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1350
+msgid "Monitor and refine"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1346
+msgid "Monitor live health"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1685
+msgid ""
+"Most networks only need the routing mode above. Add a traffic policy only "
+"for exceptions such as guest Wi-Fi, VPN clients, video calls, or a specific "
+"service port."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1388
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:244
+#: luci-app-mwan4/root/usr/share/luci/menu.d/luci-app-mwan4.json:3
+#: luci-app-mwan4/root/usr/share/luci/menu.d/luci-app-mwan4.json:16
+msgid "MultiWAN 4"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:244
+msgid "MultiWAN 4 - Diagnostics"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/globals.js:25
+msgid "MultiWAN 4 - Global Settings"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/routes.js:20
+msgid "MultiWAN 4 - Path Members"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/strategies.js:20
+msgid "MultiWAN 4 - Strategies"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:42
+msgid "MultiWAN 4 - Traffic Policies"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:44
+msgid "MultiWAN 4 - WAN Links"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:184
+msgid "MultiWAN 4 settings applied and service restarted."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:185
+msgid ""
+"MultiWAN 4 settings applied. Service restart is hidden by this session ACL."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:507
+msgid "Name"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1091
+msgid "Narrow by destination address or service port when needed."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:450
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:508
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:156
+msgid "Network interface"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:499
+msgid "New WAN link"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1080
+msgid "New traffic policy"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1433
+msgid "Next"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1394
+msgid "Next action"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:76
+msgid "Next check"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:42
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:155
+msgid "No"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1236
+msgid "No WAN links are configured, so MultiWAN decisions have not started."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:145
+msgid "No WAN links are configured."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1229
+msgid "No WAN links configured"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1580
+msgid "No WAN links configured."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:176
+msgid "No active strategies reported yet."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:188
+msgid "No active strategies reported."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:954
+msgid "No advanced options"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:199
+msgid "No connected networks reported."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:188
+msgid "No diagnostics output returned."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:715
+msgid "No enabled WAN links"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1234
+msgid "No failover yet"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1551
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1591
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:125
+msgid "No health check targets"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1515
+msgid "No live health data yet."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1707
+msgid "No logging"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:151
+msgid ""
+"No mwan4 counters reported. Generate traffic that should match a traffic "
+"policy, then run Counters again."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:158
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:183
+msgid "No output"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1076
+msgid ""
+"No policy paths yet. Use Routing mode first, or choose the main routing "
+"table or a fail-closed action."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1644
+msgid "No routing mode configured."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1352
+msgid ""
+"No runtime warnings are reported. Keep an eye on health checks after WAN or "
+"firewall changes."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1668
+msgid "No strategies"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1406
+msgid "No traffic policies yet"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1684
+msgid "No traffic policies yet."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1250
+msgid "No usable path"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:472
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:48
+msgid "None"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:27
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:36
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:51
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:101
+msgid "Not available"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:297
+msgid "Not set"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1175
+msgid "Off"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:61
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:160
+msgid "Offline"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:60
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:159
+msgid "Online"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1293
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1313
+msgid "Open Diagnostics"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:120
+msgid "Open Diagnostics to inspect the remaining warning details."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1444
+msgid "Open advanced WAN links"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1447
+msgid "Open advanced traffic policies"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1298
+msgid ""
+"Open diagnostics or ask an operator to restart mwan4; this session cannot "
+"run service controls."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:71
+msgid ""
+"Optional CIDR, single IP, or host address to match as the traffic source."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1058
+msgid "Optional CIDR, single IP, or host address."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:79
+msgid ""
+"Optional Linux routing table ID. Leave empty to reuse the stable interface "
+"ID."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:85
+msgid ""
+"Optional fwmark for this interface. It must fit inside the global firewall "
+"mark mask."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:75
+msgid "Optional network interface where matching traffic enters the router."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:104
+msgid "Optional nft set containing destination domains or addresses."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1469
+msgid ""
+"Optional: add exceptions that use a policy path, the main routing table, or "
+"a fail-closed action."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:146
+msgid "Other"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:85
+msgid "Output"
+msgstr ""
+
+#: luci-app-mwan4/root/usr/share/luci/menu.d/luci-app-mwan4.json:23
+msgid "Overview"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:139
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:150
+msgid "Packets"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/routes.js:21
+msgid ""
+"Path members bind a WAN link to a priority metric and weight. Strategies "
+"choose one or more paths."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:472
+msgid "Path references"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1733
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/strategies.js:29
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:234
+#: luci-app-mwan4/root/usr/share/luci/menu.d/luci-app-mwan4.json:49
+msgid "Paths"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1276
+msgid "Paths and strategies exist, but no traffic policy selects one yet."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/strategies.js:30
+msgid ""
+"Paths this strategy may use when their WAN links are healthy. Path metric "
+"and weight decide priority and balancing."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:308
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:310
+msgid "Pending change preview"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1106
+msgid "Pick TCP or UDP before matching ports."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:500
+msgid ""
+"Pick an existing network interface and mwan4 will run health checks against "
+"it."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1463
+msgid "Pick an existing network interface and set health check targets."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:122
+msgid "Ping size"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:996
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1015
+msgid "Policy"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1302
+msgid "Policy enforcement at risk"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1340
+msgid "Policy is active, but at least one WAN link is not currently healthy."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1266
+msgid "Policy not active"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1000
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1113
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1690
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1709
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:107
+msgid "Policy path"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:110
+msgid "Policy path: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1348
+msgid "Policy running"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:85
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:98
+msgid "Ports support single values, ranges, and comma-separated lists."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:84
+msgid "Prerouting"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:338
+msgid "Preview changes"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:714
+msgid "Primary WAN link"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/routes.js:36
+msgid "Priority metric"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1655
+msgid "Priority order across enabled WAN links."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:119
+msgid "Probe attempts sent to each health check target during one check cycle."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:116
+msgid "Probe count"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:93
+msgid "Probe method used for this WAN link health check."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:153
+msgid "Probe timeout (seconds)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1106
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:59
+msgid "Protocol"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:144
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:148
+msgid "RPC request failed"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:157
+msgid "Raw RPC response"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1354
+msgid "Ready"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1534
+msgid "Recent loss score %d of 10"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:122
+msgid ""
+"Recommended action: restart mwan4, then check Diagnostics if the warning "
+"remains."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:156
+msgid "Recovery interval (seconds)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:143
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:525
+msgid "Recovery latency (ms)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:144
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:526
+msgid "Recovery packet loss (%)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1338
+msgid "Reduced redundancy"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1319
+msgid "Refresh runtime state"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/routes.js:43
+msgid "Relative share when multiple healthy paths have the same metric."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:651
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1559
+msgid "Reliability first"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:708
+msgid "Reliability-first routing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:342
+msgid "Remove"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:516
+msgid "Required healthy targets"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:111
+msgid "Required successful health check targets"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1111
+msgid ""
+"Requires TCP or UDP. Supports single values, ranges, and comma-separated "
+"lists."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1059
+msgid "Requires TCP or UDP. Supports single values, ranges, and lists."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:157
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:113
+msgid "Restart"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:157
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1510
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:111
+msgid "Restart MultiWAN 4 service"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1292
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1299
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1312
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1510
+msgid "Restart mwan4"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1317
+msgid "Restart mwan4 if health cards stay empty after the next refresh."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1297
+msgid "Restart the service from LuCI, then re-check health and diagnostics."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1243
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1331
+msgid "Review WAN links"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:314
+msgid "Review this change before it is saved and applied."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1335
+msgid "Review unhealthy links"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1402
+msgid "Risk"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1405
+msgid "Routing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1754
+msgid "Routing lookup"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1796
+msgid "Routing mode"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1261
+msgid "Routing mode not configured"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1267
+msgid "Routing needed"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1284
+msgid ""
+"Routing pieces are present, but traffic still needs a policy that points at "
+"a strategy."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:651
+msgid "Routing preset"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:76
+msgid "Routing table ID"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:256
+msgid "Run %s diagnostics"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:250
+msgid ""
+"Run Summary first, then inspect counters or nftables when runtime warnings "
+"remain."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:204
+msgid "Running %s diagnostics..."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:105
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1303
+msgid "Runtime attention needed"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1295
+msgid "Runtime incomplete"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1323
+msgid "Runtime pending"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:73
+msgid "Runtime state"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:110
+msgid "Runtime warning"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:452
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1585
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1620
+msgid "SLA"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1294
+msgid ""
+"Saved mwan4 configuration exists, but runtime checks report missing or stale "
+"service state."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:161
+msgid "Score"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1533
+msgid "Score %d"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:68
+msgid ""
+"Select IPv4, IPv6, or both when this link has working connectivity for each "
+"family."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1230
+msgid ""
+"Select an existing network interface, choose an address family, and set "
+"health check targets."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1095
+msgid ""
+"Send matching traffic through a policy path, the main routing table, or a "
+"fail-closed action."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:237
+msgid "Service"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:154
+msgid "Service controls"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:75
+msgid "Service running"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1413
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:210
+msgid ""
+"Service start, stop, restart, and per-WAN-link controls are hidden because "
+"this session lacks the mwan4 operator ACL."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:315
+msgid "Settings are not written until you apply these pending changes."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1235
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1251
+msgid "Setup needed"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1058
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:69
+msgid "Source address"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1059
+msgid "Source port"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:82
+msgid "Source ports"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/globals.js:45
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1173
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:103
+msgid "Source routing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1756
+msgid "Source routing enabled"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:70
+msgid "Stable interface ID"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1756
+msgid "Standard policy routing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:156
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:107
+msgid "Start"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:156
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:105
+msgid "Start MultiWAN 4 service"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1516
+msgid "Start or restart mwan4 to populate per-WAN-link health check status."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1262
+msgid ""
+"Start with reliability-first failover. You can switch to load balancing or "
+"custom paths later."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1087
+msgid "Start with the source, protocol, or ingress interface."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1453
+msgid "Start with this guided path."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:453
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1585
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1612
+msgid "State"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1062
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:117
+msgid "Sticky source sessions"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:950
+msgid "Sticky source sessions for %ss"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1061
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:122
+msgid "Sticky timeout seconds"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:158
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:119
+msgid "Stop"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:158
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:117
+msgid "Stop MultiWAN 4 service"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1491
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1734
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:108
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:144
+#: luci-app-mwan4/root/usr/share/luci/menu.d/luci-app-mwan4.json:62
+msgid "Strategies"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/strategies.js:21
+msgid ""
+"Strategies combine paths for failover or load balancing: the lowest healthy "
+"metric wins, equal metrics are balanced by weight."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:652
+msgid "Strategy"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:158
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:519
+msgid "Successes before up"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:97
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:230
+msgid "Summary"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/globals.js:69
+msgid ""
+"Syslog priority used for logged mwan4 policy matches and service messages."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:750
+msgid "TCP"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:98
+msgid "TCP probe"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1603
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:91
+msgid "Take WAN link %s down"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:93
+msgid "Take down"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1321
+msgid ""
+"The saved policy may be correct, but current enforcement cannot be confirmed "
+"from this page yet."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1190
+msgid "These settings affect every strategy, path, and traffic policy."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1048
+msgid "This is an exception to the default failover/load-balance behavior."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:132
+msgid ""
+"This session can view mwan4 status but does not have permission for these "
+"controls."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:447
+msgid "This will add a tracked WAN link before it is written to mwan4."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:994
+msgid ""
+"This will add a traffic policy exception before it is saved and applied."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:469
+msgid "This will remove the WAN link and generated paths that reference it."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1013
+msgid "This will remove the traffic policy after you apply the pending change."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:648
+msgid ""
+"This will replace generated paths with a primary WAN link failover order."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:649
+msgid "This will replace generated paths with equal-priority load balancing."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:446
+msgid "This will update WAN link health checks before it is written to mwan4."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1170
+msgid ""
+"This will update global firewall and routing behavior before it is written "
+"to mwan4."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:993
+msgid "This will update the traffic policy before it is saved and applied."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:651
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1563
+msgid "Throughput first"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:708
+msgid "Throughput-first routing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:138
+msgid "Total"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:76
+msgid "Trackers"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1690
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1701
+msgid "Traffic"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1735
+#: luci-app-mwan4/root/usr/share/luci/menu.d/luci-app-mwan4.json:75
+msgid "Traffic Policies"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1107
+msgid "Traffic coming from"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1233
+msgid ""
+"Traffic follows the main routing table until a WAN link and routing mode are "
+"configured."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:998
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1017
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1104
+msgid "Traffic match"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1282
+msgid "Traffic may bypass mwan4"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1265
+msgid ""
+"Traffic may continue to follow the main routing table instead of a mwan4 "
+"traffic policy."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1406
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1495
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1682
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1725
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1800
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:143
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:235
+msgid "Traffic policies"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:43
+msgid ""
+"Traffic policies are evaluated from top to bottom and choose a policy path, "
+"the main routing table, or a fail-closed action for matching traffic."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1277
+msgid "Traffic policies missing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1406
+msgid "Traffic policies select strategies"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1690
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1697
+msgid "Traffic policy"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1079
+msgid "Traffic policy builder"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1764
+msgid "Traffic policy logging enabled"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1764
+msgid "Traffic policy logging off"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1101
+msgid "Traffic policy name"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1283
+msgid "Traffic policy needed"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:997
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1016
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1045
+msgid "Traffic policy summary"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1071
+msgid "Traffic policy: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1568
+msgid ""
+"Tune path weights, priorities, SLA behavior, and reject/drop handling "
+"manually."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:162
+msgid ""
+"Tune probe timing carefully; lower values react faster but can flap unstable "
+"links."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:238
+msgid "Tunnels"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:751
+msgid "UDP"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:99
+msgid "UDP probe"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:199
+msgid "Unknown connected network"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1539
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:129
+msgid "Unknown health check target"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:47
+msgid "Unknown item"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1322
+msgid "Unknown runtime state"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:144
+msgid "Unnamed option"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1602
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:156
+msgid "Up"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:158
+msgid "Uptime"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:92
+msgid ""
+"Use 0.0.0.0/0 or ::/0 only when you really want a catch-all traffic policy."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:108
+msgid "Use HTTPS requests for httping probes."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:30
+msgid "Use a positive decimal mark or hexadecimal mark such as 0x100."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/globals.js:20
+msgid "Use a positive decimal value or hexadecimal value such as 0x3F00."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:21
+msgid "Use a positive integer, or leave this empty for automatic assignment."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:854
+msgid "Use a positive sticky timeout in seconds."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:852
+msgid ""
+"Use a simple nft set name with letters, numbers, dots, dashes, or "
+"underscores."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1318
+msgid ""
+"Use diagnostics to confirm whether the service and trackers are running."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:703
+msgid "Use failover"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:135
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:521
+msgid "Use latency/loss SLA thresholds"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1101
+msgid "Use letters, numbers, and underscores for the policy name."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:838
+msgid "Use letters, numbers, and underscores for the traffic policy name."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:703
+msgid "Use load balancing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:795
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:112
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/strategies.js:41
+msgid "Use main routing table"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1560
+msgid "Use one primary WAN link and fail over when health checks fail."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:850
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:30
+msgid ""
+"Use ports from 1-65535, ranges such as 1000-2000, or comma-separated lists."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:848
+msgid ""
+"Use source ports from 1-65535, ranges such as 1000-2000, or comma-separated "
+"lists."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1061
+msgid "Used only when sticky source sessions are enabled."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1732
+#: luci-app-mwan4/root/usr/share/luci/menu.d/luci-app-mwan4.json:36
+msgid "WAN Links"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1260
+msgid ""
+"WAN health can be tracked, but no generated strategy tells traffic which "
+"path to use."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:449
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:471
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1585
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1608
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/routes.js:29
+msgid "WAN link"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/routes.js:30
+msgid "WAN link used by this path."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:493
+msgid "WAN link: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1404
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1487
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:106
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:145
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:233
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:211
+msgid "WAN links"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1634
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1792
+msgid "WAN links and SLA"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1268
+msgid ""
+"WAN links are configured; the next step is choosing how healthy links should "
+"carry traffic."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:45
+msgid ""
+"WAN links map OpenWrt network interfaces to health checks and SLA thresholds."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:653
+msgid "WAN order"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1433
+msgid "Waiting"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1315
+msgid "Waiting for live data"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1349
+msgid ""
+"Watch live health, or add targeted traffic policies only for traffic that "
+"needs a special path."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/routes.js:42
+msgid "Weight"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:73
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:249
+msgid "What should I check next?"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/strategies.js:36
+msgid "When no path is usable"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1281
+msgid ""
+"Without a matching traffic policy, traffic can bypass the prepared "
+"strategies."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1454
+msgid ""
+"Work from left to right: add tracked WAN links, choose a routing mode, then "
+"use traffic policies only for traffic that needs a special path."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:131
+msgid "Write policy matches to the system log when global logging permits it."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:42
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:155
+msgid "Yes"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:71
+msgid "automatic"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:788
+msgid "custom strategy"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:83
+msgid "derived from mask"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:770
+msgid "fail closed (drop traffic)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:768
+msgid "fail closed (reject traffic)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:772
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:785
+msgid "failover strategy"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:924
+msgid "from interface %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:925
+msgid "from source %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1610
+msgid "ipv4"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:774
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:785
+msgid "load-balancing strategy"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:766
+msgid "main routing table"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1355
+msgid ""
+"mwan4 has WAN links, strategies, traffic policies, and clean runtime status."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1252
+msgid "mwan4 has link definitions, but none are enabled for routing decisions."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:108
+msgid ""
+"mwan4 is configured but runtime state is incomplete. Failover strategies and "
+"traffic policies may not be enforced."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1314
+msgid ""
+"mwan4 is configured, but LuCI has not received per-link runtime health data "
+"yet."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1228
+msgid ""
+"mwan4 needs at least one tracked network interface before it can judge "
+"health or route traffic."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1337
+msgid ""
+"mwan4 should avoid unhealthy links, but available capacity and redundancy "
+"are reduced."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:710
+msgid ""
+"mwan4 will prefer the primary WAN link and move down the list when health "
+"checks fail."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:711
+msgid ""
+"mwan4 will use equal-priority paths across all enabled healthy WAN links."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1614
+msgid "netifd down"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1614
+msgid "netifd up"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:83
+msgid "nft chains"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:77
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:236
+msgid "nftables"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:187
+msgid "no active path"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:50
+msgid "not set"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1060
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:103
+msgid "optional set name"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:933
+msgid "port %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:77
+msgid "same as stable ID"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:926
+msgid "source port %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:58
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1530
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1540
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1547
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1613
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:131
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:152
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:157
+msgid "unknown"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:131
+msgid "unknown target"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1530
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1613
+msgid "up"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:507
+msgid "wan_backup"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1101
+msgid "work_vpn"
+msgstr ""
