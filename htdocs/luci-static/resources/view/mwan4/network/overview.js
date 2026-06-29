@@ -61,16 +61,20 @@ function eventButton(ev) {
 	return ev && ev.currentTarget ? ev.currentTarget : null;
 }
 
-function withBusy(node, taskFn) {
-	setBusy(node, true);
+function withBusyState(node, setter, taskFn) {
+	setter(node, true);
 
 	return Promise.resolve().then(taskFn).then(function(result) {
-		setBusy(node, false);
+		setter(node, false);
 		return result;
 	}, function(e) {
-		setBusy(node, false);
+		setter(node, false);
 		throw e;
 	});
+}
+
+function withBusy(node, taskFn) {
+	return withBusyState(node, setBusy, taskFn);
 }
 
 function setButtonBusy(button, busy) {
@@ -82,15 +86,7 @@ function setButtonBusy(button, busy) {
 }
 
 function withButtonBusy(button, taskFn) {
-	setButtonBusy(button, true);
-
-	return Promise.resolve().then(taskFn).then(function(result) {
-		setButtonBusy(button, false);
-		return result;
-	}, function(e) {
-		setButtonBusy(button, false);
-		throw e;
-	});
+	return withBusyState(button, setButtonBusy, taskFn);
 }
 
 function focusModal(modal) {
@@ -716,12 +712,27 @@ function setDefaultRules(strategy) {
 	};
 
 	for (let name in families) {
-		if (!uci.get('mwan4', name))
-			uci.add('mwan4', 'rule', name);
+		ensureSection('rule', name);
 		uci.set('mwan4', name, 'family', [ families[name][0] ]);
 		uci.set('mwan4', name, 'dest_ip', families[name][1]);
 		uci.set('mwan4', name, 'use_strategy', strategy);
 	}
+}
+
+function addPresetRoute(route, name, metric) {
+	uci.add('mwan4', 'route', route);
+	uci.set('mwan4', route, 'interface', name);
+	uci.set('mwan4', route, 'metric', String(metric));
+	uci.set('mwan4', route, 'weight', '1');
+
+	return route;
+}
+
+function writePresetStrategy(strategy, routes) {
+	ensureSection('strategy', strategy);
+	uci.set('mwan4', strategy, 'use_route', routes);
+	uci.set('mwan4', strategy, 'last_resort', 'unreachable');
+	setDefaultRules(strategy);
 }
 
 function buildRoutingPresetChange(mode) {
@@ -761,42 +772,26 @@ function buildRoutingPresetChange(mode) {
 }
 
 function commitRoutingPreset(mode, names) {
+	let routes = [];
+	let stamp = Date.now();
+	let strategy = mode == 'failover' ? 'failover' : 'balanced';
+
 	resetGeneratedRouting();
 
 	if (mode == 'failover') {
-		let routes = [];
-		let stamp = Date.now();
 		names.forEach(function(name, index) {
 			let route = sanitizeName('ui_%s_m%d_%d'.format(name, index + 1, stamp), 'route_%d_%d'.format(index + 1, stamp));
-			uci.add('mwan4', 'route', route);
-			uci.set('mwan4', route, 'interface', name);
-			uci.set('mwan4', route, 'metric', String(index + 1));
-			uci.set('mwan4', route, 'weight', '1');
-			routes.push(route);
+			routes.push(addPresetRoute(route, name, index + 1));
 		});
-
-		ensureSection('strategy', 'failover');
-		uci.set('mwan4', 'failover', 'use_route', routes);
-		uci.set('mwan4', 'failover', 'last_resort', 'unreachable');
-		setDefaultRules('failover');
 	}
 	else {
-		let routes = [];
-		let stamp = Date.now();
 		names.forEach(function(name) {
 			let route = sanitizeName('ui_%s_m1_%d'.format(name, stamp), 'route_' + name + '_' + stamp);
-			uci.add('mwan4', 'route', route);
-			uci.set('mwan4', route, 'interface', name);
-			uci.set('mwan4', route, 'metric', '1');
-			uci.set('mwan4', route, 'weight', '1');
-			routes.push(route);
+			routes.push(addPresetRoute(route, name, 1));
 		});
-
-		ensureSection('strategy', 'balanced');
-		uci.set('mwan4', 'balanced', 'use_route', routes);
-		uci.set('mwan4', 'balanced', 'last_resort', 'unreachable');
-		setDefaultRules('balanced');
 	}
+
+	writePresetStrategy(strategy, routes);
 }
 
 function showRoutingModal(mode) {
@@ -1232,8 +1227,7 @@ function getGlobalSection() {
 }
 
 function ensureGlobalSection() {
-	if (!uci.get('mwan4', 'globals'))
-		uci.add('mwan4', 'globals', 'globals');
+	ensureSection('globals', 'globals');
 	return getGlobalSection();
 }
 
@@ -1667,21 +1661,9 @@ function renderCounterStrip(counters) {
 		return E('div', { class: 'mwan4-counter-strip', hidden: 'hidden', 'aria-hidden': 'true' });
 
 	return E('div', { class: 'mwan4-counter-strip', role: 'region', 'aria-label': _('Policy counter summary') }, [
-		E('div', { class: 'mwan4-command-metric' }, [
-			E('span', [ _('Matched packets') ]),
-			E('strong', [ String(summary.packets) ]),
-			E('small', [ summary.total ? _('%d counter(s)').format(summary.total) : _('No counters reported yet') ])
-		]),
-		E('div', { class: 'mwan4-command-metric' }, [
-			E('span', [ _('Rule counters') ]),
-			E('strong', [ String(summary.rules) ]),
-			E('small', [ _('Open Diagnostics for raw counters') ])
-		]),
-		E('div', { class: 'mwan4-command-metric' }, [
-			E('span', [ _('Path counters') ]),
-			E('strong', [ String(summary.strategies + summary.interfaces) ]),
-			E('small', [ _('%d bytes matched').format(summary.bytes) ])
-		])
+		renderCommandMetric(_('Matched packets'), String(summary.packets), _('%d counter(s)').format(summary.total)),
+		renderCommandMetric(_('Rule counters'), String(summary.rules), _('Open Diagnostics for raw counters')),
+		renderCommandMetric(_('Path counters'), String(summary.strategies + summary.interfaces), _('%d bytes matched').format(summary.bytes))
 	]);
 }
 

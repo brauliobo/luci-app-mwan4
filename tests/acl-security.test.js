@@ -98,16 +98,12 @@ assert.equal(menu['admin/network/mwan4/overview'].depends?.acl?.[0], 'luci-app-m
 assert.equal(menu['admin/network/mwan4/diagnostics'].depends?.acl?.[0], 'luci-app-mwan4-diagnostics',
 	'diagnostics page should use diagnostics ACL');
 
-assert.match(statusView, /luci-app-mwan4-operator/,
-	'status view should explicitly check operator ACL before rendering controls');
-assert.match(statusView, /method:\s*'control'/,
-	'status view should use mwan4 control ubus for runtime controls');
+assert.match(statusView, /window\.location\.replace\(target\)/,
+	'status view should redirect to the overview instead of rendering duplicate controls');
+assert.doesNotMatch(statusView, /luci-app-mwan4-operator|method:\s*'control'/,
+	'status redirect must not expose operator-only runtime controls');
 assert.doesNotMatch(statusView, /fs\.exec_direct|\/usr\/sbin\/mwan4/,
 	'status view must not execute mwan4 commands directly');
-assert.match(statusView, /L\.resolveDefault\(callSessionAccess\('access-group', 'luci-app-mwan4-operator', 'write'\), false\)/,
-	'status view should treat missing operator checks as no access');
-assert.match(statusView, /if \(!hasOperatorAccess\)\n\s*return null;/,
-	'status view should gate service controls on operator access');
 assert.match(networkView, /luci-app-mwan4-operator/,
 	'network overview should explicitly check operator ACL before rendering controls');
 assert.match(networkView, /method:\s*'control'/,
@@ -126,8 +122,8 @@ assert.match(networkView, /mwan4Common\.renderRuntimeWarnings/,
 	'network overview should use shared runtime warning rendering');
 assert.doesNotMatch(networkView, /function renderDiagnostics/,
 	'network overview should not carry a duplicate runtime warning renderer');
-assert.match(statusView, /mwan4Common\.renderRuntimeWarnings/,
-	'status view should use shared runtime warning rendering');
+assert.doesNotMatch(statusView, /mwan4Common\.renderRuntimeWarnings/,
+	'status redirect should leave runtime warning rendering to the overview');
 assert.match(diagnosticsView, /method:\s*'diagnostics'/,
 	'diagnostics view should use the mwan4 diagnostics ubus method');
 assert.match(diagnosticsView, /\[ 'counters', _\('Counters'\) \]/,
