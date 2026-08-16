@@ -11,10 +11,12 @@ const limitedExpectation = process.env.LUCI_LIMITED_EXPECT || 'denied';
 const liveMutationEnabled = process.env.E2E_LUCI_MUTATION == '1' && process.env.E2E_DISPOSABLE_QEMU == '1';
 
 const overviewPath = path.resolve(__dirname, '../../htdocs/luci-static/resources/view/mwan4/network/overview.js');
+const advancedPath = path.resolve(__dirname, '../../htdocs/luci-static/resources/view/mwan4/network/advanced.js');
 const globalsPath = path.resolve(__dirname, '../../htdocs/luci-static/resources/view/mwan4/network/globals.js');
 const statusPath = path.resolve(__dirname, '../../htdocs/luci-static/resources/view/mwan4/status/overview.js');
 const diagnosticsPath = path.resolve(__dirname, '../../htdocs/luci-static/resources/view/mwan4/status/diagnostics.js');
 const commonPath = path.resolve(__dirname, '../../htdocs/luci-static/resources/mwan4/common.js');
+const overviewHelperPath = path.resolve(__dirname, '../../htdocs/luci-static/resources/mwan4/overview.js');
 const cssPath = path.resolve(__dirname, '../../htdocs/luci-static/resources/view/mwan4/mwan4.css');
 const menuPath = path.resolve(__dirname, '../../root/usr/share/luci/menu.d/luci-app-mwan4.json');
 const aclPath = path.resolve(__dirname, '../../root/usr/share/rpcd/acl.d/luci-app-mwan4.json');
@@ -28,7 +30,8 @@ const advancedPages = [
 	{ id: 'routes', route: 'admin/network/mwan4/routes', title: 'MultiWAN 4 - Path Members' },
 	{ id: 'strategies', route: 'admin/network/mwan4/strategies', title: 'MultiWAN 4 - Strategies' },
 	{ id: 'rules', route: 'admin/network/mwan4/rules', title: 'MultiWAN 4 - Traffic Policies' },
-	{ id: 'globals', route: 'admin/network/mwan4/globals', title: 'MultiWAN 4 - Global Settings' }
+	{ id: 'globals', route: 'admin/network/mwan4/globals', title: 'MultiWAN 4 - Global Settings' },
+	{ id: 'advanced', route: 'admin/network/mwan4/advanced', title: 'MultiWAN 4 - Advanced' }
 ];
 
 const scenarioMatrix = [
@@ -39,7 +42,7 @@ const scenarioMatrix = [
 	{ id: 'staged-apply', mode: 'live', route: 'admin/network/mwan4/overview', title: 'Pending change preview' },
 	{ id: 'overview-modal-save', mode: 'guarded-live', route: 'admin/network/mwan4/overview', guard: 'E2E_LUCI_MUTATION=1 E2E_DISPOSABLE_QEMU=1' },
 	{ id: 'live-status', mode: 'live', route: 'admin/network/mwan4/overview', title: 'Live health' },
-	{ id: 'diagnostics-rpc', mode: 'live', route: 'admin/network/mwan4/diagnostics', title: 'Raw RPC response' },
+	{ id: 'diagnostics-rpc', mode: 'live', route: 'admin/network/mwan4/diagnostics', title: 'Show raw response' },
 	{ id: 'limited-acl', mode: 'env-live', route: 'admin/network/mwan4/overview', env: 'LUCI_LIMITED_USER LUCI_LIMITED_PASS' },
 	{ id: 'advanced-pages', mode: 'live', pages: advancedPages }
 ];
@@ -111,10 +114,12 @@ async function expectNoBrowserIssues(page, issues) {
 
 test('overview exposes pending change previews for high-impact modal flows', async () => {
 	const overview = fs.readFileSync(overviewPath, 'utf8');
+	const advanced = fs.readFileSync(advancedPath, 'utf8');
 	const globals = fs.readFileSync(globalsPath, 'utf8');
 	const status = fs.readFileSync(statusPath, 'utf8');
 	const diagnostics = fs.readFileSync(diagnosticsPath, 'utf8');
 	const common = fs.readFileSync(commonPath, 'utf8');
+	const overviewHelper = fs.readFileSync(overviewHelperPath, 'utf8');
 	const css = fs.readFileSync(cssPath, 'utf8');
 
 	expect(common).toContain('function renderRuntimeWarnings');
@@ -122,18 +127,37 @@ test('overview exposes pending change previews for high-impact modal flows', asy
 	expect(common).toContain('function setBusy');
 	expect(common).toContain('Recommended action');
 	expect(overview).toContain("require mwan4.common as mwan4Common");
+	expect(overview).toContain("require mwan4.overview as mwan4Overview");
+	expect(advanced).toContain("require mwan4.common as mwan4Common");
 	expect(status).toContain("require mwan4.common as mwan4Common");
 	expect(diagnostics).toContain("require mwan4.common as mwan4Common");
+	expect(advanced).toContain('MultiWAN 4 - Advanced');
+	expect(advanced).toContain('Advanced WAN link integrations');
+	expect(advanced).toContain('Tunnel steering');
+	expect(advanced).toContain('BFD and advanced probes');
+	expect(advanced).toContain('PBR harmony');
+	expect(advanced).toContain('Metadata and integration writes');
+	expect(advanced).toContain("uci.set('mwan4', section_id, 'type', 'tunnel')");
+	expect(advanced).toContain('Strategy target helper');
+	expect(advanced).toContain('Supported-interface helper');
+	expect(advanced).toContain('uci add_list pbr.config.supported_interface');
+	expect(advanced).toContain('function showPbrWorkflow');
+	expect(advanced).toContain("uci.set('pbr', 'config', 'uplink_interface6'");
+	expect(advanced).toContain('function showNetworkWorkflow');
+	expect(advanced).toContain('function showTunnelWorkflow');
+	expect(advanced).toContain('function showVrfWorkflow');
+	expect(advanced).toContain('function showBfdWorkflow');
+	expect(advanced).toContain('VRF and ownership');
 	expect(overview).toContain('mwan4Common.renderRuntimeWarnings');
-	expect(status).toContain('Monitoring moved to the MultiWAN 4 overview.');
-	expect(status).toContain('window.location.replace(target)');
+	expect(status).toContain('Read-only runtime summary. Configuration and diagnostics links are shown only when this session has the matching ACL.');
+	expect(status).toContain('No configuration or diagnostics ACL is available for this session.');
 	expect(overview).toContain('function showMwan4Modal');
 	expect(overview).toContain("modal.setAttribute('role', 'dialog')");
 	expect(overview).toContain("modal.setAttribute('aria-modal', 'true')");
 	expect(overview).toContain("'aria-live': 'polite'");
 	expect(overview).toContain("'aria-busy': 'false'");
 	expect(overview).toContain("role: 'table'");
-	expect(overview).toContain("data-label");
+	expect(overviewHelper).toContain("data-label");
 	expect(overview).toContain('Edit WAN link %s');
 	expect(diagnostics).toContain("'aria-live': 'polite'");
 	expect(diagnostics).toContain("'aria-busy': 'false'");
@@ -154,7 +178,13 @@ test('overview exposes pending change previews for high-impact modal flows', asy
 	expect(overview).toContain('function primaryActionButton');
 	expect(overview).toMatch(/Choose routing mode|Choose a routing mode/);
 	expect(overview).toMatch(/Use (normal routing|main routing table)/);
-	expect(overview).toContain('Advanced match and logging');
+	expect(overview).toContain('Extra match and logging');
+	expect(overview).not.toContain("E('details'");
+	expect(overview).not.toContain("E('summary'");
+	expect(diagnostics).not.toContain("E('details'");
+	expect(diagnostics).not.toContain("E('summary'");
+	expect(advanced).not.toContain("E('details'");
+	expect(advanced).not.toContain("E('summary'");
 	expect(overview).toContain('Most networks only need the default routing from the routing mode above. Add an exception only for guest Wi-Fi, VPN clients, video calls, or a specific service port.');
 	expect(overview).toContain('default failover/load-balance behavior');
 	expect(overview).toContain('Choose TCP or UDP before adding source or destination ports.');
@@ -162,6 +192,7 @@ test('overview exposes pending change previews for high-impact modal flows', asy
 	expect(overview).toContain('ICMPv6 policies must use IPv6.');
 	expect(overview).not.toContain('Strategy or terminal action');
 	expect(overview).toContain('Recommended action');
+	expect(overview).toContain('Open Advanced');
 	expect(overview).toContain('Use reliability first');
 	expect(overview).toContain('Use throughput first');
 	expect(overview).toContain('Default routing');
@@ -185,13 +216,19 @@ test('overview exposes pending change previews for high-impact modal flows', asy
 	expect(css).toContain('.mwan4-alert-info');
 	expect(css).toContain('.mwan4-command-center');
 	expect(css).toContain('.mwan4-counter-strip');
+	expect(css).toContain('.mwan4-wan-table');
+	expect(css).toContain('.mwan4-target-summary');
 	expect(css).toContain('.mwan4-primary-action');
 	expect(css).toContain('.mwan4-state-grid');
 	expect(css).toContain('.mwan4-rule-summary');
 	expect(css).toContain('.mwan4-advanced-fields');
+	expect(css).toContain('.mwan4-guidance-card');
+	expect(css).toContain('.mwan4-copy-block');
 	expect(css).toContain('.mwan4-sr-only');
 	expect(css).toContain('.mwan4-cell::before');
 	expect(css).toContain('content: attr(data-label)');
+	expect(css).not.toContain('> summary');
+	expect(css).not.toContain(' details');
 });
 
 test('QEMU LuCI smoke scenario matrix covers the expected flows', async () => {
@@ -217,7 +254,8 @@ test('QEMU LuCI smoke scenario matrix covers the expected flows', async () => {
 		'routes',
 		'strategies',
 		'rules',
-		'globals'
+		'globals',
+		'advanced'
 	]);
 });
 
@@ -256,15 +294,25 @@ test('ACL-LUCI-110 ACL role declarations match LuCI menu dependencies', async ()
 		'admin/network/mwan4/strategies': 'luci-app-mwan4',
 		'admin/network/mwan4/rules': 'luci-app-mwan4',
 		'admin/network/mwan4/globals': 'luci-app-mwan4',
+		'admin/network/mwan4/advanced': 'luci-app-mwan4-advanced',
+		'admin/network/mwan4/mptcp': 'luci-app-mwan4',
 		'admin/network/mwan4/diagnostics': 'luci-app-mwan4-diagnostics'
 	};
 
 	expect(acl['luci-app-mwan4-status'].read.ubus.mwan4).toContain('status');
+	expect(acl['luci-app-mwan4-status'].read.uci).toBeUndefined();
+	expect(acl['luci-app-mwan4-status'].write).toBeUndefined();
+	expect(acl['luci-app-mwan4'].read.ubus.mwan4).toContain('diagnostics');
 	expect(acl['luci-app-mwan4'].read.uci).toContain('mwan4');
 	expect(acl['luci-app-mwan4'].read.uci).toContain('network');
 	expect(acl['luci-app-mwan4'].write.uci).toContain('mwan4');
+	expect(acl['luci-app-mwan4'].write.ubus).toBeUndefined();
+	expect(acl['luci-app-mwan4-advanced'].write.ubus.mwan4).toContain('advanced_control');
+	expect(acl['luci-app-mwan4-advanced'].write.uci).toContain('pbr');
 	expect(acl['luci-app-mwan4-operator'].write.ubus.mwan4).toContain('control');
+	expect(acl['luci-app-mwan4-operator'].write.uci).toBeUndefined();
 	expect(acl['luci-app-mwan4-diagnostics'].read.ubus.mwan4).toContain('diagnostics');
+	expect(acl['luci-app-mwan4-diagnostics'].write).toBeUndefined();
 
 	for (const [ route, role ] of Object.entries(expectedAclByRoute)) {
 		expect(menu[route].depends.acl).toContain(role);
@@ -273,7 +321,7 @@ test('ACL-LUCI-110 ACL role declarations match LuCI menu dependencies', async ()
 
 	for (const route of Object.keys(expectedAclByRoute).filter(route => route != 'admin/status/mwan4' && route != 'admin/network/mwan4/overview')) {
 		expect(menu[route].firstchild_ineligible).toBe(true);
-		expect(menu[route].title).toBeUndefined();
+		expect(menu[route].title).toBeTruthy();
 	}
 });
 
@@ -287,10 +335,29 @@ test('diagnostics and advanced page smoke expectations are represented staticall
 	expect(diagnostics).toContain("'aria-label': _('Run %s diagnostics').format(c[1])");
 	expect(diagnostics).toContain("role: 'status'");
 	expect(diagnostics).toContain("'aria-live': 'polite'");
+	expect(diagnostics).toContain('mwan4-route-explain-form');
+	expect(diagnostics).toContain('function readRouteExplainTuple');
+	expect(diagnostics).toContain('callRouteExplainDiagnostics');
+	expect(diagnostics).toContain('function renderInterfacesDiagnostics');
+	expect(diagnostics).toContain('function renderRoutesDiagnostics');
+	expect(diagnostics).toContain('function renderRulesDiagnostics');
+	expect(diagnostics).toContain('function renderNftablesDiagnostics');
+	expect(diagnostics).toContain('function renderServiceDiagnostics');
+	expect(diagnostics).toContain('MPTCP route alignment');
+	expect(diagnostics).toContain('Quality edge states');
+	expect(diagnostics).toContain('Probe failures');
+	expect(diagnostics).toContain('PBR interface coverage');
+	expect(diagnostics).toContain('PBR policy targets');
+	expect(diagnostics).toContain('Recursion warnings');
+	expect(diagnostics).toContain('Ownership object inventory');
+	expect(diagnostics).toContain('Ownership conflicts');
+	expect(diagnostics).toContain('function renderGenericDiagnosticsSection');
+	expect(diagnostics).toContain('Show raw response');
 
 	for (const page of advancedPages) {
 		const source = fs.readFileSync(path.resolve(__dirname, `../../htdocs/luci-static/resources/view/mwan4/network/${page.id}.js`), 'utf8');
-		expect(overview).toContain(`L.url('admin/network/mwan4/${page.id}')`);
+		if (page.id != 'advanced')
+			expect(overview).not.toContain(`L.url('admin/network/mwan4/${page.id}')`);
 		expect(source).toContain(page.title);
 		expect(source).toContain("L.url('admin/network/mwan4/overview')");
 	}
@@ -305,8 +372,15 @@ test('DIAG-090 DIAG-091 diagnostics report surfaces are represented statically',
 	expect(diagnostics).toContain("[ 'counters', _('Counters') ]");
 	expect(diagnostics).toContain("[ 'rules', _('Traffic policies') ]");
 	expect(diagnostics).toContain("[ 'nftables', _('nftables') ]");
+	expect(diagnostics).toContain("[ 'ownership', _('Ownership') ]");
+	expect(diagnostics).toContain("[ 'pbr', _('PBR') ]");
+	expect(diagnostics).toContain("[ 'mptcp', _('MPTCP') ]");
 	expect(diagnostics).toContain('function renderDiagnosticsResult');
-	expect(diagnostics).toContain('Raw RPC response');
+	expect(diagnostics).toContain('function renderRouteExplainRequest');
+	expect(diagnostics).toContain('renderDiagnosticsWarnings(counters)');
+	expect(diagnostics).toContain('Show raw response');
+	expect(diagnostics).toContain('pre.hidden = hidden');
+	expect(diagnostics).toContain('renderGenericDiagnosticsSection');
 	expect(diagnostics).toContain('mwan4Common.renderNextSteps');
 	expect(common).toContain('function renderRuntimeWarnings');
 	expect(common).toContain('Recommended action');
@@ -325,8 +399,9 @@ test('ROLL-100 ROLL-101 rollback and resilience UX keeps validation previews sta
 	expect(overview).toContain('buildInterfaceChange');
 	expect(overview).toContain('buildRuleChange');
 	expect(overview).toContain('buildGlobalChange');
-	expect(status).toContain('Open overview');
-	expect(status).toContain('window.location.replace(target)');
+	expect(status).toContain('Open network overview');
+	expect(status).toContain("method: 'status'");
+	expect(status).not.toContain('window.location.replace');
 });
 
 test('PKG-INSTALL-120 PKG-UPGRADE-121 PKG-CONFLICT-122 package assets are represented statically', async () => {
@@ -358,14 +433,21 @@ routerTest('DIAG-090 DIAG-091 ACL-LUCI-110 ACL-LUCI-111 mwan4 overview loads and
 	await expect(page.getByText('Command center', { exact: true })).toBeVisible();
 	await expect(page.getByText('Recommended action', { exact: true })).toBeVisible();
 	await expect(page.getByText('WAN links', { exact: true }).first()).toBeVisible();
-	await expect(page.getByRole('heading', { name: 'Live health' })).toBeVisible();
-	await expect(page.getByRole('heading', { name: 'WAN links and SLA' })).toBeVisible();
+	await expect(page.getByText('WAN workspace', { exact: true })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'WAN health matrix' })).toBeVisible();
 	await expect(page.getByRole('heading', { name: 'Routing mode' }).first()).toBeVisible();
 	await expect(page.getByRole('heading', { name: 'Traffic exceptions' })).toBeVisible();
 	if (await page.getByText('Matched packets', { exact: true }).count())
 		await expect(page.getByText('Matched packets', { exact: true })).toBeVisible();
 	await expect(page.locator('#mwan4-command-center')).toHaveAttribute('aria-live', 'polite');
 	await expect(page.locator('#mwan4-command-center')).toHaveAttribute('aria-busy', 'false');
+	await expect(page.locator('#mwan4-wan-workspace')).toHaveAttribute('aria-live', 'polite');
+	await expect(page.locator('#mwan4-wan-workspace')).toHaveAttribute('aria-busy', 'false');
+	await expect(page.locator('#mwan4-wan-workspace')).toContainText('Score');
+	await expect(page.locator('#mwan4-wan-workspace')).toContainText('SLA');
+	await expect(page.locator('#mwan4-wan-workspace')).toContainText('Targets');
+	await expect(page.locator('#mwan4-wan-workspace')).not.toContainText('PBR');
+	await expect(page.locator('#mwan4-wan-workspace')).not.toContainText('MPTCP');
 	await expect(page.locator('body')).not.toContainText('[object Object]');
 
 	await page.setViewportSize({ width: 390, height: 844 });
@@ -398,12 +480,12 @@ routerTest('DIAG-090 DIAG-091 ACL-LUCI-110 ACL-LUCI-111 mwan4 overview loads and
 	}
 	await page.getByRole('button', { name: 'Cancel' }).click();
 
-	const wanPanel = page.locator('.mwan4-panel').filter({ hasText: 'WAN links and SLA' });
+	const wanPanel = page.locator('#mwan4-wan-workspace');
 	await wanPanel.getByRole('button', { name: /Edit WAN link/ }).first().click();
 	await expect(page.getByText('Basic health check', { exact: true })).toBeVisible();
 	await expect(page.getByText('Health check method', { exact: true })).toBeVisible();
 	await expect(page.getByText('Health check targets', { exact: true })).toBeVisible();
-	await expect(page.getByText('Advanced health tuning', { exact: true })).toBeVisible();
+	await expect(page.getByText('Health tuning', { exact: true })).toBeVisible();
 	await expect(page.getByRole('button', { name: 'Preview changes' })).toBeVisible();
 	await page.getByRole('button', { name: 'Cancel' }).click();
 
@@ -420,7 +502,7 @@ routerTest('DIAG-090 DIAG-091 ACL-LUCI-110 ACL-LUCI-111 mwan4 overview loads and
 	await expect(page.locator('.modal.mwan4-modal').getByText('Routing mode', { exact: true })).toBeVisible();
 	await expect(page.getByText('Destination address', { exact: true })).toBeVisible();
 	await expect(page.locator('select[name="use_strategy"]')).toContainText('Use main routing table');
-	await expect(page.getByText('Advanced match and logging', { exact: true })).toBeVisible();
+	await expect(page.getByText('Extra match and logging', { exact: true })).toBeVisible();
 	await expect(page.getByText('This is an exception to the default failover/load-balance behavior.', { exact: true })).toBeVisible();
 	await expect(page.getByRole('button', { name: 'Preview changes' })).toBeVisible();
 	await page.getByRole('button', { name: 'Preview changes' }).click();
@@ -433,17 +515,18 @@ routerTest('DIAG-090 DIAG-091 ACL-LUCI-110 ACL-LUCI-111 mwan4 overview loads and
 	await expect(page.getByText('Choose TCP or UDP before adding source or destination ports.', { exact: true })).toBeVisible();
 	await page.getByRole('button', { name: 'Cancel' }).click();
 
-	const advancedPanel = page.locator('details.mwan4-advanced');
-	await expect(advancedPanel.getByText('Advanced raw editors and diagnostics', { exact: true })).toBeVisible();
-	await advancedPanel.getByText('Advanced raw editors and diagnostics', { exact: true }).click();
-	await expect(advancedPanel.getByText('Advanced global settings', { exact: true })).toBeVisible();
+	await expect(page.locator('details')).toHaveCount(0);
 
 	await page.goto(`${baseURL}/cgi-bin/luci/admin/network/mwan4/diagnostics`, { waitUntil: 'networkidle' });
 	await expect(page.getByRole('heading', { name: 'MultiWAN 4 - Diagnostics' })).toBeVisible();
 	await expect(page.getByRole('heading', { name: 'What should I check next?' }).first()).toBeVisible();
 	await expect(page.locator('#mwan4-diag-output')).toHaveAttribute('aria-live', 'polite');
 	await expect(page.getByRole('button', { name: 'Run Summary diagnostics' })).toBeVisible();
-	await expect(page.getByText('Raw RPC response', { exact: true })).toBeVisible({ timeout: 15000 });
+	await expect(page.getByRole('button', { name: 'Run PBR diagnostics' })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Run MPTCP diagnostics' })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Run Ownership diagnostics' })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Show raw response' })).toBeVisible({ timeout: 15000 });
+	await expect(page.locator('#mwan4-diag-output pre.mwan4-output')).toBeHidden();
 
 	for (const advancedPage of advancedPages) {
 		await page.goto(`${baseURL}/cgi-bin/luci/${advancedPage.route}`, { waitUntil: 'networkidle' });
@@ -460,21 +543,26 @@ routerTest('ACL-LUCI-111 live status issues status RPCs without browser errors',
 	const rpcCalls = trackMwan4Rpc(page);
 
 	await page.goto(`${baseURL}/cgi-bin/luci/admin/network/mwan4`, { waitUntil: 'networkidle' });
-	await expect(page.getByRole('heading', { name: 'Live health' })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'WAN health matrix' })).toBeVisible();
 	await expect(page.locator('#mwan4-command-center')).toHaveAttribute('aria-live', 'polite');
+	await expect(page.locator('#mwan4-wan-workspace')).toHaveAttribute('aria-live', 'polite');
 	await expect.poll(() => rpcCalls.filter(call => call.includes('status')).length, { timeout: 10000 }).toBeGreaterThan(0);
 
 	const before = await page.locator('#mwan4-command-center').textContent();
+	const workspaceBefore = await page.locator('#mwan4-wan-workspace').textContent();
 	await page.reload({ waitUntil: 'networkidle' });
-	await expect(page.getByRole('heading', { name: 'Live health' })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'WAN health matrix' })).toBeVisible();
 	const after = await page.locator('#mwan4-command-center').textContent();
+	const workspaceAfter = await page.locator('#mwan4-wan-workspace').textContent();
 
 	expect((before || '').length).toBeGreaterThan(0);
 	expect((after || '').length).toBeGreaterThan(0);
+	expect((workspaceBefore || '').length).toBeGreaterThan(0);
+	expect((workspaceAfter || '').length).toBeGreaterThan(0);
 	await expectNoBrowserIssues(page, browserIssues);
 });
 
-routerTest('DIAG-090 DIAG-091 diagnostics RPC views render raw output cleanly', async ({ page }) => {
+routerTest('DIAG-090 DIAG-091 diagnostics RPC views render structured output cleanly', async ({ page }) => {
 	await login(page);
 	const browserIssues = collectBrowserIssues(page);
 	const rpcCalls = trackMwan4Rpc(page);
@@ -486,11 +574,22 @@ routerTest('DIAG-090 DIAG-091 diagnostics RPC views render raw output cleanly', 
 	const summaryButton = page.getByRole('button', { name: 'Run Summary diagnostics' });
 	if (await summaryButton.isEnabled()) {
 		await summaryButton.click();
-		await expect(page.getByText('Raw RPC response', { exact: true })).toBeVisible({ timeout: 15000 });
+		await expect(page.getByRole('button', { name: 'Show raw response' })).toBeVisible({ timeout: 15000 });
+		await expect(page.locator('#mwan4-diag-output pre.mwan4-output')).toBeHidden();
 		await expect.poll(() => rpcCalls.filter(call => call.includes('diagnostics')).length, { timeout: 10000 }).toBeGreaterThan(0);
 	}
 	else {
 		await expect(page.getByText('Diagnostic commands are disabled because this session lacks the mwan4 diagnostics ACL.')).toBeVisible();
+	}
+
+	for (const label of [ 'Run PBR diagnostics', 'Run MPTCP diagnostics', 'Run Tunnels diagnostics' ]) {
+		const button = page.getByRole('button', { name: label });
+		if (await button.isEnabled()) {
+			await button.click();
+			await expect(page.getByRole('button', { name: 'Show raw response' })).toBeVisible({ timeout: 15000 });
+			await expect(page.locator('#mwan4-diag-output pre.mwan4-output')).toBeHidden();
+			await expect(page.locator('body')).not.toContainText('[object Object]');
+		}
 	}
 
 	await expectNoBrowserIssues(page, browserIssues);

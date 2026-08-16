@@ -160,6 +160,12 @@
 	margin-top: 12px;
 }
 
+.mwan4-advanced-overview {
+	display: grid;
+	gap: 12px;
+	margin: 12px 0 16px;
+}
+
 .mwan4-diag-section,
 .mwan4-raw {
 	border: 1px solid var(--border-color-medium);
@@ -168,21 +174,150 @@
 	padding: 12px;
 }
 
+.mwan4-raw {
+	display: grid;
+	gap: 10px;
+}
+
+.mwan4-raw pre[hidden] {
+	display: none;
+}
+
 .mwan4-diag-section > h3 {
 	margin: 0 0 10px;
 }
 
-.mwan4-diag-section > summary,
-.mwan4-raw > summary {
-	cursor: pointer;
-	font-weight: 700;
-	margin-bottom: 8px;
+.mwan4-surface-heading {
+	display: grid;
+	gap: 4px;
+	margin-bottom: 12px;
 }
 
-.mwan4-counter-table td:nth-child(2),
+.mwan4-surface-heading h3,
+.mwan4-surface-heading p,
+.mwan4-table-card h4,
+.mwan4-workflow h4 {
+	margin: 0;
+}
+
+.mwan4-surface-heading p,
+.mwan4-table-card p,
+.mwan4-workflow span {
+	color: var(--text-color-medium);
+	line-height: 1.4;
+}
+
+.mwan4-insight-grid,
+.mwan4-guidance-grid,
+.mwan4-advanced-workflows,
+.mwan4-counter-groups {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+	gap: 10px;
+	margin: 12px 0;
+}
+
+.mwan4-insight-card,
+.mwan4-guidance-card,
+.mwan4-workflow-card,
+.mwan4-table-card,
+.mwan4-workflow {
+	border: 1px solid var(--border-color-low);
+	border-radius: 6px;
+	background: var(--background-color);
+	padding: 10px;
+}
+
+.mwan4-insight-card {
+	display: grid;
+	gap: 4px;
+}
+
+.mwan4-guidance-card {
+	display: grid;
+	gap: 8px;
+	line-height: 1.4;
+}
+
+.mwan4-guidance-card p {
+	color: var(--text-color-medium);
+	margin: 0;
+}
+
+.mwan4-copy-block {
+	background: var(--background-color-low);
+	border: 1px solid var(--border-color-low);
+	border-radius: 4px;
+	margin: 0;
+	overflow: auto;
+	padding: 8px;
+	white-space: pre-wrap;
+}
+
+.mwan4-insight-card span {
+	color: var(--text-color-medium);
+	font-size: 11px;
+	font-weight: 800;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.mwan4-insight-card strong {
+	font-size: 18px;
+	overflow-wrap: anywhere;
+}
+
+.mwan4-insight-card small,
+.mwan4-workflow-card p {
+	color: var(--text-color-medium);
+	line-height: 1.35;
+	margin: 0;
+}
+
+.mwan4-table-card,
+.mwan4-workflow-card,
+.mwan4-workflow {
+	display: grid;
+	gap: 8px;
+}
+
+.mwan4-diag-table {
+	margin: 0;
+	border: 0;
+}
+
+.mwan4-diag-table th {
+	color: var(--text-color-medium);
+	font-size: 12px;
+	font-weight: 800;
+	text-transform: uppercase;
+}
+
+.mwan4-diag-table td {
+	vertical-align: top;
+	overflow-wrap: anywhere;
+}
+
+.mwan4-workflow ol {
+	display: grid;
+	gap: 8px;
+	margin: 0 0 0 18px;
+	padding: 0;
+}
+
+.mwan4-workflow li {
+	line-height: 1.35;
+}
+
+.mwan4-workflow li span {
+	display: block;
+	margin-top: 2px;
+}
+
 .mwan4-counter-table td:nth-child(3),
-.mwan4-counter-table th:nth-child(2),
-.mwan4-counter-table th:nth-child(3) {
+.mwan4-counter-table td:nth-child(4),
+.mwan4-counter-table th:nth-child(3),
+.mwan4-counter-table th:nth-child(4) {
 	text-align: right;
 }
 
@@ -325,24 +460,12 @@
 }
 
 .mwan4-service-controls {
-	display: grid;
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
 	gap: 8px;
 	justify-self: end;
 	min-width: max-content;
-}
-
-.mwan4-service-controls .mwan4-advanced-fields {
-	background: transparent;
-	padding: 8px;
-}
-
-.mwan4-service-controls summary {
-	cursor: pointer;
-	font-weight: 700;
-}
-
-.mwan4-service-controls .mwan4-advanced-fields[open] summary {
-	margin-bottom: 8px;
 }
 
 .mwan4-guide-next {
@@ -495,6 +618,116 @@
 	font-size: 18px;
 }
 
+.mwan4-panel-heading {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.mwan4-panel-heading h3 {
+	margin: 2px 0 0;
+	font-size: 20px;
+}
+
+.mwan4-wan-workspace-body {
+	display: grid;
+	gap: 10px;
+}
+
+.mwan4-workspace-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	min-width: 0;
+}
+
+.mwan4-wan-table-wrap {
+	overflow-x: auto;
+	border: 1px solid var(--border-color-low);
+	border-radius: var(--mwan4-radius-sm);
+	background: var(--background-color);
+}
+
+.mwan4-wan-table {
+	min-width: 860px;
+	margin: 0;
+	border: 0;
+}
+
+.mwan4-wan-table th,
+.mwan4-wan-table td {
+	vertical-align: top;
+	padding: 8px 10px;
+}
+
+.mwan4-wan-table th {
+	color: var(--text-color-medium);
+	font-size: 12px;
+	font-weight: 800;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.mwan4-wan-table td > strong,
+.mwan4-wan-table td > small,
+.mwan4-wan-name,
+.mwan4-wan-table .mwan4-cell-stack {
+	display: grid;
+	gap: 3px;
+}
+
+.mwan4-wan-name {
+	display: grid;
+	gap: 4px;
+	min-width: 0;
+}
+
+.mwan4-wan-name strong {
+	overflow-wrap: anywhere;
+}
+
+.mwan4-wan-name small,
+.mwan4-wan-table small {
+	color: var(--text-color-medium);
+}
+
+.mwan4-family-pills {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.mwan4-target-summary {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 4px;
+}
+
+.mwan4-target-summary li {
+	display: grid;
+	grid-template-columns: minmax(92px, 1fr) 72px 62px 48px;
+	gap: 6px;
+	color: var(--text-color-medium);
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.mwan4-wan-actions {
+	flex-wrap: nowrap;
+	justify-content: flex-start;
+	margin-top: 0;
+	white-space: nowrap;
+}
+
+.mwan4-compact-button {
+	padding: 4px 8px;
+}
+
 .mwan4-table {
 	display: grid;
 	gap: 8px;
@@ -566,31 +799,6 @@
 	margin-top: 6px;
 }
 
-.mwan4-advanced {
-	margin-top: 12px;
-}
-
-.mwan4-advanced summary {
-	cursor: pointer;
-	font-weight: 700;
-}
-
-.mwan4-link-grid {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-	margin-top: 10px;
-}
-
-.mwan4-link {
-	display: inline-flex;
-	align-items: center;
-	border: 1px solid var(--border-color-medium);
-	border-radius: 6px;
-	padding: 6px 10px;
-	background: var(--background-color-high);
-}
-
 .mwan4-empty {
 	color: var(--text-color-medium);
 	padding: 16px;
@@ -632,74 +840,6 @@
 	min-width: fit-content;
 }
 
-.mwan4-health-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-	gap: 10px;
-}
-
-.mwan4-health-card {
-	border: 1px solid var(--border-color-low);
-	border-radius: var(--mwan4-radius-sm);
-	background: var(--background-color);
-	padding: 12px;
-	min-width: 0;
-}
-
-.mwan4-health-title {
-	display: flex;
-	justify-content: space-between;
-	gap: 8px;
-	align-items: center;
-	margin-bottom: 10px;
-}
-
-.mwan4-health-bars {
-	display: grid;
-	gap: 6px;
-	margin-bottom: 10px;
-}
-
-.mwan4-health-bars span {
-	position: relative;
-	display: block;
-	overflow: hidden;
-	border-radius: 4px;
-	background: var(--background-color-low);
-	padding: 4px 8px;
-	font-size: 12px;
-}
-
-.mwan4-health-bars span::before {
-	content: "";
-	position: absolute;
-	inset: 0 auto 0 0;
-	width: var(--mwan4-bar);
-	background: rgba(46, 160, 67, 0.18);
-}
-
-.mwan4-targets {
-	list-style: none;
-	padding: 0;
-	margin: 0;
-	display: grid;
-	gap: 4px;
-}
-
-.mwan4-targets li {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) 78px 64px 54px;
-	gap: 8px;
-	font-size: 12px;
-	color: var(--text-color-medium);
-}
-
-.mwan4-link:hover {
-	border-color: var(--primary-color);
-	text-decoration: none;
-}
-
-.mwan4-link:focus-visible,
 .mwan4-primary-action:focus-visible,
 .mwan4-modal-actions .btn:focus-visible {
 	outline: 2px solid var(--primary-color);
@@ -820,11 +960,6 @@
 	border-radius: 6px;
 	background: var(--background-color-low);
 	padding: 10px;
-}
-
-.mwan4-advanced-fields summary {
-	cursor: pointer;
-	font-weight: 700;
 }
 
 .mwan4-advanced-fields .mwan4-modal-columns {
@@ -949,10 +1084,17 @@
 	.mwan4-command-main,
 	.mwan4-state-grid,
 	.mwan4-command-footer,
+	.mwan4-panel-heading,
+	.mwan4-workspace-toolbar,
 	.mwan4-first-run,
 	.mwan4-counter-strip,
 	.mwan4-builder-steps {
 		grid-template-columns: 1fr;
+	}
+
+	.mwan4-panel-heading,
+	.mwan4-workspace-toolbar {
+		display: grid;
 	}
 
 	.mwan4-command-center {
@@ -1019,8 +1161,12 @@
 		justify-self: start;
 	}
 
-	.mwan4-targets li {
-		grid-template-columns: 1fr 70px;
+	.mwan4-wan-table {
+		min-width: 780px;
+	}
+
+	.mwan4-target-summary li {
+		grid-template-columns: minmax(86px, 1fr) 64px 56px 42px;
 	}
 
 	.mwan4-modal-grid {

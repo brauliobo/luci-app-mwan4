@@ -7,9 +7,17 @@ LuCI application for configuring and operating `mwan4`.
 - Status dashboard for mwan4 interfaces, tracking targets, active strategies, and connected networks.
 - Overview warning when mwan4 is configured but service instances, health trackers, or nftables chains are inactive.
 - Service actions: start, stop, restart, per-interface ifup, and per-interface ifdown.
-- Diagnostics for `mwan4 status`, interfaces, strategies, connected networks, rules, and internal IPv4/IPv6 state.
+- Diagnostics for summaries, WAN links, routes, traffic policies, nftables, service state, counters, ownership, PBR, MPTCP, quality/SLA, probes/BFD, VRF, tunnels, and route-explain decisions. Raw RPC output stays hidden behind **Show raw response**.
 - UCI forms for globals, interfaces, routes, strategies, and rules.
 - Migration helper for existing mwan4 configs that still use old `member` and `policy` section names.
+
+## ACL Roles
+
+- `luci-app-mwan4-status`: read-only runtime status; no UCI, control RPC, or diagnostics access.
+- `luci-app-mwan4`: core configuration pages for mwan4 and network UCI.
+- `luci-app-mwan4-operator`: constrained runtime controls such as restart, ifup/ifdown, and counter reset through the backend control RPC.
+- `luci-app-mwan4-diagnostics`: read-only diagnostics RPC access with no shell execution or UCI reads.
+- `luci-app-mwan4-advanced`: explicit advanced integration workflows for PBR, VRF, tunnels, FRR/BFD, and related UCI-backed metadata.
 
 ## Build
 

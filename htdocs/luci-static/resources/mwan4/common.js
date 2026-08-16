@@ -89,9 +89,10 @@ function setBusy(node, busy) {
 	node.setAttribute('aria-busy', busy ? 'true' : 'false');
 }
 
-function renderRuntimeWarnings(status) {
+function renderRuntimeWarnings(status, options) {
 	let diagnostics = diagnosticsData(status);
 	let warnings = diagnostics.warnings || [];
+	let canOpenDiagnostics = !options || options.diagnosticsAccess !== false;
 
 	if (!Array.isArray(warnings))
 		warnings = warnings ? [ warnings ] : [];
@@ -120,10 +121,12 @@ function renderRuntimeWarnings(status) {
 		}).concat(warnings.length > visibleWarnings.length ? [
 			E('li', { class: 'mwan4-muted-line' }, [ _('Open Diagnostics to inspect the remaining warning details.') ])
 		] : [])),
-		E('p', { class: 'mwan4-alert-action' }, [ _('Recommended action: restart mwan4, then check Diagnostics if the warning remains.') ]),
-		E('p', { class: 'mwan4-alert-action' }, [
+		E('p', { class: 'mwan4-alert-action' }, [ canOpenDiagnostics
+			? _('Recommended action: restart mwan4, then check Diagnostics if the warning remains.')
+			: _('Recommended action: restart mwan4, then ask an administrator with diagnostics access to inspect remaining warnings.') ]),
+		canOpenDiagnostics ? E('p', { class: 'mwan4-alert-action' }, [
 			E('a', { class: 'btn cbi-button cbi-button-neutral', href: L.url('admin/network/mwan4/diagnostics') }, [ _('Open Diagnostics') ])
-		])
+		]) : ''
 	]);
 }
 

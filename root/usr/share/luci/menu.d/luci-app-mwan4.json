@@ -33,6 +33,7 @@
 		}
 	},
 	"admin/network/mwan4/interfaces": {
+		"title": "WAN Links",
 		"order": 100,
 		"firstchild_ineligible": true,
 		"action": {
@@ -46,6 +47,7 @@
 		}
 	},
 	"admin/network/mwan4/routes": {
+		"title": "Paths",
 		"order": 110,
 		"firstchild_ineligible": true,
 		"action": {
@@ -59,6 +61,7 @@
 		}
 	},
 	"admin/network/mwan4/strategies": {
+		"title": "Strategies",
 		"order": 120,
 		"firstchild_ineligible": true,
 		"action": {
@@ -72,6 +75,7 @@
 		}
 	},
 	"admin/network/mwan4/rules": {
+		"title": "Rules",
 		"order": 130,
 		"firstchild_ineligible": true,
 		"action": {
@@ -85,6 +89,7 @@
 		}
 	},
 	"admin/network/mwan4/globals": {
+		"title": "Globals",
 		"order": 140,
 		"firstchild_ineligible": true,
 		"action": {
@@ -97,8 +102,23 @@
 			]
 		}
 	},
+	"admin/network/mwan4/advanced": {
+		"title": "Advanced",
+		"order": 145,
+		"firstchild_ineligible": true,
+		"action": {
+			"type": "view",
+			"path": "mwan4/network/advanced"
+		},
+		"depends": {
+			"acl": [
+				"luci-app-mwan4-advanced"
+			]
+		}
+	},
 	"admin/network/mwan4/diagnostics": {
-		"order": 150,
+		"title": "Diagnostics",
+		"order": 160,
 		"firstchild_ineligible": true,
 		"action": {
 			"type": "view",
@@ -107,6 +127,20 @@
 		"depends": {
 			"acl": [
 				"luci-app-mwan4-diagnostics"
+			]
+		}
+	},
+	"admin/network/mwan4/mptcp": {
+		"title": "MPTCP",
+		"order": 150,
+		"firstchild_ineligible": true,
+		"action": {
+			"type": "view",
+			"path": "mwan4/status/mptcp"
+		},
+		"depends": {
+			"acl": [
+				"luci-app-mwan4"
 			]
 		}
 	}

@@ -6,7 +6,9 @@
 'require ui';
 'require view';
 'require mwan4.common as mwan4Common';
+'require mwan4.overview as mwan4Overview';
 /* global mwan4Common */
+/* global mwan4Overview */
 
 const callStatus = rpc.declare({
 	object: 'mwan4',
@@ -37,8 +39,10 @@ const callControl = rpc.declare({
 });
 
 let hasOperatorAccess = false;
+let hasAdvancedAccess = false;
+let hasDiagnosticsAccess = false;
 let modalReturnFocus = null;
-let probeHelpers = { httping: false, nping: false, arping: false };
+let probeHelpers = { httping: false, nping: false, arping: false, nslookup: false };
 
 mwan4Common.addStylesheet();
 
@@ -46,48 +50,15 @@ const formatDisplayValue = mwan4Common.formatDisplayValue;
 const renderPill         = mwan4Common.renderPill;
 const setBusy            = mwan4Common.setBusy;
 const statusClass        = mwan4Common.statusClass;
-
-function asArray(value) {
-	if (value == null || value === '')
-		return [];
-	return Array.isArray(value) ? value : [ value ];
-}
-
-function byId(id) {
-	return document.getElementById(id);
-}
-
-function eventButton(ev) {
-	return ev && ev.currentTarget ? ev.currentTarget : null;
-}
-
-function withBusyState(node, setter, taskFn) {
-	setter(node, true);
-
-	return Promise.resolve().then(taskFn).then(function(result) {
-		setter(node, false);
-		return result;
-	}, function(e) {
-		setter(node, false);
-		throw e;
-	});
-}
-
-function withBusy(node, taskFn) {
-	return withBusyState(node, setBusy, taskFn);
-}
-
-function setButtonBusy(button, busy) {
-	if (!button)
-		return;
-
-	button.disabled = !!busy;
-	setBusy(button, busy);
-}
-
-function withButtonBusy(button, taskFn) {
-	return withBusyState(button, setButtonBusy, taskFn);
-}
+const asArray        = mwan4Overview.asArray;
+const byId           = mwan4Overview.byId;
+const eventButton    = mwan4Overview.eventButton;
+const optionList     = mwan4Overview.optionList;
+const sanitizeName   = mwan4Overview.sanitizeName;
+const tableCell      = mwan4Overview.tableCell;
+const tableHeader    = mwan4Overview.tableHeader;
+const withBusy       = mwan4Overview.withBusy;
+const withButtonBusy = mwan4Overview.withButtonBusy;
 
 function focusModal(modal) {
 	let target = modal.querySelector('input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), a[href]');
@@ -112,47 +83,11 @@ function showMwan4Modal(title, nodes) {
 	return modal;
 }
 
-function tableHeader(labels, extraClass) {
-	let cls = 'mwan4-row mwan4-head';
-	if (extraClass)
-		cls += ' ' + extraClass;
-
-	return E('div', { class: cls, role: 'row' }, labels.map(function(label) {
-		return E('span', { role: 'columnheader' }, [ label ]);
-	}));
-}
-
-function tableCell(label, children, attrs) {
-	attrs = attrs || {};
-	attrs.class = attrs.class ? '%s mwan4-cell'.format(attrs.class) : 'mwan4-cell';
-	attrs.role = 'cell';
-	attrs['data-label'] = label;
-
-	return E('div', attrs, children);
-}
-
 function modalValue(modal, name) {
 	let node = modal.querySelector('[name="%s"]'.format(name));
 	if (!node)
 		return null;
 	return node.type == 'checkbox' ? (node.checked ? '1' : '0') : node.value.trim();
-}
-
-function sanitizeName(value, fallback) {
-	value = (value || '').trim().replace(/[^A-Za-z0-9_]/g, '_').replace(/^_+|_+$/g, '');
-	return value || fallback;
-}
-
-function optionList(values, selected, emptyLabel) {
-	let out = [];
-	if (emptyLabel)
-		out.push(E('option', { value: '' }, [ emptyLabel ]));
-	values.forEach(function(v) {
-		let value = Array.isArray(v) ? v[0] : v;
-		let label = Array.isArray(v) ? v[1] : v;
-		out.push(E('option', { value: value, selected: value == selected ? 'selected' : null }, [ formatDisplayValue(label, _('Unnamed option')) ]));
-	});
-	return out;
 }
 
 function renderServiceActions() {
@@ -161,14 +96,9 @@ function renderServiceActions() {
 
 	return E('div', { class: 'mwan4-service-controls' }, [
 		E('button', { class: 'btn cbi-button cbi-button-action', 'aria-label': _('Refresh MultiWAN 4 runtime'), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'restart' ], eventButton(ev)); } }, [ _('Refresh runtime') ]),
-		E('details', { class: 'mwan4-advanced-fields' }, [
-			E('summary', [ _('Start / stop service') ]),
-			E('p', { class: 'mwan4-muted-line' }, [ _('Use start or stop only when intentionally changing the service state.') ]),
-			E('div', { class: 'mwan4-actions' }, [
-				E('button', { class: 'btn cbi-button cbi-button-apply', 'aria-label': _('Start MultiWAN 4 service'), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'start' ], eventButton(ev)); } }, [ _('Start') ]),
-				E('button', { class: 'btn cbi-button cbi-button-reset', 'aria-label': _('Stop MultiWAN 4 service'), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'stop' ], eventButton(ev)); } }, [ _('Stop') ])
-			])
-		])
+		E('span', { class: 'mwan4-muted-line' }, [ _('Service') ]),
+		E('button', { class: 'btn cbi-button cbi-button-apply', 'aria-label': _('Start MultiWAN 4 service'), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'start' ], eventButton(ev)); } }, [ _('Start') ]),
+		E('button', { class: 'btn cbi-button cbi-button-reset', 'aria-label': _('Stop MultiWAN 4 service'), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'stop' ], eventButton(ev)); } }, [ _('Stop') ])
 	]);
 
 }
@@ -267,6 +197,8 @@ function healthMethodOptions(selected) {
 	add('nping-tcp', _('TCP probe'), probeHelpers.nping);
 	add('nping-udp', _('UDP probe'), probeHelpers.nping);
 	add('nping-icmp', _('ICMP nping probe'), probeHelpers.nping);
+	add('nping-arp', _('ARP nping probe'), probeHelpers.nping);
+	add('nslookup', _('DNS probe'), probeHelpers.nslookup);
 	add('arping', _('ARP probe'), probeHelpers.arping);
 
 	if (selected && !seen[selected])
@@ -277,13 +209,13 @@ function healthMethodOptions(selected) {
 
 function mwanInterfaces() {
 	return uci.sections('mwan4', 'interface').sort(function(a, b) {
-		return a['.name'] > b['.name'];
+		return String(a['.name'] || '').localeCompare(String(b['.name'] || ''));
 	});
 }
 
 function strategies() {
 	return uci.sections('mwan4', 'strategy').sort(function(a, b) {
-		return a['.name'] > b['.name'];
+		return String(a['.name'] || '').localeCompare(String(b['.name'] || ''));
 	});
 }
 
@@ -470,12 +402,14 @@ function interfaceDraftFromModal(name) {
 	let modal = document.querySelector('.modal');
 	let selected = modalValue(modal, 'network') || networkNames()[0] || 'wan';
 	let trackIps = splitTokens(modalValue(modal, 'track_ip'));
+	let family = modalValue(modal, 'family') || 'ipv4';
+	let families = family == 'dual' ? [ 'ipv4', 'ipv6' ] : [ family ];
 
 	return {
 		name:             name || sanitizeName(modalValue(modal, 'name'), selected),
 		network:          selected,
 		enabled:          name ? modalValue(modal, 'enabled') : '1',
-		family:           modalValue(modal, 'family') || 'ipv4',
+		family:           families,
 		track_method:     modalValue(modal, 'track_method') || 'ping',
 		track_ip:         trackIps.length ? trackIps : [ '1.1.1.1', '8.8.8.8' ],
 		reliability:      modalValue(modal, 'reliability') || '1',
@@ -500,7 +434,7 @@ function writeInterfaceDraft(draft, existingName) {
 	}
 
 	uci.set('mwan4', sid, 'enabled', draft.enabled);
-	setList('mwan4', sid, 'family', [ draft.family || 'ipv4' ]);
+	setList('mwan4', sid, 'family', draft.family && draft.family.length ? draft.family : [ 'ipv4' ]);
 	setList('mwan4', sid, 'track_ip', draft.track_ip);
 	uci.set('mwan4', sid, 'track_method', draft.track_method || 'ping');
 	uci.set('mwan4', sid, 'reliability', draft.reliability || '1');
@@ -532,6 +466,7 @@ function buildInterfaceChange(name) {
 		items:   [
 			[ _('WAN link'), draft.name ],
 			[ _('Network interface'), name ? draft.name : draft.network ],
+			[ _('Address families'), draft.family.join(', ') ],
 			[ _('Health check'), '%s: %s'.format(draft.track_method, draft.track_ip.join(', ')) ],
 			[ _('SLA'), sla ],
 			[ _('State'), draft.enabled == '1' ? _('Enabled') : _('Disabled') ]
@@ -574,6 +509,7 @@ function showInterfaceRemovalPreview(name) {
 function showInterfaceModal(name) {
 	let section = name ? uci.get('mwan4', name) : null;
 	let families = asArray(section?.family);
+	let familyChoice = families.includes('ipv4') && families.includes('ipv6') ? 'dual' : (families.includes('ipv6') ? 'ipv6' : 'ipv4');
 	let title = name ? _('WAN link: %s').format(name) : _('Add WAN link');
 	let fields = [
 		name ? E('div', { class: 'mwan4-modal-title' }, [
@@ -599,13 +535,20 @@ function showInterfaceModal(name) {
 				E('span', [ _('Most links only need an address family and two reliable targets.') ])
 			]),
 			E('div', { class: 'mwan4-modal-columns' }, [
-				modalSelect(_('Address family'), 'family', [ 'ipv4', 'ipv6' ], families.includes('ipv6') ? 'ipv6' : 'ipv4', null),
+				modalSelect(_('Address family'), 'family', [
+					[ 'ipv4', _('IPv4') ],
+					[ 'ipv6', _('IPv6') ],
+					[ 'dual', _('IPv4 + IPv6') ]
+				], familyChoice, null),
 				modalSelect(_('Health check method'), 'track_method', healthMethodOptions(section?.track_method || 'ping'), section?.track_method || 'ping', null)
 			]),
 			modalInput(_('Health check targets'), 'track_ip', asArray(section?.track_ip).join(' ') || '1.1.1.1 8.8.8.8', { placeholder: _('1.1.1.1 8.8.8.8') })
 		]),
-		E('details', { class: 'mwan4-advanced-fields', open: section?.check_quality == '1' ? 'open' : null }, [
-			E('summary', [ _('Advanced health tuning') ]),
+		E('section', { class: 'mwan4-builder-section mwan4-advanced-fields' }, [
+			E('div', { class: 'mwan4-builder-title' }, [
+				E('strong', [ _('Health tuning') ]),
+				E('span', [ _('Set hysteresis and optional latency/loss thresholds for this WAN link.') ])
+			]),
 			E('div', { class: 'mwan4-modal-columns' }, [
 				modalInput(_('Required healthy targets'), 'reliability', section?.reliability || '1', { type: 'number', min: '1' }),
 				modalInput(_('Healthy interval (seconds)'), 'interval', section?.interval || '10', { type: 'number', min: '1' }),
@@ -693,9 +636,19 @@ function renderEmptyState(title, body, actions) {
 	]);
 }
 
+function isOverviewGeneratedRoute(section) {
+	let name = section && section['.name'] || '';
+	return section && (section.generated_by == 'luci-overview' || /^ui_.*_m[0-9]+_[0-9]+$/.test(name));
+}
+
+function overviewGeneratedRoutes() {
+	return uci.sections('mwan4', 'route').filter(isOverviewGeneratedRoute);
+}
+
 function resetGeneratedRouting() {
 	uci.sections('mwan4', 'route').forEach(function(section) {
-		uci.remove('mwan4', section['.name']);
+		if (isOverviewGeneratedRoute(section))
+			uci.remove('mwan4', section['.name']);
 	});
 }
 
@@ -724,6 +677,7 @@ function addPresetRoute(route, name, metric) {
 	uci.set('mwan4', route, 'interface', name);
 	uci.set('mwan4', route, 'metric', String(metric));
 	uci.set('mwan4', route, 'weight', '1');
+	uci.set('mwan4', route, 'generated_by', 'luci-overview');
 
 	return route;
 }
@@ -739,6 +693,8 @@ function buildRoutingPresetChange(mode) {
 	let modal = document.querySelector('.modal');
 	let names = enabledInterfaceNames();
 	let strategy = mode == 'failover' ? 'failover' : 'balanced';
+	let generatedCount = overviewGeneratedRoutes().length;
+	let customCount = uci.sections('mwan4', 'route').length - generatedCount;
 	if (!names.length) {
 		ui.addNotification(null, E('p', [ _('Enable at least one WAN link first.') ]), 'warning');
 		return;
@@ -746,13 +702,13 @@ function buildRoutingPresetChange(mode) {
 
 	if (mode == 'failover') {
 		let primary = modalValue(modal, 'primary') || names[0];
-		names.sort(function(a, b) {
-			if (a == primary)
-				return -1;
-			if (b == primary)
-				return 1;
-			return a > b;
-		});
+			names.sort(function(a, b) {
+				if (a == primary)
+					return -1;
+				if (b == primary)
+					return 1;
+				return String(a).localeCompare(String(b));
+			});
 	}
 
 	return {
@@ -763,6 +719,8 @@ function buildRoutingPresetChange(mode) {
 			[ _('Routing preset'), mode == 'failover' ? _('Reliability first') : _('Throughput first') ],
 			[ _('Strategy'), formatPolicyPath(strategy) ],
 			[ _('WAN order'), names.join(mode == 'failover' ? ' -> ' : ' + ') ],
+			[ _('Generated paths replaced'), String(generatedCount) ],
+			[ _('Custom paths preserved'), String(customCount) ],
 			[ _('Default routing'), _('IPv4 and IPv6 default traffic will use %s.').format(formatPolicyPath(strategy)) ]
 		],
 		apply:   function() {
@@ -1146,10 +1104,11 @@ function renderRuleSummaryCard(draft) {
 }
 
 function renderRuleAdvancedFields(rule) {
-	let hasAdvanced = rule?.src_ip || rule?.src_port || rule?.ipset || rule?.sticky == '1' || rule?.logging == '1';
-
-	return E('details', { class: 'mwan4-advanced-fields', open: hasAdvanced ? 'open' : null }, [
-		E('summary', [ _('Advanced match and logging') ]),
+	return E('section', { class: 'mwan4-builder-section mwan4-advanced-fields' }, [
+		E('div', { class: 'mwan4-builder-title' }, [
+			E('strong', [ _('Extra match and logging') ]),
+			E('span', [ _('Optional source, nft set, sticky-session, and logging fields stay visible so the rule is reviewable at a glance.') ])
+		]),
 		E('div', { class: 'mwan4-modal-columns' }, [
 			modalInput(_('Source address'), 'src_ip', rule?.src_ip || '', { placeholder: _('Any') }, _('Optional CIDR, single IP, or host address.')),
 			modalInput(_('Source port'), 'src_port', rule?.src_port || '', { placeholder: _('Any') }, _('Requires TCP or UDP. Supports single values, ranges, and lists.')),
@@ -1333,7 +1292,7 @@ function commandCenterState(status, progress) {
 
 	if (!progress.enabledLinkCount) {
 		return {
-			action:       { label: _('Review WAN links'), buttonClass: 'cbi-button-edit', click: function() { return scrollToSection('mwan4-wan-links'); } },
+			action:       { label: _('Review WAN links'), buttonClass: 'cbi-button-edit', click: function() { return scrollToSection('mwan4-wan-workspace'); } },
 			currentBody:  _('Configured WAN links exist, but each one is disabled in mwan4.'),
 			currentTitle: _('All WAN links disabled'),
 			nextBody:     _('Enable the link that should carry traffic, then verify health checks.'),
@@ -1421,7 +1380,7 @@ function commandCenterState(status, progress) {
 
 	if (live.offline) {
 		return {
-			action:       { label: _('Review WAN links'), buttonClass: 'cbi-button-edit', click: function() { return scrollToSection('mwan4-wan-links'); } },
+			action:       { label: _('Review WAN links'), buttonClass: 'cbi-button-edit', click: function() { return scrollToSection('mwan4-wan-workspace'); } },
 			currentBody:  _('%d of %d runtime WAN links are online.').format(live.online, live.total),
 			currentTitle: _('Link risk detected'),
 			nextBody:     _('Inspect the offline WAN link, health check targets, and SLA thresholds before changing traffic exceptions.'),
@@ -1436,10 +1395,10 @@ function commandCenterState(status, progress) {
 	}
 
 	return {
-		action:       { label: _('Monitor live health'), buttonClass: 'cbi-button-neutral', click: function() { return scrollToSection('mwan4-live-health'); } },
+		action:       { label: _('Monitor WAN workspace'), buttonClass: 'cbi-button-neutral', click: function() { return scrollToSection('mwan4-wan-workspace'); } },
 		currentBody:  _('%d of %d runtime WAN links are online.').format(live.online, live.total),
 		currentTitle: _('Policy running'),
-		nextBody:     _('Watch live health, or add traffic exceptions only for traffic that needs a special path.'),
+		nextBody:     _('Watch the WAN workspace, or add traffic exceptions only for traffic that needs a special path.'),
 		nextTitle:    _('Monitor and refine'),
 		pillClass:    'mwan4-online',
 		riskBody:     _('No runtime warnings are reported. Keep an eye on health checks after WAN or firewall changes.'),
@@ -1488,9 +1447,13 @@ function renderCommandCenter(status, progress) {
 		]),
 		E('div', { class: 'mwan4-command-footer' }, [
 			E('div', { class: 'mwan4-command-notices' }, [
-				mwan4Common.renderRuntimeWarnings(status),
+				mwan4Common.renderRuntimeWarnings(status, { diagnosticsAccess: hasDiagnosticsAccess }),
 				mwan4Common.renderAclNotice(hasOperatorAccess,
 					_('Service start, stop, restart, and per-WAN-link controls are hidden because this session lacks the mwan4 operator ACL.'))
+			]),
+			E('div', { class: 'mwan4-actions' }, [
+				hasAdvancedAccess ? E('a', { class: 'btn cbi-button cbi-button-neutral', href: L.url('admin/network/mwan4/advanced') }, [ _('Open Advanced') ]) : '',
+				hasDiagnosticsAccess ? E('a', { class: 'btn cbi-button cbi-button-neutral', href: L.url('admin/network/mwan4/diagnostics') }, [ _('Open Diagnostics') ]) : ''
 			]),
 			renderServiceActions()
 		])
@@ -1520,11 +1483,10 @@ function renderFirstRunGuide(progress) {
 		: !progress.hasRouting
 			? E('button', { class: 'btn cbi-button cbi-button-apply', 'aria-label': _('Continue quick setup'), click: function() { return showRoutingModal('failover'); } }, [ _('Continue quick setup') ])
 			: E('button', { class: 'btn cbi-button cbi-button-add', 'aria-label': _('Add traffic exception'), click: function() { return showRuleModal(null); } }, [ _('Add exception') ]);
-	let secondaryAction = !progress.hasLinks
-		? E('a', { class: 'btn cbi-button cbi-button-neutral', href: L.url('admin/network/mwan4/interfaces') }, [ _('Open advanced WAN links') ])
-		: !progress.hasRouting
-			? E('button', { class: 'btn cbi-button cbi-button-neutral', 'aria-label': _('Configure load-balancing routing'), click: function() { return showRoutingModal('balanced'); } }, [ _('Configure load balancing') ])
-			: E('a', { class: 'btn cbi-button cbi-button-neutral', href: L.url('admin/network/mwan4/rules') }, [ _('Open advanced rule editor') ]);
+	let actions = [ primaryAction ];
+
+	if (progress.hasLinks && !progress.hasRouting)
+		actions.push(E('button', { class: 'btn cbi-button cbi-button-neutral', 'aria-label': _('Configure load-balancing routing'), click: function() { return showRoutingModal('balanced'); } }, [ _('Configure load balancing') ]));
 
 	return E('section', { class: 'mwan4-first-run', 'aria-labelledby': 'mwan4-first-run-title' }, [
 		E('div', { class: 'mwan4-first-run-copy' }, [
@@ -1532,10 +1494,7 @@ function renderFirstRunGuide(progress) {
 			E('h3', { id: 'mwan4-first-run-title' }, [ _('Build a working MultiWAN setup') ]),
 			E('strong', { class: 'mwan4-guide-next' }, [ _('Start with this guided path.') ]),
 			E('p', [ _('Work from left to right: add tracked WAN links, choose a routing mode, then add traffic exceptions only for traffic that needs a special path.') ]),
-			E('div', { class: 'mwan4-first-run-actions' }, [
-				primaryAction,
-				secondaryAction
-			])
+			E('div', { class: 'mwan4-first-run-actions' }, actions)
 		]),
 		E('ol', { class: 'mwan4-setup-steps' }, [
 			renderSetupStep(progress.hasLinks, !progress.hasLinks,
@@ -1578,59 +1537,171 @@ function renderSummary(status) {
 	]);
 }
 
-function renderHealthMatrix(status) {
-	let interfaces = status.interfaces || {};
-	let names = Object.keys(interfaces).sort();
+function roundedMetric(value) {
+	if (value == null || value === '')
+		return null;
 
-	if (!names.length) {
-		let configuredLinks = mwanInterfaces().length;
-		let actions = [];
+	let number = Number(value);
+	return isNaN(number) ? null : Math.round(number);
+}
 
-		if (configuredLinks && hasOperatorAccess)
-			actions.push(E('button', { class: 'btn cbi-button cbi-button-action', 'aria-label': _('Restart MultiWAN 4 service'), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'restart' ], eventButton(ev)); } }, [ _('Restart mwan4') ]));
-		else if (!configuredLinks)
-			actions.push(E('button', { class: 'btn cbi-button cbi-button-add', 'aria-label': _('Add WAN link'), click: function() { return showInterfaceModal(null); } }, [ _('Add WAN link') ]));
+function metricText(value, suffix) {
+	let number = roundedMetric(value);
 
-		return renderEmptyState(
-			configuredLinks ? _('No live health data yet.') : _('Health checks start after the first WAN link.'),
-			configuredLinks ? _('Start or restart mwan4 to populate per-WAN-link health check status.') : _('Add a WAN link with health check targets so mwan4 can decide when it is healthy.'),
-			actions
+	if (number == null)
+		return _('Not measured');
+
+	return suffix ? _('%d%s').format(number, suffix) : String(number);
+}
+
+function configuredRuntimeFamilies(section, runtime) {
+	let runtimeFamilies = Object.keys((runtime || {}).families || {});
+
+	if (runtimeFamilies.length)
+		return runtimeFamilies;
+
+	let families = asArray(section.family);
+	return families.length ? families : [ 'ipv4' ];
+}
+
+function renderFamilyStatePills(section, runtime) {
+	let families = configuredRuntimeFamilies(section, runtime);
+	let runtimeFamilies = (runtime || {}).families || {};
+
+	return E('div', { class: 'mwan4-family-pills', 'aria-label': _('Per-family health') }, families.map(function(family) {
+		let item = runtimeFamilies[family] || {};
+		let state = item.health_state || item.status || (item.up ? 'online' : 'unknown');
+
+		return renderPill('%s: %s'.format(familyLabel(family), state), statusClass(state, item.up));
+	}));
+}
+
+function targetRows(section, runtime) {
+	let targets = asArray(runtime.track_ip);
+
+	if (!targets.length)
+		targets = asArray(section.track_ip).map(function(ip) {
+			return { ip: ip, status: _('configured') };
+		});
+
+	return targets;
+}
+
+function renderTargetSummary(section, runtime) {
+	let targets = targetRows(section, runtime);
+	let rows = [];
+
+	if (!targets.length)
+		return E('span', { class: 'mwan4-muted-line' }, [ _('No targets') ]);
+
+	targets.slice(0, 3).forEach(function(target) {
+		if (!target || typeof target != 'object')
+			target = { ip: target, status: _('configured') };
+
+		rows.push(E('li', [
+			E('span', [ formatDisplayValue(target.ip, '-') ]),
+			E('span', [ formatDisplayValue(target.status, _('unknown')) ]),
+			E('span', [ target.latency != null ? _('%d ms').format(target.latency) : '-' ]),
+			E('span', [ target.packetloss != null ? _('%d%%').format(target.packetloss) : '-' ])
+		]));
+	});
+
+	if (targets.length > rows.length)
+		rows.push(E('li', { class: 'mwan4-muted-line' }, [ _('+%d more').format(targets.length - rows.length) ]));
+
+	return E('ul', { class: 'mwan4-target-summary' }, rows);
+}
+
+function renderWanActions(name) {
+	let actions = [
+		E('button', { class: 'btn cbi-button cbi-button-edit mwan4-compact-button', 'aria-label': _('Edit WAN link %s').format(name), click: function() { return showInterfaceModal(name); } }, [ _('Edit') ])
+	];
+
+	if (hasOperatorAccess) {
+		actions.splice(1, 0,
+			E('button', { class: 'btn cbi-button cbi-button-action mwan4-compact-button', 'aria-label': _('Bring WAN link %s up').format(name), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'ifup', name ], eventButton(ev)); } }, [ _('Up') ]),
+			E('button', { class: 'btn cbi-button cbi-button-reset mwan4-compact-button', 'aria-label': _('Take WAN link %s down').format(name), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'ifdown', name ], eventButton(ev)); } }, [ _('Down') ])
 		);
 	}
 
-	return E('div', { class: 'mwan4-health-grid' }, names.map(function(name) {
-		let item = interfaces[name] || {};
-		let targets = asArray(item.track_ip);
-		let score = Number(item.score || 0);
-		let lost = Number(item.lost || 0);
+	return E('div', { class: 'mwan4-actions mwan4-wan-actions' }, actions);
+}
 
-		return E('div', { class: 'mwan4-health-card' }, [
-			E('div', { class: 'mwan4-health-title' }, [
+function renderWanRow(section, status) {
+	let name = section['.name'];
+	let runtime = (status.interfaces || {})[name] || {};
+	let enabled = section.enabled != '0';
+	let method = runtime.track_method || section.track_method || 'ping';
+	let state = runtime.health_state || runtime.status || (runtime.up ? 'online' : enabled ? 'unknown' : 'disabled');
+	let score = metricText(runtime.score_percent, '%');
+	let failed = runtime.failed_checks == null ? _('Not measured') : String(runtime.failed_checks);
+	let quality = section.check_quality == '1';
+	let sla = quality
+		? _('fail %sms/%s%%, recover %sms/%s%%').format(section.failure_latency || '1000', section.failure_loss || '40', section.recovery_latency || '500', section.recovery_loss || '10')
+		: _('Availability-only health checks; latency/loss SLA is not enforced.');
+
+	return E('tr', { class: 'mwan4-wan-row', 'data-interface': name }, [
+		E('td', [
+			E('div', { class: 'mwan4-wan-name' }, [
 				E('strong', [ name ]),
-				renderPill(item.status || (item.up ? _('up') : _('unknown')), statusClass(item.status, item.up))
-			]),
-			E('div', { class: 'mwan4-health-bars' }, [
-				E('span', { style: '--mwan4-bar:%d%%'.format(Math.min(100, score * 10)), 'aria-label': _('Health score %d of 10').format(score) }, [ _('Score %d').format(score) ]),
-				E('span', { style: '--mwan4-bar:%d%%'.format(Math.min(100, lost * 10)), 'aria-label': _('Recent loss score %d of 10').format(lost) }, [ _('Loss %d').format(lost) ])
-			]),
-			E('ul', { class: 'mwan4-targets' }, targets.length ? targets.map(function(t) {
-				if (!t || typeof t != 'object')
-					return E('li', [
-						E('span', [ formatDisplayValue(t, _('Unknown health check target')) ]),
-						E('span', [ _('unknown') ]),
-						E('span', [ '-' ]),
-						E('span', [ '-' ])
-					]);
+				E('small', [ enabled ? _('Enabled') : _('Disabled') ]),
+				renderFamilyStatePills(section, runtime)
+			])
+		]),
+		E('td', [
+			renderPill(state, statusClass(state, runtime.up)),
+			E('small', [ formatDisplayValue(runtime.tracking || runtime.status, _('unknown')), runtime.up ? _(' / netifd up') : _(' / netifd down') ])
+		]),
+		E('td', [
+			E('strong', [ score ]),
+			E('small', [ runtime.score_current == null ? _('unmeasured') : _('%s/%s score').format(runtime.score_current, runtime.score_max || '10') ]),
+			E('small', [ _('%s failed, %d target(s)').format(failed, Number(runtime.failed_targets || 0)) ])
+		]),
+		E('td', [
+			E('strong', [ method ]),
+			E('small', [ _('down %s / up %s, reliability %s').format(section.down || '5', section.up || '5', section.reliability || '1') ]),
+			E('small', [ quality ? _('SLA: %s').format(sla) : _('SLA: availability only') ])
+		]),
+		E('td', [ renderTargetSummary(section, runtime) ]),
+		E('td', [
+			renderWanActions(name)
+		])
+	]);
+}
 
-				return E('li', [
-					E('span', [ formatDisplayValue(t.ip, '-') ]),
-					E('span', [ formatDisplayValue(t.status, _('unknown')) ]),
-					E('span', [ t.latency ? _('%d ms').format(t.latency) : '-' ]),
-					E('span', [ t.packetloss != null ? _('%d%%').format(t.packetloss) : '-' ])
-				]);
-			}) : [ E('li', [ _('No health check targets') ]) ])
+function renderWanWorkspace(status, counters) {
+	let sections = mwanInterfaces();
+
+	if (!sections.length)
+		return E('div', { class: 'mwan4-wan-workspace-body' }, [
+			renderEmptyState(
+				_('No WAN links configured.'),
+				_('Add each internet uplink once, then mwan4 can track health, SLA state, and strategy paths from one workspace.'),
+				[ E('button', { class: 'btn cbi-button cbi-button-add', 'aria-label': _('Add WAN link'), click: function() { return showInterfaceModal(null); } }, [ _('Add WAN link') ]) ]
+			)
 		]);
-	}));
+
+	return E('div', { class: 'mwan4-wan-workspace-body' }, [
+		E('div', { class: 'mwan4-workspace-toolbar' }, [
+			E('span', { class: 'mwan4-muted-line' }, [ _('Compare saved WAN/SLA settings with live tracker state. Missing measurements stay explicit.') ]),
+			E('button', { class: 'btn cbi-button cbi-button-add', 'aria-label': _('Add WAN link'), click: function() { return showInterfaceModal(null); } }, [ _('Add WAN link') ])
+		]),
+		E('div', { class: 'mwan4-wan-table-wrap' }, [
+			E('table', { class: 'table mwan4-wan-table' }, [
+				E('tr', [
+					E('th', [ _('WAN') ]),
+					E('th', [ _('State') ]),
+					E('th', [ _('Score') ]),
+					E('th', [ _('Probe / SLA') ]),
+					E('th', [ _('Targets') ]),
+					E('th', [ _('Actions') ])
+				])
+			].concat(sections.map(function(section) {
+				return renderWanRow(section, status || {});
+			})))
+		]),
+		renderCounterStrip(counters)
+	]);
 }
 
 function summarizeCounters(result) {
@@ -1667,65 +1738,6 @@ function renderCounterStrip(counters) {
 	]);
 }
 
-function renderInterfaceRows(status) {
-	let interfaces = status.interfaces || {};
-	let sections = mwanInterfaces();
-	let rows;
-
-	if (!sections.length)
-		return renderEmptyState(
-			_('No WAN links configured.'),
-			_('Add each internet uplink once, then mwan4 can track health and build strategies from it.'),
-			[ E('button', { class: 'btn cbi-button cbi-button-add', 'aria-label': _('Add WAN link'), click: function() { return showInterfaceModal(null); } }, [ _('Add WAN link') ]) ]
-		);
-
-	rows = [ tableHeader([ _('WAN link'), _('State'), _('Health check'), _('Actions') ], 'mwan4-link-row') ];
-
-	sections.forEach(function(section) {
-		let name = section['.name'];
-		let state = interfaces[name] || {};
-		let families = asArray(section.family);
-		let targetCount = asArray(section.track_ip).length;
-		let targetSummary = targetCount ? _('%d target(s)').format(targetCount) : _('No targets');
-		let method = section.track_method || 'ping';
-		let actions = [
-			E('button', { class: 'btn cbi-button cbi-button-edit', 'aria-label': _('Edit WAN link %s').format(name), click: function() { return showInterfaceModal(name); } }, [ _('Edit') ])
-		];
-		let quality = section.check_quality == '1' ? _('SLA thresholds on') : _('Availability only');
-
-		if (hasOperatorAccess) {
-			actions.push(
-				E('button', { class: 'btn cbi-button cbi-button-action', 'aria-label': _('Bring WAN link %s up').format(name), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'ifup', name ], eventButton(ev)); } }, [ _('Up') ]),
-				E('button', { class: 'btn cbi-button cbi-button-reset', 'aria-label': _('Take WAN link %s down').format(name), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'ifdown', name ], eventButton(ev)); } }, [ _('Down') ])
-			);
-		}
-
-		rows.push(E('div', { class: 'mwan4-row mwan4-link-row', role: 'row' }, [
-			tableCell(_('WAN link'), [
-				E('strong', [ name ]),
-				E('small', [ families.join(', ') || _('ipv4') ])
-			]),
-			tableCell(_('State'), [
-				renderPill(state.status || (state.up ? _('up') : _('unknown')), statusClass(state.status, state.up)),
-				E('small', [ state.up ? _('netifd up') : _('netifd down') ])
-			]),
-			tableCell(_('Health check'), [
-				E('strong', [ _('%s with %s').format(method, targetSummary) ]),
-				E('small', [ _('%s; down %s / up %s').format(quality, section.down || '5', section.up || '5') ])
-			]),
-			tableCell(_('Actions'), actions, { class: 'mwan4-actions' })
-		]));
-	});
-
-	rows.push(
-		E('div', { class: 'mwan4-toolbar' }, [
-			E('button', { class: 'btn cbi-button cbi-button-add', 'aria-label': _('Add WAN link'), click: function() { return showInterfaceModal(null); } }, [ _('Add WAN link') ])
-		])
-	);
-
-	return E('div', { class: 'mwan4-table', role: 'table', 'aria-label': _('WAN links and SLA') }, rows);
-}
-
 function renderRouting() {
 	let strategyNames = strategies().map(function(section) { return section['.name']; });
 	let routes = uci.sections('mwan4', 'route');
@@ -1755,7 +1767,7 @@ function renderRouting() {
 		E('div', { class: 'mwan4-mode' }, [
 			E('h3', [ _('Custom strategy') ]),
 			E('div', { class: 'mwan4-route-preview' }, [ _('Tune path weights, priorities, SLA behavior, and reject/drop handling manually.') ]),
-			E('a', { class: 'btn cbi-button cbi-button-neutral', href: L.url('admin/network/mwan4/strategies') }, [ _('Open advanced strategies') ])
+			E('small', { class: 'mwan4-muted-line' }, [ _('Use the Strategies tab when manual path weighting is needed.') ])
 		]),
 		E('div', { class: 'mwan4-mode mwan4-mode-current' }, [
 			E('h3', [ _('Current routing') ]),
@@ -1836,20 +1848,6 @@ function renderRules() {
 	return E('div', { class: 'mwan4-table mwan4-rules', role: 'table', 'aria-label': _('Traffic exceptions') }, nodes);
 }
 
-function renderAdvanced() {
-	return E('details', { class: 'mwan4-advanced' }, [
-		E('summary', [ _('Advanced raw editors and diagnostics') ]),
-		E('div', { class: 'mwan4-link-grid' }, [
-			E('a', { class: 'mwan4-link', href: L.url('admin/network/mwan4/interfaces') }, [ _('WAN Links') ]),
-			E('a', { class: 'mwan4-link', href: L.url('admin/network/mwan4/routes') }, [ _('Paths') ]),
-			E('a', { class: 'mwan4-link', href: L.url('admin/network/mwan4/strategies') }, [ _('Strategies') ]),
-			E('a', { class: 'mwan4-link', href: L.url('admin/network/mwan4/rules') }, [ _('Rule Editor') ]),
-			E('a', { class: 'mwan4-link', href: L.url('admin/network/mwan4/globals') }, [ _('Advanced global settings') ]),
-			E('a', { class: 'mwan4-link', href: L.url('admin/network/mwan4/diagnostics') }, [ _('Diagnostics') ])
-		])
-	]);
-}
-
 function renderGlobalSettings() {
 	let section = getGlobalSection();
 	let mask = globalValue(section, 'mwan4.mmx_mask', 'mmx_mask', '0x3F00');
@@ -1890,15 +1888,16 @@ function renderApp(status, counters) {
 	if (progress.needsGuide)
 		nodes.push(renderFirstRunGuide(progress));
 
-	nodes.push(
-		E('section', { id: 'mwan4-live-health', class: 'mwan4-panel', 'aria-labelledby': 'mwan4-live-health-title', 'aria-live': 'polite', 'aria-busy': 'false' }, [
-			E('h3', { id: 'mwan4-live-health-title' }, [ _('Live health') ]),
-			renderHealthMatrix(status),
-			renderCounterStrip(counters)
-		]),
-		E('section', { id: 'mwan4-wan-links', class: 'mwan4-panel', 'aria-labelledby': 'mwan4-wan-links-title' }, [
-			E('h3', { id: 'mwan4-wan-links-title' }, [ _('WAN links and SLA') ]),
-			renderInterfaceRows(status)
+		nodes.push(
+		E('section', { id: 'mwan4-wan-workspace', class: 'mwan4-panel mwan4-wan-workspace', 'aria-labelledby': 'mwan4-wan-workspace-title', 'aria-live': 'polite', 'aria-busy': 'false' }, [
+			E('div', { class: 'mwan4-panel-heading' }, [
+				E('div', [
+					E('span', { class: 'mwan4-eyebrow' }, [ _('WAN workspace') ]),
+					E('h3', { id: 'mwan4-wan-workspace-title' }, [ _('WAN health matrix') ])
+				]),
+				hasDiagnosticsAccess ? E('a', { class: 'btn cbi-button cbi-button-neutral', href: L.url('admin/network/mwan4/diagnostics') }, [ _('Open Diagnostics') ]) : ''
+			]),
+			renderWanWorkspace(status, counters)
 		]),
 		E('section', { class: 'mwan4-panel', 'aria-labelledby': 'mwan4-routing-title' }, [
 			E('h3', { id: 'mwan4-routing-title' }, [ _('Routing mode') ]),
@@ -1907,8 +1906,7 @@ function renderApp(status, counters) {
 		E('section', { class: 'mwan4-panel', 'aria-labelledby': 'mwan4-rules-title' }, [
 			E('h3', { id: 'mwan4-rules-title' }, [ _('Traffic exceptions') ]),
 			renderRules()
-		]),
-		renderAdvanced()
+		])
 	);
 
 	return E('div', { class: 'mwan4-app' }, nodes);
@@ -1921,29 +1919,35 @@ return view.extend({
 			uci.load('network'),
 			L.resolveDefault(callStatus(), {}),
 			L.resolveDefault(callSessionAccess('access-group', 'luci-app-mwan4-operator', 'write'), false),
+			L.resolveDefault(callSessionAccess('access-group', 'luci-app-mwan4-advanced', 'write'), false),
+			L.resolveDefault(callSessionAccess('access-group', 'luci-app-mwan4-diagnostics', 'read'), false),
 			L.resolveDefault(callStatus('counters'), {}),
 			L.resolveDefault(fs.stat('/usr/bin/httping'), {}),
 			L.resolveDefault(fs.stat('/usr/bin/nping'), {}),
-			L.resolveDefault(fs.stat('/usr/bin/arping'), {})
+			L.resolveDefault(fs.stat('/usr/bin/arping'), {}),
+			L.resolveDefault(fs.stat('/usr/bin/nslookup'), {})
 		]);
 	},
 
 	render: function(data) {
 		let status = data[2] || {};
 		hasOperatorAccess = !!data[3];
-		let counters = data[4] || {};
+		hasAdvancedAccess = !!data[4];
+		hasDiagnosticsAccess = !!data[5];
+		let counters = data[6] || {};
 		probeHelpers = {
-			httping: helperAvailable(data[5]),
-			nping:   helperAvailable(data[6]),
-			arping:  helperAvailable(data[7])
+			httping:  helperAvailable(data[7]),
+			nping:    helperAvailable(data[8]),
+			arping:   helperAvailable(data[9]),
+			nslookup: helperAvailable(data[10])
 		};
 
 		poll.add(function() {
 			let commandCenter = byId('mwan4-command-center');
-			let liveHealth = byId('mwan4-live-health');
+			let wanWorkspace = byId('mwan4-wan-workspace');
 
 			setBusy(commandCenter, true);
-			setBusy(liveHealth, true);
+			setBusy(wanWorkspace, true);
 
 			return Promise.all([
 				L.resolveDefault(callStatus(), {}),
@@ -1954,13 +1958,18 @@ return view.extend({
 
 				if (commandCenter)
 					commandCenter.replaceWith(renderCommandCenter(result || {}, setupProgress()));
-				if (liveHealth)
-					liveHealth.replaceChildren(
-						E('h3', { id: 'mwan4-live-health-title' }, [ _('Live health') ]),
-						renderHealthMatrix(result || {}),
-						renderCounterStrip(counterResult)
+				if (wanWorkspace)
+					wanWorkspace.replaceChildren(
+						E('div', { class: 'mwan4-panel-heading' }, [
+							E('div', [
+								E('span', { class: 'mwan4-eyebrow' }, [ _('WAN workspace') ]),
+								E('h3', { id: 'mwan4-wan-workspace-title' }, [ _('WAN health matrix') ])
+							]),
+							hasDiagnosticsAccess ? E('a', { class: 'btn cbi-button cbi-button-neutral', href: L.url('admin/network/mwan4/diagnostics') }, [ _('Open Diagnostics') ]) : ''
+						]),
+						renderWanWorkspace(result || {}, counterResult)
 					);
-				setBusy(byId('mwan4-live-health'), false);
+				setBusy(byId('mwan4-wan-workspace'), false);
 			});
 		});
 

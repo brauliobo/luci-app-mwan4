@@ -36,6 +36,7 @@ return view.extend({
 			L.resolveDefault(fs.stat('/usr/bin/httping'), {}),
 			L.resolveDefault(fs.stat('/usr/bin/nping'), {}),
 			L.resolveDefault(fs.stat('/usr/bin/arping'), {}),
+			L.resolveDefault(fs.stat('/usr/bin/nslookup'), {}),
 			uci.load('network')
 		]);
 	},
@@ -101,6 +102,7 @@ return view.extend({
 			o.value('nping-arp', _('ARP nping probe'));
 		}
 		if (stats[2].type == 'file') o.value('arping', _('ARP probe'));
+		if (stats[3].type == 'file') o.value('nslookup', _('DNS probe'));
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'httping_ssl', _('HTTPS health checks'));

@@ -1,6 +1,146 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "WAN workspace"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "WAN health matrix"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Probe / SLA"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Health tuning"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Extra match and logging"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "PBR"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "MPTCP"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/mptcp.js
+msgid "MPTCP workflow"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/mptcp.js
+msgid "MPTCP endpoint management"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/mptcp.js
+msgid "MPTCP kernel/sysctl state"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/mptcp.js
+msgid "Per-WAN MPTCP endpoint roles"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Quality"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Route explain"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Route explain tuple"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Explain tuple"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Requested tuple"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Any family"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Any source"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Any source port"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Any destination port"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Explaining route choice for %s..."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Route explain failed: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Probe and BFD visibility"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "VRF visibility"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "PBR harmony"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Tunnel diagnostics"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/mptcp.js
+msgid "MPTCP source-route alignment"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Ownership and cleanup"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Audit routing table, rule, chain, and counter ownership before cleanup or coexistence changes."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Run Ownership"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Grouped counters"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/mptcp.js
+msgid "Expected route"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/mptcp.js
+msgid "No MPTCP route-alignment rows were reported."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Run Summary first, then use the advanced workflows below for MPTCP, route decisions, tunnels, ownership, probes, VRF, counters, or PBR harmony."
+msgstr ""
+
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:76
 msgid "%d / %d"
 msgstr ""
@@ -200,10 +340,6 @@ msgstr ""
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1670
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1730
 msgid "Advanced"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1056
-msgid "Advanced match and logging"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1001
@@ -2150,6 +2286,34 @@ msgstr ""
 msgid "Use main routing table"
 msgstr ""
 
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/advanced.js
+msgid "Provision WAN"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/advanced.js
+msgid "Configure tunnel"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/advanced.js
+msgid "Configure PBR"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/advanced.js
+msgid "Configure VRF"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/advanced.js
+msgid "Configure BFD"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/mptcp.js
+msgid "Enable MPTCP configuration"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Reset nft counters"
+msgstr ""
+
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1560
 msgid "Use one primary WAN link and fail over when health checks fail."
 msgstr ""
@@ -2432,4 +2596,368 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1101
 msgid "work_vpn"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/advanced.js
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js
+msgid "DNS probe"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Probe helper availability"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Counter references"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "l3mdev routing rules"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Missing counter definitions"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Some nft rules reference counters that were not reported by nft list counters."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "References"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Chains"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "%d rule reference(s)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "No chain"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "No nft rule counter references were reported."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "FRR BFD visibility through vtysh"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "FRR vtysh not available"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Helper"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Built in"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Available"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "SLA metrics"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "No probe helper availability data was reported."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "BFD sessions"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Peer"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Not bound"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Default VRF"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "No BFD sessions were reported."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "FRR vtysh is not available, so BFD sessions cannot be read."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Kernel VRF lookup rules are present"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Kernel VRF lookup rule is missing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "VRF table routes"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "No l3mdev routing rules were reported."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "No VRF table routes were reported."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/advanced.js
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Package readiness"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Packages"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/advanced.js
+msgid "Generate WireGuard key"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/advanced.js
+msgid "Apply endpoint exemptions"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/advanced.js
+msgid "Apply FRR/BFD"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/advanced.js
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "PBR validation"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/advanced.js
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "VRF live validation"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/advanced.js
+msgid "Endpoint exemptions"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Feature package map"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Configured BFD peers"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/advanced.js
+msgid "WireGuard public key"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/advanced.js
+msgid "Metadata and integration writes"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Generated paths replaced"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Custom paths preserved"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Strategy override"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "WAN link diagnostics"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Route table snapshot"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Traffic policy routing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "nftables runtime"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Service state"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Generated nftables files"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Tracker instances"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/diagnostics.js
+msgid "Error"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/diagnostics.js
+msgid "Error output"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/diagnostics.js
+msgid "Failure"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/diagnostics.js
+msgid "Warning"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/diagnostics.js
+msgid "Conflict"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/diagnostics.js
+msgid "Collision"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/diagnostics.js
+msgid "Unsupported"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/diagnostics.js
+msgid "Backend reported this section as failed"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "MPTCP route alignment"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "No MPTCP source-route alignment rows were reported."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Quality edge states"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "No reason reported"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Sample"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "No quality edge states were reported."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Probe failures"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "No probe failure rows were reported."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "PBR interface coverage"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Supported"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "pbr supported_interface"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Missing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "mwan4 enabled WAN"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Unknown interface"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Source"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "No PBR supported-interface coverage rows were reported."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "PBR policy targets"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Unnamed policy"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Target"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "No PBR policy target rows were reported."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Recursion warnings"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Unknown tunnel"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "No tunnel recursion warnings were reported."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Ownership object inventory"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Kind"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Object"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "No ownership object inventory was reported."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Ownership conflicts"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Unknown object"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Unknown owner"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "No ownership conflicts were reported."
 msgstr ""

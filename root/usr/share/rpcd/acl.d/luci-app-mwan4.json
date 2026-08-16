@@ -21,11 +21,15 @@
 				],
 				"/usr/bin/arping": [
 					"list"
+				],
+				"/usr/bin/nslookup": [
+					"list"
 				]
 			},
 			"ubus": {
 				"mwan4": [
 					"capabilities",
+					"diagnostics",
 					"status",
 					"validate"
 				]
@@ -37,7 +41,58 @@
 		},
 		"write": {
 			"uci": [
-				"mwan4"
+				"mwan4",
+				"network"
+			]
+		}
+	},
+	"luci-app-mwan4-advanced": {
+		"description": "Grant access for luci-app-mwan4 advanced integrations",
+		"read": {
+			"file": {
+				"/usr/bin/httping": [
+					"list"
+				],
+				"/usr/bin/nping": [
+					"list"
+				],
+				"/usr/bin/arping": [
+					"list"
+				],
+				"/usr/bin/nslookup": [
+					"list"
+				]
+			},
+			"ubus": {
+				"mwan4": [
+					"capabilities",
+					"diagnostics",
+					"status",
+					"validate"
+				]
+			},
+			"uci": [
+				"frr",
+				"ipsec",
+				"mwan4",
+				"network",
+				"openvpn",
+				"pbr"
+			]
+		},
+		"write": {
+			"ubus": {
+				"mwan4": [
+					"advanced_control"
+				]
+			},
+			"uci": [
+				"frr",
+				"ipsec",
+				"mwan4",
+				"network",
+				"openvpn",
+				"pbr"
 			]
 		}
 	},
