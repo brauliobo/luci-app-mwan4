@@ -608,8 +608,15 @@ function runtimeWarnings(status) {
 
 function liveInterfaceCounts(status) {
 	let interfaces = (status || {}).interfaces || {};
-	let names = Object.keys(interfaces);
-	let online = names.filter(function(name) { return interfaces[name].status == 'online' || interfaces[name].up; }).length;
+	let names = Object.keys(interfaces).filter(function(name) {
+		return interfaces[name].enabled !== false && interfaces[name].enabled != '0';
+	});
+	let online = names.filter(function(name) {
+		let runtime = interfaces[name];
+		let state = runtime.health_state != null ? runtime.health_state : runtime.status;
+
+		return state == 'online';
+	}).length;
 
 	return {
 		names:   names,
@@ -1506,33 +1513,6 @@ function renderFirstRunGuide(progress) {
 			renderSetupStep(progress.hasRouting, false,
 				_('Add exceptions only if needed'),
 				_('Optional: route guest Wi-Fi, VPN clients, video calls, or a service through a special path.'))
-		])
-	]);
-}
-
-function renderSummary(status) {
-	let interfaces = status.interfaces || {};
-	let names = Object.keys(interfaces);
-	let online = names.filter(function(name) { return interfaces[name].status == 'online' || interfaces[name].up; }).length;
-	let activeStrategies = status.strategies || {};
-	let strategyCount = 0;
-
-	Object.keys(activeStrategies).forEach(function(family) {
-		strategyCount += Object.keys(activeStrategies[family] || {}).length;
-	});
-
-	return E('div', { class: 'mwan4-summary' }, [
-		E('div', { class: 'mwan4-metric' }, [
-			E('span', [ _('WAN links') ]),
-			E('strong', [ '%d/%d'.format(online, names.length) ])
-		]),
-		E('div', { class: 'mwan4-metric' }, [
-			E('span', [ _('Strategies') ]),
-			E('strong', [ String(strategyCount || strategies().length) ])
-		]),
-		E('div', { class: 'mwan4-metric' }, [
-			E('span', [ _('Traffic exceptions') ]),
-			E('strong', [ String(trafficExceptions().length) ])
 		])
 	]);
 }

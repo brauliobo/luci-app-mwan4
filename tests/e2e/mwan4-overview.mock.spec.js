@@ -56,6 +56,25 @@ test.describe('mocked mwan4 overview workspace', () => {
 		await expect(commandCenter.getByRole('link', { name: 'Open Diagnostics' })).toHaveAttribute('href', /admin\/network\/mwan4\/diagnostics/);
 	});
 
+	test('counts only enabled health-online runtime interface sections as WAN links', async ({ page }) => {
+		const status = defaultStatus();
+		status.interfaces = {
+			wan_vivo: { enabled: true, health_state: 'online', status: 'online', up: true },
+			wan_vivo6: { enabled: true, status: 'online', up: true },
+			wan_tim: { enabled: true, health_state: 'offline', status: 'offline', up: true },
+			wan_tim6: { enabled: true, health_state: 'degraded', status: 'online', up: true },
+			wan_str: { enabled: true, health_state: 'offline', status: 'online', up: true },
+			wan_str6: { enabled: true, status: 'offline', up: true },
+			wan_disabled: { enabled: false, health_state: 'online', status: 'online', up: true }
+		};
+
+		await renderOverview(page, { status });
+
+		const commandCenter = page.locator('#mwan4-command-center');
+		await expect(commandCenter).toContainText('2/6 online');
+		await expect(commandCenter).toContainText('Degraded');
+	});
+
 	test('hides advanced workspace link without the advanced ACL', async ({ page }) => {
 		await renderOverview(page, { advancedAccess: false });
 
@@ -145,6 +164,30 @@ test.describe('mocked mwan4 overview workspace', () => {
 		await expect(page.locator('#mwan4-wan-workspace [data-interface="wan_backup"]')).toContainText('offline');
 		await expect(page.locator('#mwan4-wan-workspace')).toContainText('Matched packets');
 		await expect(page.locator('#mwan4-wan-workspace')).toContainText('Path counters');
+	});
+
+	test('poll refresh follows health transitions while carrier remains up', async ({ page }) => {
+		const status = defaultStatus();
+		status.interfaces.wan_primary.enabled = true;
+		status.interfaces.wan_primary.health_state = 'online';
+		status.interfaces.wan_backup.enabled = true;
+		status.interfaces.wan_backup.health_state = 'online';
+
+		await renderOverview(page, { status });
+		await expect(page.locator('#mwan4-command-center')).toContainText('2/2 online');
+
+		status.interfaces.wan_backup.health_state = 'offline';
+		status.interfaces.wan_backup.status = 'offline';
+		expect(status.interfaces.wan_backup.up).toBe(true);
+
+		await page.evaluate(function(nextStatus) {
+			window.__mwan4Mock.setStatus(nextStatus);
+			return window.__mwan4Mock.runPoll();
+		}, status);
+
+		const commandCenter = page.locator('#mwan4-command-center');
+		await expect(commandCenter).toContainText('1/2 online');
+		await expect(commandCenter).toContainText('Degraded');
 	});
 
 	test('writes dual-stack family selection from the compact WAN editor', async ({ page }) => {
