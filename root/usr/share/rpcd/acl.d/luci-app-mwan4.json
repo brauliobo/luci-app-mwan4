@@ -4,6 +4,7 @@
 		"read": {
 			"ubus": {
 				"mwan4": [
+					"connections",
 					"status"
 				]
 			}
@@ -29,6 +30,7 @@
 			"ubus": {
 				"mwan4": [
 					"capabilities",
+					"connections",
 					"diagnostics",
 					"status",
 					"validate"
@@ -71,6 +73,7 @@
 			"ubus": {
 				"mwan4": [
 					"capabilities",
+					"connections",
 					"diagnostics",
 					"status",
 					"validate"
@@ -125,6 +128,7 @@
 			"ubus": {
 				"mwan4": [
 					"capabilities",
+					"connections",
 					"diagnostics"
 				]
 			}

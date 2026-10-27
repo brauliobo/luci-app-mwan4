@@ -46,8 +46,8 @@ assert.deepEqual(keys(acl), [
 	'luci-app-mwan4-status'
 ], 'ACL should expose separate status, config, advanced, operator, and diagnostics roles');
 
-assert.deepEqual(ubusPermissions(acl['luci-app-mwan4-status'], 'read', 'mwan4'), [ 'status' ],
-	'status ACL should only grant mwan4 ubus status reads');
+assert.deepEqual(ubusPermissions(acl['luci-app-mwan4-status'], 'read', 'mwan4'), [ 'connections', 'status' ],
+	'status ACL should only grant mwan4 ubus status and connections reads');
 assert.equal(acl['luci-app-mwan4-status'].write, undefined,
 	'status ACL must not grant write permissions');
 assert.deepEqual(filePermissions(acl['luci-app-mwan4-status'], 'read'), {},
@@ -63,7 +63,7 @@ assert.deepEqual(keys(filePermissions(acl['luci-app-mwan4'], 'read')), [
 ], 'config ACL read file access should only list optional tracker binaries used by probe selectors');
 assert.deepEqual(keys(filePermissions(acl['luci-app-mwan4'], 'write')), [],
 	'config ACL must not grant service control exec permissions');
-assert.deepEqual(ubusPermissions(acl['luci-app-mwan4'], 'read', 'mwan4'), [ 'capabilities', 'diagnostics', 'status', 'validate' ],
+assert.deepEqual(ubusPermissions(acl['luci-app-mwan4'], 'read', 'mwan4'), [ 'capabilities', 'connections', 'diagnostics', 'status', 'validate' ],
 	'config ACL should read status/capabilities/validation plus diagnostics needed by core config pages');
 assert.deepEqual(acl['luci-app-mwan4'].read?.uci, [ 'mwan4', 'network' ],
 	'config ACL should read only core mwan4 and netifd WAN configuration');
@@ -71,6 +71,11 @@ assert.deepEqual(acl['luci-app-mwan4'].write?.uci, [ 'mwan4', 'network' ],
 	'config ACL should write only core mwan4 and netifd WAN configuration');
 assert.deepEqual(ubusPermissions(acl['luci-app-mwan4'], 'write', 'mwan4'), [ 'pbr_import' ],
 	'config ACL should grant only the PBR import ubus method (preview and apply need write because apply rewrites mwan4 UCI)');
+for (const role of Object.keys(acl))
+	assert.ok(!ubusPermissions(acl[role], 'write', 'mwan4').includes('connections'),
+		`${role} must only grant the connections list at read level`);
+assert.match(read('htdocs/luci-static/resources/mwan4/connections.js'), /method: 'connections'/,
+	'the shared connections component calls the read-level connections method');
 assert.ok(!ubusPermissions(acl['luci-app-mwan4'], 'read', 'mwan4').includes('pbr_import'),
 	'read-only config sessions must not reach the PBR import apply path');
 
@@ -80,7 +85,7 @@ assert.deepEqual(keys(filePermissions(acl['luci-app-mwan4-advanced'], 'read')), 
 	'/usr/bin/nping',
 	'/usr/bin/nslookup'
 ], 'advanced ACL read file access should only list optional tracker binaries used by probe selectors');
-assert.deepEqual(ubusPermissions(acl['luci-app-mwan4-advanced'], 'read', 'mwan4'), [ 'capabilities', 'diagnostics', 'status', 'validate' ],
+assert.deepEqual(ubusPermissions(acl['luci-app-mwan4-advanced'], 'read', 'mwan4'), [ 'capabilities', 'connections', 'diagnostics', 'status', 'validate' ],
 	'advanced ACL should read status/capabilities/validation/diagnostics for integration guidance');
 assert.deepEqual(ubusPermissions(acl['luci-app-mwan4-advanced'], 'write', 'mwan4'), [ 'advanced_control' ],
 	'advanced ACL should grant only the constrained advanced_control ubus method');
@@ -102,7 +107,7 @@ assert.equal(acl['luci-app-mwan4-operator'].write?.uci, undefined,
 
 assert.deepEqual(keys(filePermissions(acl['luci-app-mwan4-diagnostics'], 'read')), [],
 	'diagnostics ACL must not grant shell command exec permissions');
-assert.deepEqual(ubusPermissions(acl['luci-app-mwan4-diagnostics'], 'read', 'mwan4'), [ 'capabilities', 'diagnostics' ],
+assert.deepEqual(ubusPermissions(acl['luci-app-mwan4-diagnostics'], 'read', 'mwan4'), [ 'capabilities', 'connections', 'diagnostics' ],
 	'diagnostics ACL should grant only the diagnostics rpcd contract methods');
 assert.equal(acl['luci-app-mwan4-diagnostics'].write, undefined,
 	'diagnostics ACL must not grant writes');
