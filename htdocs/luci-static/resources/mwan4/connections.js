@@ -55,7 +55,7 @@ function ruleStats(name, status, counters) {
 function interfaceActive(name, status) {
 	let value = (((status || {}).interfaces || {})[name] || {}).active_connections;
 
-	return value == null ? null : Number(value);
+	return value == null ? null : Number(value.total);
 }
 
 function strategyActive(name, status) {

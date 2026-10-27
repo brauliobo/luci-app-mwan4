@@ -75,7 +75,7 @@ function defaultStatus() {
 	return {
 		interfaces: {
 			wan_primary: {
-				active_connections: 5,
+				active_connections: { ipv4: 5, ipv6: 0, total: 5 },
 				status: 'online',
 				up: true,
 				tracking: 'tracking',
@@ -95,7 +95,7 @@ function defaultStatus() {
 				]
 			},
 			wan_backup: {
-				active_connections: 2,
+				active_connections: { ipv4: 2, ipv6: 0, total: 2 },
 				status: 'online',
 				up: true,
 				tracking: 'tracking',
