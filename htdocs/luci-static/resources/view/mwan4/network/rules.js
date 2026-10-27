@@ -57,6 +57,10 @@ return view.extend({
 		o.placeholder = _('Readable display name');
 		o.description = _('Shown in the overview; the section name stays a short internal identifier.');
 
+		o = s.option(form.DummyValue, 'rule_id', _('Rule ID'));
+		o.default = '-';
+		o.description = _('Assigned automatically by mwan4 to count connections per rule; it never changes while the rule exists.');
+
 		o = s.option(form.DynamicList, 'family', _('Address families'));
 		o.description = _('IPv4 and IPv6 traffic policies are evaluated separately. Add both only for equivalent dual-stack matches.');
 		o.value('ipv4', _('IPv4'));
