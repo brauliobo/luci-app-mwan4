@@ -8,13 +8,16 @@ LuCI application for configuring and operating `mwan4`.
 - Overview warning when mwan4 is configured but service instances, health trackers, or nftables chains are inactive.
 - Service actions: start, stop, restart, per-interface ifup, and per-interface ifdown.
 - Diagnostics for summaries, WAN links, routes, traffic policies, nftables, service state, counters, ownership, PBR, MPTCP, quality/SLA, probes/BFD, VRF, tunnels, and route-explain decisions. Raw RPC output stays hidden behind **Show raw response**.
-- UCI forms for globals, interfaces, routes, strategies, and rules.
+- Overview **Routing rules** list: priority is the UCI order (reorder by drag or the move buttons; the generated default catch-alls stay last and locked), per-rule enable toggle, match chips, the strategy shown as ordered WAN chips coloured by live health, and live hit counters.
+- One rule modal with three questions: **What** (domains and IP/CIDR in one box, auto-classified into `domain`/`dest_ip`, plus protocol and ports), **Who** (all devices, DHCP/ARP devices by MAC/IP into `src_mac`/`src_ip`, or an interface into `src_iface`) and **Via** (an existing strategy or a one-click "Prefer WAN, fall back to others" / "Only WAN, never leak" preset that creates the strategy). DSCP, router traffic, sticky sessions, logging, and the nft set stay visible as compact fields. Section names (15 characters max) are derived from the rule name, which is kept as `label`.
+- **Import from PBR** (shown only when the backend `pbr_import` RPC reports PBR policies and the session may write `mwan4`): dry-run preview with skipped policies and warnings called out, then apply.
+- UCI forms for globals, interfaces, routes, strategies, and rules (the raw Rules tab also exposes label, enabled, domain, source MAC, DSCP, and router traffic).
 - Migration helper for existing mwan4 configs that still use old `member` and `policy` section names.
 
 ## ACL Roles
 
 - `luci-app-mwan4-status`: read-only runtime status; no UCI, control RPC, or diagnostics access.
-- `luci-app-mwan4`: core configuration pages for mwan4 and network UCI.
+- `luci-app-mwan4`: core configuration pages for mwan4 and network UCI, plus the `pbr_import` ubus method (write scope only, because applying it rewrites `/etc/config/mwan4`).
 - `luci-app-mwan4-operator`: constrained runtime controls such as restart, ifup/ifdown, and counter reset through the backend control RPC.
 - `luci-app-mwan4-diagnostics`: read-only diagnostics RPC access with no shell execution or UCI reads.
 - `luci-app-mwan4-advanced`: explicit advanced integration workflows for PBR, VRF, tunnels, FRR/BFD, and related UCI-backed metadata.

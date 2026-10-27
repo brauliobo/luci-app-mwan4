@@ -14,6 +14,7 @@ This backlog tracks UX, status-contract, and advanced-networking issues discover
 - Added deterministic mocked Playwright coverage for the merged WAN workspace, missing metrics, advanced shortcuts staying out of the matrix, empty first-run state, and poll refresh behavior.
 - Added first-class advanced Diagnostics surfaces for `mptcp`, `quality`, `probes`, `vrf`, `explain`, `counters`, `pbr`, and `tunnels`, plus a dedicated `MPTCP` LuCI tab backed by the diagnostics ACL.
 - Kept PBR harmony and MPTCP workflow entry points out of the WAN workspace so the matrix remains focused on WAN health, SLA, and counters.
+- Replaced the per-field traffic exception builder with a dense `Routing rules` list (ordering, enable toggle, match chips, via chips with live health, hit counters, locked defaults) and a three-question modal (What / Who / Via with one-click Prefer/Only presets). `Import from PBR` previews and applies the backend `pbr_import` conversion.
 
 ## Immediate UI Fixes
 
@@ -47,7 +48,7 @@ This backlog tracks UX, status-contract, and advanced-networking issues discover
 - Replace the collapsed raw-editor link strip with contextual tools inside each section.
 - Keep raw WAN sections, route tables, strategies, rules, globals, and diagnostics in LuCI tabs; do not reintroduce overview deep-link clusters.
 - Routing mode should include effective path inspection: active, standby, offline, fallback, and why each path is selected or skipped.
-- Traffic exceptions should include a route-decision simulator for source, destination, protocol, port, and family.
+- Routing rules should include a route-decision simulator for source, destination, protocol, port, and family.
 - Diagnostics should remain available, but the overview should summarize the same data with actionable fixes.
 - Add copyable diagnostic commands only where they explain an observed issue.
 - Add preset preview diffs before changing generated routes, strategies, or default rules.
