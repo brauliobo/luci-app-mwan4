@@ -418,6 +418,21 @@
 	padding: 10px;
 }
 
+.mwan4-compact-metrics.has-connections {
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+button.mwan4-command-metric {
+	cursor: pointer;
+	font: inherit;
+	text-align: left;
+}
+
+button.mwan4-command-metric:hover,
+.mwan4-conn-button:hover {
+	border-color: var(--primary-color-high, #0069d6);
+}
+
 .mwan4-command-metric span {
 	display: block;
 	color: var(--text-color-medium);
@@ -1075,6 +1090,10 @@
 	grid-template-columns: 96px 52px minmax(110px, 0.9fr) minmax(170px, 2fr) minmax(150px, 1.4fr) 72px auto;
 }
 
+.mwan4-rules.has-connections .mwan4-row {
+	grid-template-columns: 96px 52px minmax(110px, 0.9fr) minmax(170px, 2fr) minmax(150px, 1.4fr) 72px 96px auto;
+}
+
 .mwan4-rules .mwan4-actions {
 	margin-top: 0;
 }
@@ -1184,6 +1203,11 @@
 }
 
 @media (max-width: 900px) {
+	.mwan4-rules.has-connections .mwan4-row,
+	.mwan4-compact-metrics.has-connections {
+		grid-template-columns: 1fr;
+	}
+
 	.mwan4-row {
 		display: grid;
 		grid-template-columns: 1fr;
@@ -1291,4 +1315,69 @@
 	.mwan4-modal-actions {
 		justify-content: flex-start;
 	}
+}
+
+.mwan4-connections {
+	display: grid;
+	gap: 10px;
+	min-width: 0;
+}
+
+.mwan4-conn-filters {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+	gap: 8px;
+}
+
+.mwan4-conn-summary {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.mwan4-conn-notice {
+	margin: 0;
+	padding: 6px 10px;
+	border: 1px solid var(--border-color-low);
+	border-radius: var(--mwan4-radius-sm);
+	background: var(--background-color-low);
+}
+
+.mwan4-conn-empty {
+	margin: 0;
+	color: var(--text-color-medium);
+}
+
+.mwan4-conn-table {
+	min-width: 760px;
+	margin: 0;
+	border: 0;
+}
+
+.mwan4-conn-table th,
+.mwan4-conn-table td {
+	padding: 6px 10px;
+	vertical-align: top;
+	white-space: nowrap;
+}
+
+.mwan4-conn-table td small {
+	display: block;
+	color: var(--text-color-medium);
+}
+
+.mwan4-conn-button {
+	font-variant-numeric: tabular-nums;
+}
+
+.mwan4-strategy-connections {
+	margin-top: 8px;
+}
+
+.mwan4-rule-connections {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
 }

@@ -55,6 +55,16 @@ function formatDisplayValue(value, fallback) {
 	return String(value);
 }
 
+function formatBytes(bytes) {
+	let units = [ 'B', 'KB', 'MB', 'GB', 'TB' ];
+	let unit = 0;
+
+	for (; bytes >= 1024 && unit < units.length - 1; unit++)
+		bytes /= 1024;
+
+	return '%s %s'.format(unit ? bytes.toFixed(1) : bytes, units[unit]);
+}
+
 function renderPill(text, cls) {
 	return E('span', { class: 'mwan4-pill %s'.format(cls || 'mwan4-muted') }, [ formatDisplayValue(text, _('unknown')) ]);
 }
@@ -159,6 +169,7 @@ function rpcErrorMessage(result, fallback) {
 
 return baseclass.extend({
 	addStylesheet:         addStylesheet,
+	formatBytes:           formatBytes,
 	formatDisplayValue:    formatDisplayValue,
 	renderAclNotice:       renderAclNotice,
 	renderNextSteps:       renderNextSteps,
