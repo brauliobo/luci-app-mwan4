@@ -3,8 +3,10 @@
 'require ui';
 'require view';
 'require mwan4.common as mwan4Common';
+'require mwan4.connections as mwan4Connections';
 'require mwan4.diagnostics as mwan4Diagnostics';
 /* global mwan4Common */
+/* global mwan4Connections */
 /* global mwan4Diagnostics */
 
 const callDiagnostics = rpc.declare({
@@ -1132,6 +1134,21 @@ function renderWorkflowCard(title, body, actions, extra) {
 	return E('div', { class: 'mwan4-workflow-card' }, nodes);
 }
 
+function summaryChoices(summary) {
+	let names = (((summary || {}).diagnostics || {}).summary) || {};
+	let pair = function(name) { return [ name, name ]; };
+
+	return { interface: asArray(names.interfaces).map(pair), strategy: asArray(names.strategies).map(pair) };
+}
+
+function renderConnections(summary) {
+	return E('div', { id: 'mwan4-diag-connections', class: 'mwan4-next-steps mwan4-diag-connections' }, [
+		E('h3', [ _('Connections') ]),
+		E('p', [ _('Live conntrack entries attributed to mwan4 routing rules and WAN links. The list refreshes while this page is open.') ]),
+		mwan4Connections.renderPanel({ choices: summaryChoices(summary) })
+	]);
+}
+
 function renderAdvancedWorkflows() {
 	return E('div', { class: 'mwan4-advanced-workflows' }, [
 		renderWorkflowCard(_('Package readiness'), _('Check optional package bundles for advanced probes, WireGuard, tunnels, PBR, VRF, and FRR/BFD before applying workflows.'), [
@@ -1171,7 +1188,8 @@ return view.extend({
 			return Promise.all([
 				access[0],
 				access[1],
-				access[0] ? L.resolveDefault(callDiagnostics('summary'), {}) : {}
+				access[0] ? L.resolveDefault(callDiagnostics('summary'), {}) : {},
+				access[0] ? mwan4Connections.probe() : null
 			]);
 		});
 	},
@@ -1211,6 +1229,7 @@ return view.extend({
 					E('p', [ _('Run Summary first, then use the advanced workflows below for MPTCP, route decisions, tunnels, ownership, probes, VRF, counters, or PBR harmony.') ])
 				]),
 				renderAdvancedWorkflows(),
+				hasDiagnosticsAccess && data[3] != null ? renderConnections(initialResult) : null,
 				E('div', { class: 'mwan4-actions' }, commands.map(function(c) {
 					return E('button', {
 						class:       'btn cbi-button cbi-button-action',
