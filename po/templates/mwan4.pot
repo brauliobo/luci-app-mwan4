@@ -3653,3 +3653,147 @@ msgstr ""
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js
 msgid "Also apply this rule to traffic originated by the router itself."
 msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "IPv4: %d active / %d new, IPv6: %d active / %d new"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "%dh %dm"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "%dm %ds"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "%ds"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "View connections of routing rule %s: %d active, %d new"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "%d packets"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "Via WAN"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "TTL"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "Address, port, or rule"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "Search connections"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "No connections match these filters."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "Show more"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "unexpected response"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "%d active connection(s)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "Showing the first %d of %d connections. Narrow the filters or show more."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "Connections are unavailable: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "Any rule"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "Any WAN"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "Any strategy"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "Family"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "IPv4 and IPv6"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "Search"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Connections"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Close"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "%d active, %d new since the ruleset was loaded"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "No connections counted for this rule yet."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "View connections"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "View all active connections"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Active connections"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Open the live connection list"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "View active connections of WAN link %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "View active connections of strategy %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "%s: %d"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js
+msgid "Rule ID"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js
+msgid "Assigned automatically by mwan4 to count connections per rule; it never changes while the rule exists."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
+msgid "Live conntrack entries attributed to mwan4 routing rules and WAN links. The list refreshes while this page is open."
+msgstr ""

@@ -9,6 +9,7 @@ const root = path.resolve(__dirname, '..');
 
 const jsFiles = [
 	'htdocs/luci-static/resources/mwan4/common.js',
+	'htdocs/luci-static/resources/mwan4/connections.js',
 	'htdocs/luci-static/resources/mwan4/advanced.js',
 	'htdocs/luci-static/resources/mwan4/diagnostics.js',
 	'htdocs/luci-static/resources/mwan4/overview.js',
@@ -275,7 +276,13 @@ for (const needle of [
 	'msgid "Domains and addresses"',
 	'msgid "Add a known device"',
 	'msgid "Everything else"',
-	'msgid "Include router traffic"'
+	'msgid "Include router traffic"',
+	'msgid "Connections"',
+	'msgid "Active connections"',
+	'msgid "View connections"',
+	'msgid "No connections match these filters."',
+	'msgid "Showing the first %d of %d connections. Narrow the filters or show more."',
+	'msgid "Rule ID"'
 ])
 	assertContains(pot, needle, `POT is missing ${needle}`);
 
