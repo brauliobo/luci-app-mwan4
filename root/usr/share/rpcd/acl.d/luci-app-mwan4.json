@@ -40,6 +40,11 @@
 			]
 		},
 		"write": {
+			"ubus": {
+				"mwan4": [
+					"pbr_import"
+				]
+			},
 			"uci": [
 				"mwan4",
 				"network"

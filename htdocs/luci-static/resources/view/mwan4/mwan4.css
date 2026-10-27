@@ -1072,7 +1072,115 @@
 }
 
 .mwan4-rules .mwan4-row {
-	grid-template-columns: 0.8fr 1.3fr 1.4fr 1.1fr auto;
+	grid-template-columns: 96px 52px minmax(110px, 0.9fr) minmax(170px, 2fr) minmax(150px, 1.4fr) 72px auto;
+}
+
+.mwan4-rules .mwan4-actions {
+	margin-top: 0;
+}
+
+.mwan4-rule-row.is-disabled > .mwan4-cell:not(:nth-child(-n+2)):not(:last-child) {
+	opacity: 0.55;
+}
+
+.mwan4-rule-row.is-default {
+	background: var(--background-color-low);
+	font-style: italic;
+}
+
+.mwan4-rule-row.is-drop-before {
+	box-shadow: 0 -2px 0 0 var(--primary-color-high, #0069d6);
+}
+
+.mwan4-rule-row.is-drop-after {
+	box-shadow: 0 2px 0 0 var(--primary-color-high, #0069d6);
+}
+
+.mwan4-rule-row .mwan4-cell > strong,
+.mwan4-rule-row .mwan4-cell > small {
+	display: block;
+}
+
+.mwan4-rule-order {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.mwan4-rule-order .mwan4-move {
+	padding: 0 6px;
+	min-height: 24px;
+	line-height: 22px;
+}
+
+.mwan4-drag-handle {
+	cursor: grab;
+	color: var(--text-color-medium);
+	letter-spacing: -2px;
+	user-select: none;
+}
+
+.mwan4-rule-index {
+	min-width: 1.4em;
+	font-weight: 700;
+}
+
+.mwan4-rules-actions {
+	margin-top: 0;
+	justify-content: flex-end;
+}
+
+.mwan4-chips {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px;
+	min-width: 0;
+}
+
+.mwan4-chip {
+	display: inline-block;
+	max-width: 100%;
+	border: 1px solid var(--border-color-low);
+	border-radius: 4px;
+	padding: 0 6px;
+	background: var(--background-color-low);
+	font-size: 12px;
+	line-height: 20px;
+	overflow-wrap: anywhere;
+}
+
+.mwan4-chip-domain { border-color: #9ec5fe; background: #e7f1ff; color: #0a3a80; }
+.mwan4-chip-ip { border-color: #c4b5fd; background: #f1ecff; color: #3b1d8e; }
+.mwan4-chip-wan { font-weight: 600; }
+
+.mwan4-via-sep {
+	color: var(--text-color-medium);
+	font-weight: 700;
+}
+
+.mwan4-rule-warning {
+	color: #856404;
+	font-weight: 600;
+}
+
+.mwan4-import-table {
+	width: 100%;
+}
+
+.mwan4-import-table small {
+	display: block;
+	color: var(--text-color-medium);
+}
+
+.mwan4-modal-grid [hidden] {
+	display: none;
+}
+
+.mwan4-modal-field textarea {
+	width: 100%;
+	box-sizing: border-box;
+	font-family: monospace;
 }
 
 @media (max-width: 900px) {

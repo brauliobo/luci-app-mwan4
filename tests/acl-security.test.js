@@ -69,8 +69,10 @@ assert.deepEqual(acl['luci-app-mwan4'].read?.uci, [ 'mwan4', 'network' ],
 	'config ACL should read only core mwan4 and netifd WAN configuration');
 assert.deepEqual(acl['luci-app-mwan4'].write?.uci, [ 'mwan4', 'network' ],
 	'config ACL should write only core mwan4 and netifd WAN configuration');
-assert.deepEqual(ubusPermissions(acl['luci-app-mwan4'], 'write', 'mwan4'), [],
-	'config ACL must not grant runtime control ubus methods');
+assert.deepEqual(ubusPermissions(acl['luci-app-mwan4'], 'write', 'mwan4'), [ 'pbr_import' ],
+	'config ACL should grant only the PBR import ubus method (preview and apply need write because apply rewrites mwan4 UCI)');
+assert.ok(!ubusPermissions(acl['luci-app-mwan4'], 'read', 'mwan4').includes('pbr_import'),
+	'read-only config sessions must not reach the PBR import apply path');
 
 assert.deepEqual(keys(filePermissions(acl['luci-app-mwan4-advanced'], 'read')), [
 	'/usr/bin/arping',
@@ -159,6 +161,12 @@ assert.match(networkView, /if \(hasOperatorAccess\) \{/,
 	'network overview should gate interface controls on operator access');
 assert.match(networkView, /hasOperatorAccess\s*\?\s*runMwan4\(\[ 'restart' \]\)/,
 	'network overview should restart through control rpc only when operator access is present');
+assert.match(networkView, /method:\s*'pbr_import'/,
+	'network overview should use the mwan4 pbr_import ubus method for the PBR import action');
+assert.match(networkView, /callSessionAccess\('access-group', 'luci-app-mwan4', 'write'\)/,
+	'network overview should show the PBR import action only to sessions that can write mwan4 configuration');
+assert.match(networkView, /canImportPbr\(\) \?/,
+	'network overview should render the PBR import action only when pbr_import reports PBR policies');
 assert.match(networkView, /mwan4Common\.renderRuntimeWarnings/,
 	'network overview should use shared runtime warning rendering');
 assert.match(networkView, /fs\.stat\('\/usr\/bin\/nslookup'\)/,

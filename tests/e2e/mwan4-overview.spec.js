@@ -38,7 +38,7 @@ const scenarioMatrix = [
 	{ id: 'acl-roles', mode: 'static', title: 'ACL role declarations and menu dependencies' },
 	{ id: 'overview', mode: 'live', route: 'admin/network/mwan4/overview', title: 'MultiWAN 4' },
 	{ id: 'diagnostics', mode: 'live', route: 'admin/network/mwan4/diagnostics', title: 'MultiWAN 4 - Diagnostics' },
-	{ id: 'policy-builder', mode: 'live', route: 'admin/network/mwan4/overview', title: 'Traffic exception builder' },
+	{ id: 'policy-builder', mode: 'live', route: 'admin/network/mwan4/overview', title: 'Routing rule builder' },
 	{ id: 'staged-apply', mode: 'live', route: 'admin/network/mwan4/overview', title: 'Pending change preview' },
 	{ id: 'overview-modal-save', mode: 'guarded-live', route: 'admin/network/mwan4/overview', guard: 'E2E_LUCI_MUTATION=1 E2E_DISPOSABLE_QEMU=1' },
 	{ id: 'live-status', mode: 'live', route: 'admin/network/mwan4/overview', title: 'Live health' },
@@ -185,11 +185,9 @@ test('overview exposes pending change previews for high-impact modal flows', asy
 	expect(diagnostics).not.toContain("E('summary'");
 	expect(advanced).not.toContain("E('details'");
 	expect(advanced).not.toContain("E('summary'");
-	expect(overview).toContain('Most networks only need the default routing from the routing mode above. Add an exception only for guest Wi-Fi, VPN clients, video calls, or a specific service port.');
-	expect(overview).toContain('default failover/load-balance behavior');
+	expect(overview).toContain('All traffic follows the default routing below. Add a rule to send a site, a device, or a whole network through specific WAN links.');
 	expect(overview).toContain('Choose TCP or UDP before adding source or destination ports.');
-	expect(overview).toMatch(/Use letters, numbers, and underscores for the traffic exception name\./);
-	expect(overview).toContain('ICMPv6 policies must use IPv6.');
+	expect(overview).toContain('The protocol and addresses do not share an IP family (IPv4 or IPv6).');
 	expect(overview).not.toContain('Strategy or terminal action');
 	expect(overview).toContain('Recommended action');
 	expect(overview).toContain('Open Advanced');
@@ -436,7 +434,7 @@ routerTest('DIAG-090 DIAG-091 ACL-LUCI-110 ACL-LUCI-111 mwan4 overview loads and
 	await expect(page.getByText('WAN workspace', { exact: true })).toBeVisible();
 	await expect(page.getByRole('heading', { name: 'WAN health matrix' })).toBeVisible();
 	await expect(page.getByRole('heading', { name: 'Routing mode' }).first()).toBeVisible();
-	await expect(page.getByRole('heading', { name: 'Traffic exceptions' })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'Routing rules' })).toBeVisible();
 	if (await page.getByText('Matched packets', { exact: true }).count())
 		await expect(page.getByText('Matched packets', { exact: true })).toBeVisible();
 	await expect(page.locator('#mwan4-command-center')).toHaveAttribute('aria-live', 'polite');
@@ -461,8 +459,8 @@ routerTest('DIAG-090 DIAG-091 ACL-LUCI-110 ACL-LUCI-111 mwan4 overview loads and
 		await expect(page.getByText('Start with this guided path.', { exact: true })).toBeVisible();
 		await expect(page.getByText('Add a WAN link', { exact: true })).toBeVisible();
 		await expect(page.getByText('Choose routing mode', { exact: true })).toBeVisible();
-		await expect(page.getByText('Add exceptions only if needed', { exact: true })).toBeVisible();
-		await expect(page.getByRole('button', { name: /Continue quick setup|Add exception/ })).toBeVisible();
+		await expect(page.getByText('Add routing rules only if needed', { exact: true })).toBeVisible();
+		await expect(page.getByRole('button', { name: /Continue quick setup|Add routing rule/ })).toBeVisible();
 	}
 
 	await page.getByRole('button', { name: 'Use reliability first' }).click();
@@ -489,26 +487,22 @@ routerTest('DIAG-090 DIAG-091 ACL-LUCI-110 ACL-LUCI-111 mwan4 overview loads and
 	await expect(page.getByRole('button', { name: 'Preview changes' })).toBeVisible();
 	await page.getByRole('button', { name: 'Cancel' }).click();
 
-	const rulePanel = page.locator('.mwan4-panel').filter({ hasText: 'Traffic exceptions' });
-	if (await rulePanel.getByText('No traffic exceptions yet.', { exact: true }).count())
-		await expect(rulePanel.getByText('Most networks only need the default routing from the routing mode above. Add an exception only for guest Wi-Fi, VPN clients, video calls, or a specific service port.', { exact: true })).toBeVisible();
+	const rulePanel = page.locator('.mwan4-panel').filter({ hasText: 'Routing rules' });
+	if (await rulePanel.getByText('No routing rules yet.', { exact: true }).count())
+		await expect(rulePanel.getByText('All traffic follows the default routing below. Add a rule to send a site, a device, or a whole network through specific WAN links.', { exact: true })).toBeVisible();
 
-	await rulePanel.getByRole('button', { name: /Add (traffic )?exception/ }).click();
-	await expect(page.getByText('Traffic exception builder', { exact: true })).toBeVisible();
-	await expect(page.getByText('New traffic exception', { exact: true })).toBeVisible();
-	await expect(page.getByText('1. Match traffic', { exact: true })).toBeVisible();
-	await expect(page.getByText('2. Describe the destination', { exact: true })).toBeVisible();
-	await expect(page.getByText('3. Choose path', { exact: true })).toBeVisible();
-	await expect(page.locator('.modal.mwan4-modal').getByText('Routing mode', { exact: true })).toBeVisible();
-	await expect(page.getByText('Destination address', { exact: true })).toBeVisible();
+	await rulePanel.getByRole('button', { name: 'Add routing rule' }).first().click();
+	await expect(page.getByText('Routing rule builder', { exact: true })).toBeVisible();
+	await expect(page.getByText('New routing rule', { exact: true })).toBeVisible();
+	await expect(page.getByText('1. What traffic?', { exact: true })).toBeVisible();
+	await expect(page.getByText('2. Who?', { exact: true })).toBeVisible();
+	await expect(page.getByText('3. Via which WAN links?', { exact: true })).toBeVisible();
 	await expect(page.locator('select[name="use_strategy"]')).toContainText('Use main routing table');
 	await expect(page.getByText('Extra match and logging', { exact: true })).toBeVisible();
-	await expect(page.getByText('This is an exception to the default failover/load-balance behavior.', { exact: true })).toBeVisible();
-	await expect(page.getByRole('button', { name: 'Preview changes' })).toBeVisible();
+	await page.locator('input[name="label"]').fill('Smoke');
+	await page.locator('textarea[name="what"]').fill('example.com');
 	await page.getByRole('button', { name: 'Preview changes' }).click();
-	const rulePreview = page.getByRole('region', { name: 'Pending change preview' });
-	await expect(rulePreview).toBeVisible();
-	await expect(rulePreview.getByText('Traffic exception summary', { exact: true })).toBeVisible();
+	await expect(page.getByRole('region', { name: 'Pending change preview' })).toBeVisible();
 	await expect(page.getByRole('button', { name: 'Apply pending changes' })).toBeVisible();
 	await page.getByRole('button', { name: 'Edit pending change' }).click();
 	await page.locator('input[name="dest_port"]').fill('443');

@@ -1,5 +1,32 @@
 const { test, expect } = require('@playwright/test');
-const { defaultCounters, defaultDiagnostics, defaultStatus, defaultUci, renderDiagnostics, renderOverview, renderStatus } = require('./helpers/luci-rpc-mock');
+const { defaultCounters, defaultDiagnostics, defaultPbrPreview, defaultStatus, defaultUci, renderDiagnostics, renderOverview, renderStatus } = require('./helpers/luci-rpc-mock');
+
+function uciWithRules() {
+	const uci = defaultUci();
+	const defaults = uci.mwan4.filter(function(section) { return /^default_rule_v[46]$/.test(section['.name']); });
+	const rest = uci.mwan4.filter(function(section) { return defaults.indexOf(section) < 0; });
+
+	uci.mwan4 = rest.concat([
+		{ '.type': 'rule', '.name': 'streaming', label: 'Streaming', enabled: '1', domain: [ 'netflix.com', 'youtube.com' ], dest_ip: [ '203.0.113.0/24' ], src_mac: [ 'aa:bb:cc:dd:ee:01' ], proto: 'tcp', dest_port: '443', use_strategy: 'failover', family: [ 'ipv4', 'ipv6' ] },
+		{ '.type': 'rule', '.name': 'console', label: 'Gaming console', enabled: '0', src_ip: [ '192.168.1.50' ], dscp: '46', local: '1', use_strategy: 'default', family: [ 'ipv4' ] },
+		{ '.type': 'rule', '.name': 'backups', enabled: '1', dest_ip: '198.51.100.7', use_strategy: 'unreachable', family: [ 'ipv4' ] }
+	]).concat(defaults);
+	uci.mwan4.forEach(function(section, index) { section['.index'] = index; });
+
+	return uci;
+}
+
+async function ruleOrder(page) {
+	return page.evaluate(function() {
+		return window.__mwan4Mock.getUci().mwan4.filter(function(section) { return section['.type'] == 'rule'; }).map(function(section) { return section['.name']; });
+	});
+}
+
+async function ruleSection(page, name) {
+	return page.evaluate(function(sid) {
+		return window.__mwan4Mock.getUci().mwan4.find(function(section) { return section['.name'] == sid; });
+	}, name);
+}
 
 test.describe('mocked mwan4 overview workspace', () => {
 	test('renders live WAN and SLA data without turning missing metrics into zeroes', async ({ page }) => {
@@ -325,5 +352,335 @@ test.describe('mocked mwan4 overview workspace', () => {
 		await expect(page.locator('#mwan4-diag-output')).toContainText('Ownership object inventory');
 		await page.getByRole('button', { name: 'Run Counters', exact: true }).click();
 		await expect(page.locator('#mwan4-diag-output')).toContainText('Missing counter definitions');
+	});
+});
+
+test.describe('mocked mwan4 routing rules', () => {
+	test('lists rules in priority order with chips, live via health, hit counters, and a locked default', async ({ page }) => {
+		const status = defaultStatus();
+		const counters = defaultCounters();
+
+		status.interfaces.wan_backup.health_state = 'offline';
+		counters.counters.mwan4_counter_rule_streaming_ipv4 = { packets: 42, bytes: 4096 };
+		counters.counters.mwan4_counter_rule_streaming_ipv6 = { packets: 8, bytes: 1024 };
+		status.diagnostics.warnings = [ { rule: 'streaming', message: 'dnsmasq-full with nftset support is missing' } ];
+
+		await renderOverview(page, { uci: uciWithRules(), status, counters });
+
+		const rows = page.locator('.mwan4-rules .mwan4-rule-row');
+		const streaming = page.locator('[data-rule="streaming"]');
+
+		await expect(page.getByRole('heading', { name: 'Routing rules' })).toBeVisible();
+		await expect(rows).toHaveCount(5);
+		await expect(rows.nth(0)).toHaveAttribute('data-rule', 'streaming');
+		await expect(rows.nth(2)).toHaveAttribute('data-rule', 'backups');
+		await expect(rows.nth(3)).toHaveAttribute('data-rule', 'default_rule_v4');
+		await expect(rows.nth(4)).toHaveAttribute('data-rule', 'default_rule_v6');
+		await expect(rows.nth(3)).not.toHaveAttribute('draggable', 'true');
+		await expect(rows.nth(3).getByRole('button')).toHaveCount(0);
+		await expect(rows.nth(3).getByRole('checkbox')).toHaveCount(0);
+
+		await expect(streaming).toContainText('Streaming');
+		await expect(streaming.locator('.mwan4-chip-domain')).toHaveText([ 'netflix.com', 'youtube.com' ]);
+		await expect(streaming.locator('.mwan4-chip-ip')).toHaveText([ '203.0.113.0/24' ]);
+		await expect(streaming).toContainText('living-room-tv (aa:bb:cc:dd:ee:01)');
+		await expect(streaming).toContainText('TCP port 443');
+		await expect(streaming.locator('.mwan4-via [data-wan="wan_primary"]')).toHaveClass(/mwan4-online/);
+		await expect(streaming.locator('.mwan4-via [data-wan="wan_backup"]')).toHaveClass(/mwan4-offline/);
+		await expect(streaming.locator('.mwan4-via')).toContainText('>');
+		await expect(streaming).toContainText('ordered failover');
+		await expect(streaming.locator('.mwan4-cell[data-label="Hits"]')).toContainText('50');
+		await expect(streaming.locator('.mwan4-rule-warning')).toContainText('dnsmasq-full with nftset support is missing');
+		await expect(page.locator('[data-rule="console"]')).toContainText('192.168.1.50');
+		await expect(page.locator('[data-rule="console"]')).toContainText('DSCP 46');
+		await expect(page.locator('[data-rule="console"]')).toContainText('Includes router traffic');
+		await expect(page.locator('[data-rule="console"] .mwan4-rule-toggle')).not.toBeChecked();
+		await expect(page.locator('[data-rule="backups"]')).toContainText('198.51.100.7');
+		await expect(page.locator('[data-rule="default_rule_v4"]')).toContainText('Everything else');
+		await expect(page.locator('[data-rule="default_rule_v4"] .mwan4-cell[data-label="Hits"]')).toContainText('9');
+		await expect(page.locator('[data-rule="default_rule_v4"] .mwan4-via')).toContainText('wan_primary');
+		await expect(page.locator('details')).toHaveCount(0);
+	});
+
+	test('keeps the hit counters of the rules table fresh on poll', async ({ page }) => {
+		const counters = defaultCounters();
+
+		await renderOverview(page, { uci: uciWithRules(), counters });
+		await expect(page.locator('[data-rule="streaming"] .mwan4-cell[data-label="Hits"]')).toContainText('-');
+
+		counters.counters.mwan4_counter_rule_streaming_ipv4 = { packets: 7, bytes: 700 };
+		await page.evaluate(function(next) {
+			window.__mwan4Mock.setCounters(next);
+			return window.__mwan4Mock.runPoll();
+		}, counters);
+
+		await expect(page.locator('[data-rule="streaming"] .mwan4-cell[data-label="Hits"]')).toContainText('7');
+	});
+
+	test('shows the empty state with the default routing only', async ({ page }) => {
+		await renderOverview(page);
+
+		await expect(page.locator('.mwan4-rules')).toContainText('No routing rules yet.');
+		await expect(page.locator('.mwan4-rules .mwan4-rule-row')).toHaveCount(2);
+		await expect(page.getByRole('button', { name: 'Add routing rule' }).first()).toBeVisible();
+	});
+
+	test('toggles a rule from the table and keeps the order', async ({ page }) => {
+		await renderOverview(page, { uci: uciWithRules() });
+
+		await page.locator('[data-rule="console"] .mwan4-rule-toggle').check();
+		await expect.poll(async () => (await ruleSection(page, 'console')).enabled).toBe('1');
+
+		await page.locator('[data-rule="streaming"] .mwan4-rule-toggle').uncheck();
+		await expect.poll(async () => (await ruleSection(page, 'streaming')).enabled).toBe('0');
+		expect(await ruleOrder(page)).toEqual([ 'streaming', 'console', 'backups', 'default_rule_v4', 'default_rule_v6' ]);
+
+		const calls = await page.evaluate(function() { return window.__mwan4Mock.rpcCalls; });
+		expect(calls.filter(function(call) { return call.method == 'validate'; }).length).toBe(2);
+	});
+
+	test('reorders rules with the move buttons and by dragging, defaults always stay last', async ({ page }) => {
+		await renderOverview(page, { uci: uciWithRules() });
+
+		await expect(page.getByRole('button', { name: 'Move routing rule Streaming up' })).toBeDisabled();
+		await page.getByRole('button', { name: 'Move routing rule Streaming down' }).click();
+		await expect.poll(() => ruleOrder(page)).toEqual([ 'console', 'streaming', 'backups', 'default_rule_v4', 'default_rule_v6' ]);
+
+		await page.getByRole('button', { name: 'Move routing rule backups down' }).waitFor({ state: 'attached' });
+		await expect(page.getByRole('button', { name: 'Move routing rule backups down' })).toBeDisabled();
+		await page.getByRole('button', { name: 'Move routing rule backups up' }).click();
+		await expect.poll(() => ruleOrder(page)).toEqual([ 'console', 'backups', 'streaming', 'default_rule_v4', 'default_rule_v6' ]);
+
+		await page.locator('[data-rule="streaming"]').dragTo(page.locator('[data-rule="console"]'), { targetPosition: { x: 40, y: 2 } });
+		await expect.poll(() => ruleOrder(page)).toEqual([ 'streaming', 'console', 'backups', 'default_rule_v4', 'default_rule_v6' ]);
+
+		await expect(page.locator('.mwan4-rules .mwan4-rule-row').nth(3)).toHaveAttribute('data-rule', 'default_rule_v4');
+		await expect(page.locator('.mwan4-rules .mwan4-rule-row').nth(4)).toHaveAttribute('data-rule', 'default_rule_v6');
+	});
+
+	test('classifies mixed domain and IP input in the What box and writes separate UCI options', async ({ page }) => {
+		await renderOverview(page);
+		await page.getByRole('button', { name: 'Add routing rule' }).first().click();
+
+		await page.locator('.modal input[name="label"]').fill('Video sites');
+		await page.locator('.modal textarea[name="what"]').fill('https://www.YouTube.com/watch?v=1\n203.0.113.0/24, youtu.be\n2001:db8::/32\nyoutu.be');
+
+		const classified = page.locator('#mwan4-rule-classified');
+		await expect(classified.locator('.mwan4-chip-domain')).toHaveText([ 'www.youtube.com', 'youtu.be' ]);
+		await expect(classified.locator('.mwan4-chip-ip')).toHaveText([ '203.0.113.0/24', '2001:db8::/32' ]);
+
+		await page.getByRole('button', { name: 'Preview changes' }).click();
+		await expect(page.locator('.modal')).toContainText('www.youtube.com, youtu.be, 203.0.113.0/24, 2001:db8::/32');
+		await page.getByRole('button', { name: 'Apply pending changes' }).click();
+
+		const rule = await ruleSection(page, 'video_sites');
+		expect(rule.label).toBe('Video sites');
+		expect(rule.domain).toEqual([ 'www.youtube.com', 'youtu.be' ]);
+		expect(rule.dest_ip).toEqual([ '203.0.113.0/24', '2001:db8::/32' ]);
+		expect(rule.family).toEqual([ 'ipv4', 'ipv6' ]);
+		expect(rule.enabled).toBe('1');
+		expect(rule.use_strategy).toBe('failover');
+		expect(rule.src_ip).toBeNull();
+		expect(await ruleOrder(page)).toEqual([ 'video_sites', 'default_rule_v4', 'default_rule_v6' ]);
+	});
+
+	test('answers what, who, and via with a Prefer preset that creates the strategy', async ({ page }) => {
+		const uci = uciWithRules();
+
+		await renderOverview(page, { uci });
+		await page.getByRole('button', { name: 'Add routing rule' }).first().click();
+
+		await expect(page.locator('.modal')).toContainText('1. What traffic?');
+		await expect(page.locator('.modal')).toContainText('2. Who?');
+		await expect(page.locator('.modal')).toContainText('3. Via which WAN links?');
+		await expect(page.locator('.modal details')).toHaveCount(0);
+		await expect(page.locator('.modal')).toContainText('Extra match and logging');
+
+		await page.locator('.modal input[name="label"]').fill('A very long rule name for the living room tv');
+		await page.locator('.modal textarea[name="what"]').fill('hbo.com');
+		await page.locator('.modal select[name="proto"]').selectOption('tcp');
+		await page.locator('.modal input[name="dest_port"]').fill('443, 8443');
+
+		await expect(page.locator('.modal [data-who-mode="devices"]')).toBeHidden();
+		await page.locator('.modal select[name="who_mode"]').selectOption('devices');
+		await expect(page.locator('.modal [data-who-mode="devices"]')).toBeVisible();
+		await page.locator('.modal select[name="device_pick"]').selectOption('aa:bb:cc:dd:ee:01');
+		await page.locator('.modal select[name="device_pick"]').selectOption('aa:bb:cc:dd:ee:02');
+		await page.locator('.modal textarea[name="who"]').fill((await page.locator('.modal textarea[name="who"]').inputValue()) + '\n192.168.1.99');
+		await expect(page.locator('.modal select[name="device_pick"]')).toContainText('living-room-tv / 192.168.1.20 / aa:bb:cc:dd:ee:01');
+
+		const via = page.locator('.modal select[name="use_strategy"]');
+		await expect(via.locator('optgroup')).toHaveCount(3);
+		await via.selectOption('prefer:wan_backup');
+		await page.locator('.modal input[name="dscp"]').fill('46');
+		await page.locator('.modal input[name="local"]').check();
+
+		await page.getByRole('button', { name: 'Preview changes' }).click();
+		await expect(page.locator('.modal')).toContainText('Prefer wan_backup, fall back to others');
+		await expect(page.locator('.modal')).toContainText('living-room-tv (aa:bb:cc:dd:ee:01)');
+		await page.getByRole('button', { name: 'Apply pending changes' }).click();
+
+		const rule = await ruleSection(page, 'a_very_long_rul');
+		const strategy = await ruleSection(page, 'wan_backup_first');
+		const routes = await page.evaluate(function(names) {
+			return window.__mwan4Mock.getUci().mwan4.filter(function(section) { return names.indexOf(section['.name']) >= 0; });
+		}, strategy.use_route);
+
+		expect('a_very_long_rul'.length).toBeLessThanOrEqual(15);
+		expect(rule.label).toBe('A very long rule name for the living room tv');
+		expect(rule.domain).toEqual([ 'hbo.com' ]);
+		expect(rule.proto).toBe('tcp');
+		expect(rule.dest_port).toBe('443, 8443');
+		expect(rule.src_mac).toEqual([ 'aa:bb:cc:dd:ee:01', 'aa:bb:cc:dd:ee:02' ]);
+		expect(rule.src_ip).toEqual([ '192.168.1.99' ]);
+		expect(rule.dscp).toBe('46');
+		expect(rule.local).toBe('1');
+		expect(rule.use_strategy).toBe('wan_backup_first');
+		expect(strategy.last_resort).toBe('unreachable');
+		expect(routes.map(function(route) { return [ route.interface, route.metric ]; })).toEqual([ [ 'wan_backup', '1' ], [ 'wan_primary', '2' ] ]);
+		expect(await ruleOrder(page)).toEqual([ 'streaming', 'console', 'backups', 'a_very_long_rul', 'default_rule_v4', 'default_rule_v6' ]);
+	});
+
+	test('Only preset creates a fail-closed strategy and reuses it for the next rule', async ({ page }) => {
+		await renderOverview(page);
+
+		for (const label of [ 'Tunnel one', 'Tunnel two' ]) {
+			await page.getByRole('button', { name: 'Add routing rule' }).first().click();
+			await page.locator('.modal input[name="label"]').fill(label);
+			await page.locator('.modal textarea[name="what"]').fill('example.org');
+			await page.locator('.modal select[name="use_strategy"]').selectOption('only:wan_primary');
+			await page.getByRole('button', { name: 'Preview changes' }).click();
+			await page.getByRole('button', { name: 'Apply pending changes' }).click();
+		}
+
+		const uci = await page.evaluate(function() { return window.__mwan4Mock.getUci(); });
+		const strategies = uci.mwan4.filter(function(section) { return section['.type'] == 'strategy' && section['.name'] == 'wan_primary_only'; });
+
+		expect(strategies).toHaveLength(1);
+		expect(strategies[0].last_resort).toBe('unreachable');
+		expect(uci.mwan4.filter(function(section) { return section.generated_by == 'luci-rule'; }).map(function(route) { return route.interface; })).toEqual([ 'wan_primary' ]);
+		expect(await ruleOrder(page)).toEqual([ 'tunnel_one', 'tunnel_two', 'default_rule_v4', 'default_rule_v6' ]);
+		expect((await ruleSection(page, 'tunnel_two')).use_strategy).toBe('wan_primary_only');
+	});
+
+	test('edits an existing rule and picks an interface as the source', async ({ page }) => {
+		await renderOverview(page, { uci: uciWithRules() });
+		await page.getByRole('button', { name: 'Edit routing rule Streaming' }).click();
+
+		await expect(page.locator('.modal textarea[name="what"]')).toHaveValue('netflix.com\nyoutube.com\n203.0.113.0/24');
+		await expect(page.locator('.modal select[name="who_mode"]')).toHaveValue('devices');
+		await expect(page.locator('.modal textarea[name="who"]')).toHaveValue('aa:bb:cc:dd:ee:01');
+
+		await page.locator('.modal select[name="who_mode"]').selectOption('iface');
+		await page.locator('.modal select[name="src_iface"]').selectOption('wan_backup');
+		await page.getByRole('button', { name: 'Preview changes' }).click();
+		await expect(page.locator('.modal')).toContainText('Interface wan_backup');
+		await page.getByRole('button', { name: 'Apply pending changes' }).click();
+
+		const rule = await ruleSection(page, 'streaming');
+		expect(rule.src_iface).toBe('wan_backup');
+		expect(rule.src_mac).toBeNull();
+		expect(rule.src_ip).toBeNull();
+		expect(await ruleOrder(page)).toEqual([ 'streaming', 'console', 'backups', 'default_rule_v4', 'default_rule_v6' ]);
+	});
+
+	test('validates domains, addresses, MACs, ports, and DSCP inline', async ({ page }) => {
+		await renderOverview(page);
+		await page.getByRole('button', { name: 'Add routing rule' }).first().click();
+
+		const problem = page.locator('#mwan4-rule-validation');
+
+		await expect(problem).toBeHidden();
+		await page.locator('.modal textarea[name="what"]').fill('example.com');
+		await expect(problem).toHaveText('Give the rule a name.');
+
+		await page.locator('.modal input[name="label"]').fill('Checks');
+		await page.locator('.modal textarea[name="what"]').fill('example.com\nnot a domain!\n999.1.1.1\n10.0.0.0/33');
+		await expect(problem).toContainText('Not a domain name or IP address: not, a, domain!, 999.1.1.1, 10.0.0.0/33');
+		await expect(page.locator('#mwan4-rule-classified .mwan4-offline')).toHaveCount(5);
+
+		await page.locator('.modal textarea[name="what"]').fill('aa:bb:cc:dd:ee:01');
+		await expect(problem).toContainText('MAC addresses belong in Who');
+
+		await page.locator('.modal textarea[name="what"]').fill('example.com');
+		await page.locator('.modal input[name="dest_port"]').fill('443');
+		await expect(problem).toContainText('Choose TCP or UDP before adding source or destination ports.');
+		await page.locator('.modal select[name="proto"]').selectOption('udp');
+		await page.locator('.modal input[name="dest_port"]').fill('70000');
+		await expect(problem).toContainText('Use ports from 1-65535');
+
+		await page.locator('.modal input[name="dest_port"]').fill('');
+		await page.locator('.modal input[name="dscp"]').fill('64');
+		await expect(problem).toContainText('Use a DSCP value from 1 to 63.');
+		await page.locator('.modal input[name="dscp"]').fill('');
+
+		await page.locator('.modal select[name="who_mode"]').selectOption('devices');
+		await page.locator('.modal textarea[name="who"]').fill('laptop.lan');
+		await expect(problem).toContainText('Devices must be IP addresses, CIDR ranges, or MAC addresses: laptop.lan');
+		await page.locator('.modal textarea[name="who"]').fill('AA-BB-CC-DD-EE-09');
+		await expect(problem).toBeHidden();
+
+		await page.locator('.modal select[name="who_mode"]').selectOption('all');
+		await page.locator('.modal textarea[name="what"]').fill('');
+		await page.locator('.modal select[name="proto"]').selectOption('all');
+		await expect(problem).toContainText('Add at least one thing to match');
+
+		await page.locator('.modal textarea[name="what"]').fill('198.51.100.0/24');
+		await page.locator('.modal select[name="proto"]').selectOption('icmpv6');
+		await expect(problem).toContainText('do not share an IP family');
+
+		await page.locator('.modal select[name="proto"]').selectOption('all');
+		await page.getByRole('button', { name: 'Preview changes' }).click();
+		await page.getByRole('button', { name: 'Apply pending changes' }).click();
+		expect((await ruleSection(page, 'checks')).family).toEqual([ 'ipv4' ]);
+	});
+
+	test('removes a rule from the editor after a preview', async ({ page }) => {
+		await renderOverview(page, { uci: uciWithRules() });
+		await page.getByRole('button', { name: 'Edit routing rule Gaming console' }).click();
+		await page.getByRole('button', { name: 'Remove' }).click();
+		await expect(page.locator('.modal')).toContainText('This will remove the routing rule');
+		await page.getByRole('button', { name: 'Apply pending changes' }).click();
+
+		expect(await ruleOrder(page)).toEqual([ 'streaming', 'backups', 'default_rule_v4', 'default_rule_v6' ]);
+	});
+
+	test('hides Import from PBR unless pbr_import reports policies and the session can write', async ({ page }) => {
+		await renderOverview(page);
+		await expect(page.getByRole('button', { name: 'Import routing rules from PBR' })).toHaveCount(0);
+
+		await renderOverview(page, { pbrPreview: defaultPbrPreview(), configWrite: false });
+		await expect(page.getByRole('button', { name: 'Import routing rules from PBR' })).toHaveCount(0);
+
+		await renderOverview(page, { pbrPreview: defaultPbrPreview() });
+		await expect(page.getByRole('button', { name: 'Import routing rules from PBR' })).toBeVisible();
+	});
+
+	test('previews the PBR import as a dry run and applies it on confirm', async ({ page }) => {
+		await renderOverview(page, { pbrPreview: defaultPbrPreview() });
+		await page.getByRole('button', { name: 'Import routing rules from PBR' }).click();
+
+		const modal = page.locator('.modal');
+		await expect(modal).toContainText('Dry-run preview');
+		await expect(modal.locator('tr[data-pbr-section="cfg1"]')).toContainText('youtube');
+		await expect(modal.locator('tr[data-pbr-section="cfg1"]')).toContainText('pbr_youtube');
+		await expect(modal.locator('tr[data-pbr-section="cfg1"]')).toContainText('wan_backup_first');
+		await expect(modal.locator('tr[data-pbr-section="cfg1"]')).toContainText('Import');
+		await expect(modal.locator('tr[data-pbr-section="cfg2"]')).toContainText('Skipped');
+		await expect(modal.locator('tr[data-pbr-section="cfg2"]')).toContainText('dns_policy is not supported');
+		await expect(modal.locator('.mwan4-import-warnings')).toContainText('20-discord-chrome.sh was not imported');
+		await expect(modal).toContainText('Strategies to create: wan_backup_first');
+
+		let calls = await page.evaluate(function() { return window.__mwan4Mock.rpcCalls; });
+		expect(calls.filter(function(call) { return call.method == 'pbr_import'; }).map(function(call) { return call.params[0]; })).toEqual([ false ]);
+		expect(await ruleOrder(page)).toEqual([ 'default_rule_v4', 'default_rule_v6' ]);
+
+		await modal.getByRole('button', { name: 'Import 1 rule(s)' }).click();
+		await expect(page.locator('.mwan4-rules [data-rule="pbr_youtube"]')).toContainText('youtube');
+
+		calls = await page.evaluate(function() { return window.__mwan4Mock.rpcCalls; });
+		expect(calls.filter(function(call) { return call.method == 'pbr_import'; }).map(function(call) { return call.params[0]; })).toContain(true);
+		expect(await ruleOrder(page)).toEqual([ 'pbr_youtube', 'default_rule_v4', 'default_rule_v6' ]);
+		await expect(page.locator('.modal')).toHaveCount(0);
 	});
 });

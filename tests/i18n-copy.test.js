@@ -12,6 +12,7 @@ const jsFiles = [
 	'htdocs/luci-static/resources/mwan4/advanced.js',
 	'htdocs/luci-static/resources/mwan4/diagnostics.js',
 	'htdocs/luci-static/resources/mwan4/overview.js',
+	'htdocs/luci-static/resources/mwan4/rules.js',
 	'htdocs/luci-static/resources/view/mwan4/network/globals.js',
 	'htdocs/luci-static/resources/view/mwan4/network/advanced.js',
 	'htdocs/luci-static/resources/view/mwan4/network/interfaces.js',
@@ -119,7 +120,19 @@ for (const needle of [
 	'l3mdev routing rules',
 	'Fail closed (reject traffic)',
 	'Fail closed (drop traffic)',
-	'main routing table'
+	'main routing table',
+	'Routing rules',
+	'Import from PBR',
+	'Dry-run preview',
+	'1. What traffic?',
+	'2. Who?',
+	'3. Via which WAN links?',
+	'Prefer %s, fall back to others',
+	'Only %s, never leak',
+	'Domains and addresses',
+	'Add a known device',
+	'Everything else',
+	'Include router traffic'
 ])
 	assertContains(combined, needle);
 
@@ -141,6 +154,10 @@ for (const needle of [
 	"_('Live WAN health and SLA')",
 	"_('Advanced health tuning')",
 	"_('Advanced match and logging')",
+	"_('Traffic exceptions')",
+	"_('Add exception')",
+	"_('Traffic exception builder')",
+	"_('Traffic exception summary')",
 	'Each card combines saved WAN/SLA settings'
 ])
 	assert.equal(combined.includes(needle), false, `stale or ambiguous copy remains: ${needle}`);
@@ -246,7 +263,19 @@ for (const needle of [
 	'msgid "Backend reported this section as failed"',
 	'msgid "l3mdev routing rules"',
 	'msgid "Fail closed (reject traffic)"',
-	'msgid "Use main routing table"'
+	'msgid "Use main routing table"',
+	'msgid "Routing rules"',
+	'msgid "Import from PBR"',
+	'msgid "Dry-run preview"',
+	'msgid "1. What traffic?"',
+	'msgid "2. Who?"',
+	'msgid "3. Via which WAN links?"',
+	'msgid "Prefer %s, fall back to others"',
+	'msgid "Only %s, never leak"',
+	'msgid "Domains and addresses"',
+	'msgid "Add a known device"',
+	'msgid "Everything else"',
+	'msgid "Include router traffic"'
 ])
 	assertContains(pot, needle, `POT is missing ${needle}`);
 
