@@ -1,5 +1,5 @@
 const { test, expect } = require('@playwright/test');
-const { defaultCounters, defaultDiagnostics, defaultPbrPreview, defaultStatus, defaultUci, renderDiagnostics, renderOverview, renderStatus } = require('./helpers/luci-rpc-mock');
+const { defaultConnections, defaultCounters, defaultDiagnostics, defaultPbrPreview, defaultStatus, defaultUci, renderDiagnostics, renderOverview, renderStatus } = require('./helpers/luci-rpc-mock');
 
 function uciWithRules() {
 	const uci = defaultUci();
@@ -682,5 +682,254 @@ test.describe('mocked mwan4 routing rules', () => {
 		expect(calls.filter(function(call) { return call.method == 'pbr_import'; }).map(function(call) { return call.params[0]; })).toContain(true);
 		expect(await ruleOrder(page)).toEqual([ 'pbr_youtube', 'default_rule_v4', 'default_rule_v6' ]);
 		await expect(page.locator('.modal')).toHaveCount(0);
+	});
+});
+
+function collectErrors(page) {
+	const errors = [];
+
+	page.on('pageerror', error => errors.push(error.message));
+	page.on('console', message => message.type() == 'error' && errors.push(message.text()));
+
+	return errors;
+}
+
+function manyConnections(count) {
+	const connections = defaultConnections();
+
+	connections.items = Array.from({ length: count }, (_, index) => Object.assign({}, connections.items[0], { sport: 1000 + index }));
+
+	return connections;
+}
+
+const rpcCount = (page, method) => page.evaluate(name => window.__mwan4Mock.rpcCalls.filter(call => call.method == name).length, method);
+const lastConnectionsCall = page => page.evaluate(() => window.__mwan4Mock.rpcCalls.filter(call => call.method == 'connections').pop().params);
+
+test.describe('mocked mwan4 connection counting', () => {
+	test('shows active and new connections per rule and keeps the generated default row read-only', async ({ page }) => {
+		await renderOverview(page, { uci: uciWithRules() });
+
+		const streaming = page.locator('[data-rule="streaming"] .mwan4-cell[data-label="Connections"]');
+
+		await expect(page.locator('.mwan4-rule-head')).toContainText('Connections');
+		await expect(streaming.getByRole('button')).toHaveText('3 / 40');
+		await expect(streaming.getByRole('button')).toHaveAttribute('title', 'IPv4: 2 active / 30 new, IPv6: 1 active / 10 new');
+		await expect(page.locator('[data-rule="console"] .mwan4-cell[data-label="Connections"]')).toHaveText('-');
+		await expect(page.locator('[data-rule="default_rule_v4"] .mwan4-cell[data-label="Connections"]')).toHaveText('4 / 9');
+		await expect(page.locator('[data-rule="default_rule_v4"]').getByRole('button')).toHaveCount(0);
+	});
+
+	test('opens the connections modal filtered to a rule and lists its flows', async ({ page }) => {
+		await renderOverview(page, { uci: uciWithRules() });
+		await page.locator('[data-rule="streaming"] .mwan4-conn-button').click();
+
+		const modal = page.locator('.modal .mwan4-connections');
+		const rows = modal.locator('.mwan4-conn-row');
+
+		await expect(rows).toHaveCount(1);
+		await expect(rows.first()).toContainText('TCP');
+		await expect(rows.first()).toContainText('192.168.1.30:51000');
+		await expect(rows.first()).toContainText('203.0.113.10:443');
+		await expect(rows.first()).toContainText('ESTABLISHED');
+		await expect(rows.first()).toContainText('Streaming');
+		await expect(rows.first()).toContainText('wan_primary');
+		await expect(rows.first()).toContainText('146.5 KB');
+		await expect(rows.first()).toContainText('2h 0m');
+		await expect(modal.locator('select[name="rule"]')).toHaveValue('streaming');
+		await expect(modal.locator('.mwan4-conn-total')).toHaveText('1 active connection(s)');
+		await expect(page.locator('.modal details')).toHaveCount(0);
+		expect((await lastConnectionsCall(page)).slice(0, 6)).toEqual([ 'streaming', null, null, null, null, null ]);
+
+		await page.getByRole('button', { name: 'Close' }).click();
+		await expect(page.locator('.modal')).toHaveCount(0);
+	});
+
+	test('filters by rule, WAN, strategy, family, protocol, and free text, with an empty state', async ({ page }) => {
+		await renderOverview(page, { uci: uciWithRules() });
+		await page.getByRole('button', { name: 'View all active connections' }).click();
+
+		const modal = page.locator('.modal .mwan4-connections');
+		const rows = modal.locator('.mwan4-conn-row');
+
+		await expect(rows).toHaveCount(3);
+		await expect(rows.nth(2)).toContainText('Default routing');
+		await modal.locator('select[name="interface"]').selectOption('wan_backup');
+		await expect(rows).toHaveCount(1);
+		await expect(rows.first()).toContainText('UDP');
+		await modal.locator('select[name="interface"]').selectOption('');
+		await modal.locator('select[name="strategy"]').selectOption('failover');
+		await expect(rows).toHaveCount(2);
+		await modal.locator('select[name="family"]').selectOption('ipv6');
+		await expect(rows).toHaveCount(1);
+		await expect(rows.first()).toContainText('[2001:db8:ffff::10]:443');
+		await modal.locator('select[name="family"]').selectOption('');
+		await modal.locator('select[name="proto"]').selectOption('udp');
+		await expect(modal.locator('.mwan4-conn-empty')).toBeVisible();
+		await modal.locator('select[name="strategy"]').selectOption('');
+		await expect(rows).toHaveCount(1);
+		await modal.locator('select[name="proto"]').selectOption('');
+		await modal.locator('select[name="rule"]').selectOption('backups');
+		await expect(rows).toHaveCount(1);
+		await modal.locator('select[name="rule"]').selectOption('');
+		await modal.locator('input[name="search"]').fill('203.0.113');
+		await expect(rows).toHaveCount(1);
+		await expect(modal.locator('.mwan4-conn-empty')).toBeHidden();
+		await modal.locator('input[name="search"]').fill('no-such-flow');
+		await expect(rows).toHaveCount(0);
+		await expect(modal.locator('.mwan4-conn-empty')).toBeVisible();
+		await expect(modal.locator('.mwan4-conn-empty')).toHaveText('No connections match these filters.');
+	});
+
+	test('hides the bytes column without accounting', async ({ page }) => {
+		const connections = defaultConnections();
+
+		connections.accounting = false;
+		await renderOverview(page, { uci: uciWithRules(), connections });
+		await page.getByRole('button', { name: 'View all active connections' }).click();
+
+		await expect(page.locator('.modal .mwan4-conn-table th')).toHaveText([ 'Protocol', 'Source', 'Destination', 'State', 'Rule', 'Via WAN', 'TTL' ]);
+	});
+
+	test('refreshes while open and stops polling after close', async ({ page }) => {
+		await page.clock.install();
+		await renderOverview(page, { uci: uciWithRules() });
+		await page.getByRole('button', { name: 'View all active connections' }).click();
+
+		const rows = page.locator('.modal .mwan4-conn-row');
+
+		await expect(rows).toHaveCount(3);
+		await page.evaluate(() => {
+			const next = { ok: true, accounting: true, items: [ { family: 'ipv4', proto: 'tcp', src: '192.168.1.99', sport: 1, dst: '203.0.113.99', dport: 80, state: 'SYN_SENT', timeout: 30, packets: 1, bytes: 60, rule: 'streaming', rule_label: 'Streaming', interface: 'wan_primary', strategy: 'failover' } ] };
+
+			window.__mwan4Mock.setConnections(next);
+		});
+		await page.clock.runFor(3100);
+		await expect(rows).toHaveCount(1);
+		await expect(rows.first()).toContainText('SYN_SENT');
+
+		await page.getByRole('button', { name: 'Close' }).click();
+		await page.clock.runFor(1000);
+
+		const before = await rpcCount(page, 'connections');
+
+		await page.clock.runFor(10000);
+		expect(await rpcCount(page, 'connections')).toBe(before);
+	});
+
+	test('shows a truncation notice and loads more rows on demand', async ({ page }) => {
+		await renderOverview(page, { uci: uciWithRules(), connections: manyConnections(250) });
+		await page.getByRole('button', { name: 'View all active connections' }).click();
+
+		const modal = page.locator('.modal .mwan4-connections');
+
+		await expect(modal.locator('.mwan4-conn-row')).toHaveCount(200);
+		await expect(modal.locator('.mwan4-conn-notice')).toContainText('Showing the first 200 of 250 connections');
+		await modal.getByRole('button', { name: 'Show more' }).click();
+		await expect(modal.locator('.mwan4-conn-row')).toHaveCount(250);
+		await expect(modal.locator('.mwan4-conn-notice')).toBeHidden();
+		expect((await lastConnectionsCall(page))[6]).toBe(400);
+	});
+
+	test('shows live counts and View connections in the rule editor', async ({ page }) => {
+		await renderOverview(page, { uci: uciWithRules() });
+		await page.getByRole('button', { name: 'Edit routing rule Streaming' }).click();
+
+		const live = page.locator('.modal [data-rule-connections="streaming"]');
+
+		await expect(live).toContainText('3 active, 40 new since the ruleset was loaded');
+
+		const counters = defaultCounters();
+
+		counters.rules.streaming.active_connections = { ipv4: 5, ipv6: 0, total: 5 };
+		await page.evaluate(next => {
+			window.__mwan4Mock.setCounters(next);
+			return window.__mwan4Mock.runPoll();
+		}, counters);
+		await expect(live).toContainText('5 active, 40 new');
+
+		await live.getByRole('button', { name: 'View connections' }).click();
+		await expect(page.locator('.modal .mwan4-connections select[name="rule"]')).toHaveValue('streaming');
+		await expect(page.locator('.modal .mwan4-conn-row')).toHaveCount(1);
+	});
+
+	test('does not offer connections while adding a new rule', async ({ page }) => {
+		await renderOverview(page, { uci: uciWithRules() });
+		await page.getByRole('button', { name: 'Add routing rule' }).first().click();
+
+		await expect(page.locator('.modal [data-rule-connections]')).toHaveCount(0);
+	});
+
+	test('adds WAN, strategy, and header entry points that open a pre-filtered modal', async ({ page }) => {
+		await renderOverview(page, { uci: uciWithRules() });
+
+		await expect(page.locator('#mwan4-wan-workspace th').filter({ hasText: 'Active connections' })).toHaveCount(1);
+		await expect(page.locator('.mwan4-conn-metric')).toContainText('3');
+		await expect(page.locator('.mwan4-strategy-connections')).toContainText('failover: 5');
+
+		await page.locator('[data-interface="wan_backup"] .mwan4-conn-button').click();
+		await expect(page.locator('.modal .mwan4-connections select[name="interface"]')).toHaveValue('wan_backup');
+		await expect(page.locator('.modal .mwan4-conn-row')).toHaveCount(1);
+		await page.getByRole('button', { name: 'Close' }).click();
+
+		await page.getByRole('button', { name: 'View active connections of strategy failover' }).click();
+		await expect(page.locator('.modal .mwan4-connections select[name="strategy"]')).toHaveValue('failover');
+		await expect(page.locator('.modal .mwan4-conn-row')).toHaveCount(2);
+		await page.getByRole('button', { name: 'Close' }).click();
+
+		await page.locator('.mwan4-conn-metric').click();
+		await expect(page.locator('.modal .mwan4-conn-row')).toHaveCount(3);
+	});
+
+	test('updates the counts on poll', async ({ page }) => {
+		await renderOverview(page, { uci: uciWithRules() });
+
+		const status = defaultStatus();
+		const counters = defaultCounters();
+
+		status.interfaces.wan_backup.active_connections = 9;
+		counters.rules.streaming.new_connections = { ipv4: 31, ipv6: 10, total: 41 };
+		await page.evaluate(next => {
+			window.__mwan4Mock.setStatus(next.status);
+			window.__mwan4Mock.setCounters(next.counters);
+			return window.__mwan4Mock.runPoll();
+		}, { status, counters });
+
+		await expect(page.locator('[data-interface="wan_backup"] .mwan4-conn-button')).toHaveText('9');
+		await expect(page.locator('[data-rule="streaming"] .mwan4-conn-button')).toHaveText('3 / 41');
+	});
+
+	test('degrades to the previous UI against a backend without the connections method', async ({ page }) => {
+		const errors = collectErrors(page);
+
+		await renderOverview(page, { uci: uciWithRules(), connections: null });
+		await page.evaluate(() => window.__mwan4Mock.runPoll());
+
+		await expect(page.locator('[data-rule="streaming"]')).toBeVisible();
+		await expect(page.locator('.mwan4-rule-head')).not.toContainText('Connections');
+		await expect(page.locator('.mwan4-conn-button, .mwan4-conn-metric, .mwan4-strategy-connections button')).toHaveCount(0);
+		await expect(page.locator('#mwan4-wan-workspace')).not.toContainText('Active connections');
+
+		await page.getByRole('button', { name: 'Edit routing rule Streaming' }).click();
+		await expect(page.locator('.modal [data-rule-connections]')).toBeEmpty();
+		expect(errors).toEqual([]);
+	});
+
+	test('shows a Connections section on the diagnostics page and hides it without the method', async ({ page }) => {
+		await renderDiagnostics(page);
+
+		const section = page.locator('#mwan4-diag-connections');
+
+		await expect(section.getByRole('heading', { name: 'Connections' })).toBeVisible();
+		await expect(section.locator('.mwan4-conn-row')).toHaveCount(3);
+		await section.locator('select[name="interface"]').selectOption('wan_backup');
+		await expect(section.locator('.mwan4-conn-row')).toHaveCount(1);
+		await expect(section.locator('select[name="interface"] option')).toContainText([ 'Any WAN', 'wan_backup', 'wan_primary' ]);
+
+		await renderDiagnostics(page, { connections: null });
+		await expect(page.locator('#mwan4-diag-connections')).toHaveCount(0);
+		await expect(page.getByRole('heading', { name: 'MultiWAN 4 - Diagnostics' })).toBeVisible();
+
+		await renderDiagnostics(page, { diagnosticsAccess: false });
+		await expect(page.locator('#mwan4-diag-connections')).toHaveCount(0);
 	});
 });
