@@ -49,6 +49,14 @@ return view.extend({
 		s.nodescriptions = true;
 		s.sortable = true;
 
+		o = s.option(form.Flag, 'enabled', _('Enabled'));
+		o.default = '1';
+		o.rmempty = false;
+
+		o = s.option(form.Value, 'label', _('Rule name'));
+		o.placeholder = _('Readable display name');
+		o.description = _('Shown in the overview; the section name stays a short internal identifier.');
+
 		o = s.option(form.DynamicList, 'family', _('Address families'));
 		o.description = _('IPv4 and IPv6 traffic policies are evaluated separately. Add both only for equivalent dual-stack matches.');
 		o.value('ipv4', _('IPv4'));
@@ -66,10 +74,15 @@ return view.extend({
 		o.value('icmpv6');
 		o.value('esp');
 
-		o = s.option(form.Value, 'src_ip', _('Source address'));
+		o = s.option(form.DynamicList, 'src_ip', _('Source address'));
 		o.placeholder = _('Any');
-		o.description = _('Optional CIDR, single IP, or host address to match as the traffic source.');
+		o.description = _('Optional CIDR or IP addresses to match as the traffic source.');
 		o.datatype = 'ipaddr';
+
+		o = s.option(form.DynamicList, 'src_mac', _('Source MAC address'));
+		o.description = _('Optional device MAC addresses to match as the traffic source.');
+		o.datatype = 'macaddr';
+		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'src_iface', _('Ingress interface'));
 		o.description = _('Optional network interface where matching traffic enters the router.');
@@ -87,10 +100,16 @@ return view.extend({
 		o.depends('proto', 'udp');
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'dest_ip', _('Destination address'));
+		o = s.option(form.DynamicList, 'dest_ip', _('Destination address'));
 		o.placeholder = _('Any or 203.0.113.0/24');
 		o.description = _('Use 0.0.0.0/0 or ::/0 only when you really want a catch-all traffic policy.');
 		o.datatype = 'ipaddr';
+
+		o = s.option(form.DynamicList, 'domain', _('Destination domains'));
+		o.placeholder = _('example.com');
+		o.description = _('Domains are resolved by dnsmasq into nft sets; subdomains match automatically.');
+		o.datatype = 'hostname';
+		o.modalonly = true;
 
 		o = s.option(form.Value, 'dest_port', _('Destination ports'));
 		o.placeholder = _('443 or 1000-2000');
@@ -98,6 +117,12 @@ return view.extend({
 		o.description = _('Ports support single values, ranges, and comma-separated lists.');
 		o.depends('proto', 'tcp');
 		o.depends('proto', 'udp');
+
+		o = s.option(form.Value, 'dscp', _('DSCP value'));
+		o.datatype = 'range(1,63)';
+		o.placeholder = _('Any');
+		o.description = _('Match packets marked with this DSCP class (1-63).');
+		o.modalonly = true;
 
 		o = s.option(form.Value, 'ipset', _('DNS or nft set'));
 		o.placeholder = _('optional set name');
@@ -124,6 +149,11 @@ return view.extend({
 		o.default = '600';
 		o.description = _('How long a sticky source mapping is kept after the last match.');
 		o.depends('sticky', '1');
+		o.modalonly = true;
+
+		o = s.option(form.Flag, 'local', _('Include router traffic'));
+		o.default = '0';
+		o.description = _('Also apply this rule to traffic originated by the router itself.');
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'logging', _('Log matches'));
