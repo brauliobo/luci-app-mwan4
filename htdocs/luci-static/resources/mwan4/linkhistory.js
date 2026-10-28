@@ -32,21 +32,30 @@ function segmentNode(segment) {
 		y:      0,
 		width:  Math.max(MIN_WIDTH, (segment.to - segment.from) * 100),
 		height: 10
-	}, [ svg('title', {}, [ document.createTextNode(segment.state) ]) ]);
+	}, [ svg('title', {}, [ document.createTextNode(segment.state == 'unknown' ? _('No data') : segment.state) ]) ]);
+}
+
+function renderLegend() {
+	return E('div', { class: 'mwan4-strip-legend' }, [ [ 'online', _('Online') ], [ 'held', _('Held') ], [ 'offline', _('Offline') ], [ 'unknown', _('No data') ] ]
+		.map(entry => mwan4Common.renderPill(entry[1], mwan4Common.statusClass(entry[0]))));
 }
 
 function renderStrip(list, now) {
+	let segments = mwan4Stability.strip(list, now, SPAN);
+	let recorded = list.length ? Math.max(list[0].time, now - SPAN) : null;
+
 	return E('div', { class: 'mwan4-strip-wrap' }, [
-		svg('svg', { class: 'mwan4-strip', viewBox: '0 0 100 10', preserveAspectRatio: 'none', role: 'img', 'aria-label': _('Link state over the last 24 hours') },
-			mwan4Stability.strip(list, now, SPAN).map(segmentNode)),
-		E('div', { class: 'mwan4-strip-scale' }, [ E('small', [ _('24 hours ago') ]), E('small', [ _('now') ]) ])
+		svg('svg', { class: 'mwan4-strip', viewBox: '0 0 100 10', preserveAspectRatio: 'none', role: 'img', 'aria-label': _('Link state over the last 24 hours') }, segments.map(segmentNode)),
+		E('div', { class: 'mwan4-strip-scale' }, [ E('small', [ _('24 hours ago') ]), E('small', [ _('now') ]) ]),
+		renderLegend(),
+		recorded != null && recorded > now - SPAN ? E('small', { class: 'mwan4-muted-line' }, [ _('Nothing was recorded before %s, so earlier time is not counted.').format(formatTime(recorded)) ]) : null
 	]);
 }
 
 function renderEvent(event) {
 	return E('tr', { class: 'mwan4-history-row' }, [
 		E('td', [ formatTime(event.time) ]),
-		E('td', [ mwan4Common.renderPill(event.state, mwan4Common.statusClass(event.state)) ]),
+		E('td', [ mwan4Common.renderPill(event.state, mwan4Common.statusClass(mwan4Stability.linkState(event.state) || event.state)) ]),
 		E('td', [ mwan4Stability.reasonLabel(event.reason) || '-' ])
 	]);
 }
@@ -63,10 +72,8 @@ function renderSummary(entry) {
 	let held = mwan4Stability.heldInfo(entry);
 
 	return [
-		E('span', { title: flaps ? mwan4Stability.flapsTitle(flaps) : null }, [ flaps ? _('Flaps: %d in window / %d total').format(flaps.window, flaps.total) : _('Flaps: -') ]),
-		E('span', [ availability
-			? _('Availability: %s (1h %s)').format(mwan4Stability.formatPct(availability.h24), mwan4Stability.formatPct(availability.h1))
-			: _('Availability: -') ]),
+		E('span', [ flaps ? _('Flaps: %s').format(mwan4Stability.flapsText(flaps)) : _('Flaps: -') ]),
+		E('span', [ availability ? _('Availability: %s').format(mwan4Stability.availabilityText(availability)) : _('Availability: -') ]),
 		held ? mwan4Stability.renderHeldChip(held) : E('span', { class: 'mwan4-muted-line' }, [ _('Not held') ])
 	];
 }

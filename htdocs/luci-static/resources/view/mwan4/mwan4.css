@@ -1448,6 +1448,13 @@ button.mwan4-command-metric:hover,
 .mwan4-strip rect.mwan4-warning { fill: #e0a800; }
 .mwan4-strip rect.mwan4-muted { fill: #adb5bd; }
 
+.mwan4-strip-legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4em;
+	margin: 0.4em 0;
+}
+
 .mwan4-strip-scale {
 	display: flex;
 	justify-content: space-between;
