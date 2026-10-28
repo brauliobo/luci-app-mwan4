@@ -2,6 +2,8 @@
 'require baseclass';
 'require mwan4.common as mwan4Common';
 'require mwan4.stability as mwan4Stability';
+
+var E = mwan4Common.element;
 /* global mwan4Common */
 /* global mwan4Stability */
 

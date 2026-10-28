@@ -1,6 +1,13 @@
 'use strict';
 'require baseclass';
 
+// LuCI's dom.append renders null array elements as the text "null": drop empty children.
+function element(tag, attrs, children) {
+	let compact = value => Array.isArray(value) ? value.filter(child => child != null && child !== false) : value;
+
+	return E(tag, compact(attrs), compact(children));
+}
+
 function addStylesheet() {
 	if (document.querySelector('link[data-mwan4-style="1"]'))
 		return;
@@ -168,6 +175,7 @@ function rpcErrorMessage(result, fallback) {
 }
 
 return baseclass.extend({
+	element:         element,
 	addStylesheet:         addStylesheet,
 	formatBytes:           formatBytes,
 	formatDisplayValue:    formatDisplayValue,

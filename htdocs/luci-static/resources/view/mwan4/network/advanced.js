@@ -7,6 +7,8 @@
 'require view';
 'require mwan4.common as mwan4Common';
 'require mwan4.advanced as mwan4Advanced';
+
+var E = mwan4Common.element;
 /* global mwan4Common */
 /* global mwan4Advanced */
 

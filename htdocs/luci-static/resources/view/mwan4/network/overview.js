@@ -11,6 +11,8 @@
 'require mwan4.overview as mwan4Overview';
 'require mwan4.rules as mwan4Rules';
 'require mwan4.stability as mwan4Stability';
+
+var E = mwan4Common.element;
 /* global mwan4Common */
 /* global mwan4Connections */
 /* global mwan4LinkHistory */

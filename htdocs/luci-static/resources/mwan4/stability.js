@@ -1,7 +1,10 @@
 'use strict';
 'require baseclass';
 'require rpc';
+'require mwan4.common as mwan4Common';
 'require mwan4.connections as mwan4Connections';
+
+var E = mwan4Common.element;
 /* global mwan4Connections */
 
 /*

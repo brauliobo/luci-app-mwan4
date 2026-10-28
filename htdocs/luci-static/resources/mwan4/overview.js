@@ -1,6 +1,8 @@
 'use strict';
 'require baseclass';
 'require mwan4.common as mwan4Common';
+
+var E = mwan4Common.element;
 /* global mwan4Common */
 
 const formatDisplayValue = mwan4Common.formatDisplayValue;

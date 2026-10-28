@@ -2,6 +2,8 @@
 'require baseclass';
 'require rpc';
 'require mwan4.common as mwan4Common';
+
+var E = mwan4Common.element;
 /* global mwan4Common */
 
 const PAGE         = 200;
