@@ -3797,3 +3797,275 @@ msgstr ""
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
 msgid "Live conntrack entries attributed to mwan4 routing rules and WAN links. The list refreshes while this page is open."
 msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "flapping"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "recovering"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Held out of routing strategies until it stays healthy"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "held: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Skipped by: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "degraded (%d)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "%d flap(s) in the current window, %d since start"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Last hour: %s, last 24 hours: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Flap damping"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Flap threshold"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Flap window (seconds)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Flap hold-down (seconds)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Failback hold (seconds)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Connection flush grace (seconds)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Keep a WAN out of routing strategies after repeated online/offline flips."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Online to offline transitions inside the window that suppress the WAN."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Time span in which transitions are counted."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Healthy time required before a suppressed WAN is used again."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Healthy time required before a recovered WAN takes new connections (0 disables)."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Wait this long before flushing the connections of a downed WAN, so healthy flows survive a short outage (0 flushes immediately)."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Latency and loss limits need \"Use latency/loss SLA thresholds\" (check_quality) enabled on the WAN links of this strategy."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Global defaults"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Use default (%s)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "on"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "off"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "On"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Maximum latency (ms)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Maximum packet loss (%)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "no limit"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/linkhistory.js
+msgid "Link state over the last 24 hours"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/linkhistory.js
+msgid "24 hours ago"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/linkhistory.js
+msgid "now"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/linkhistory.js
+msgid "Time"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/linkhistory.js
+msgid "Reason"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/linkhistory.js
+msgid "Flaps: %d in window / %d total"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/linkhistory.js
+msgid "Flaps: -"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/linkhistory.js
+msgid "Availability: %s (1h %s)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/linkhistory.js
+msgid "Availability: -"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/linkhistory.js
+msgid "Not held"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/linkhistory.js
+msgid "No state transitions recorded yet."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/linkhistory.js
+msgid "Link history is unavailable: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Link history: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Single health check target: one lost probe can take this WAN link offline. Add a second target."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Stability"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Hold back unstable WAN links so short flaps do not move or drop healthy connections."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Empty inherits the global default."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "latency %s ms"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "loss %s%%"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "no limits"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "This will update the quality limits of this strategy before they are written to mwan4."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Limits"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Strategy quality: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "A WAN link above a limit is skipped by this strategy only; it stays online elsewhere. If every link exceeds the limits, the least bad one is kept."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "No latency/loss data from: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Stability defaults"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Link stability defaults"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Defaults for every WAN link; a WAN link can override each value."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Empty uses the built-in default."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Show link history of WAN link %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "History"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Single health check target: add a second one."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Flaps in the current window / since start"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Flaps"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Availability over the last 24 hours"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Availability"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Edit quality limits of strategy %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Quality: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js
+msgid "Hosts or addresses used to decide whether this WAN link is healthy. Use at least two: with a single target one lost probe can flap the link."
+msgstr ""

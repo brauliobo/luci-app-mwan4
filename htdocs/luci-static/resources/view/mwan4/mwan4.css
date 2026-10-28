@@ -667,7 +667,7 @@ button.mwan4-command-metric:hover,
 }
 
 .mwan4-wan-table {
-	min-width: 860px;
+	min-width: 940px;
 	margin: 0;
 	border: 0;
 }
@@ -1380,4 +1380,92 @@ button.mwan4-command-metric:hover,
 	align-items: center;
 	gap: 10px;
 	flex-wrap: wrap;
+}
+
+.mwan4-state-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+
+.mwan4-held-chip,
+.mwan4-degraded-chip {
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.mwan4-countdown,
+.mwan4-flaps-cell,
+.mwan4-availability-cell {
+	font-variant-numeric: tabular-nums;
+}
+
+.mwan4-flaps-cell,
+.mwan4-availability-cell {
+	white-space: nowrap;
+}
+
+.mwan4-modal-warning,
+.mwan4-wan-table small.mwan4-single-target-warning {
+	display: block;
+	color: #856404;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.mwan4-modal-warning[hidden] {
+	display: none;
+}
+
+.mwan4-link-history {
+	display: grid;
+	gap: 10px;
+	min-width: 0;
+}
+
+.mwan4-history-summary {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 16px;
+}
+
+.mwan4-history-body {
+	display: grid;
+	gap: 10px;
+}
+
+.mwan4-strip {
+	display: block;
+	width: 100%;
+	height: 18px;
+	border: 1px solid var(--border-color-low);
+	border-radius: var(--mwan4-radius-sm);
+}
+
+.mwan4-strip rect.mwan4-online { fill: #2e8b57; }
+.mwan4-strip rect.mwan4-offline { fill: #c0392b; }
+.mwan4-strip rect.mwan4-warning { fill: #e0a800; }
+.mwan4-strip rect.mwan4-muted { fill: #adb5bd; }
+
+.mwan4-strip-scale {
+	display: flex;
+	justify-content: space-between;
+	color: var(--text-color-medium);
+}
+
+.mwan4-history-list {
+	max-height: 40vh;
+	overflow-y: auto;
+}
+
+.mwan4-history-table {
+	margin: 0;
+	border: 0;
+}
+
+.mwan4-history-table th,
+.mwan4-history-table td {
+	padding: 6px 10px;
+	white-space: nowrap;
 }

@@ -7,12 +7,16 @@
 'require view';
 'require mwan4.common as mwan4Common';
 'require mwan4.connections as mwan4Connections';
+'require mwan4.linkhistory as mwan4LinkHistory';
 'require mwan4.overview as mwan4Overview';
 'require mwan4.rules as mwan4Rules';
+'require mwan4.stability as mwan4Stability';
 /* global mwan4Common */
 /* global mwan4Connections */
+/* global mwan4LinkHistory */
 /* global mwan4Overview */
 /* global mwan4Rules */
+/* global mwan4Stability */
 
 const callStatus = rpc.declare({
 	object: 'mwan4',
@@ -55,7 +59,7 @@ const callHostHints = rpc.declare({
 	expect: { }
 });
 
-let live = { status: {}, counters: {}, total: null };
+let live = { status: {}, counters: {}, total: null, history: false };
 let hasOperatorAccess = false;
 let hasConfigWrite = false;
 let dragRule = null;
@@ -150,10 +154,11 @@ function reloadOverview() {
 		L.resolveDefault(callStatus(), {}),
 		L.resolveDefault(callStatus('counters'), {}),
 		L.resolveDefault(callPbrImport(false), {}),
-		mwan4Connections.probe()
+		mwan4Connections.probe(),
+		mwan4Stability.probe()
 	]).then(function(data) {
 		pbrPreview = data[4] || {};
-		setLive(data[2], data[3], data[5]);
+		setLive(data[2], data[3], data[5], data[6]);
 
 		if (root)
 			root.replaceChildren(renderApp(data[2] || {}, data[3] || {}));
@@ -183,8 +188,19 @@ function closeModal() {
 		window.setTimeout(function() { target.focus(); }, 0);
 }
 
-function setLive(status, counters, total) {
-	live = { status: status || {}, counters: counters || {}, total: total };
+function setLive(status, counters, total, history) {
+	live = { status: status || {}, counters: counters || {}, total: total, history: history == null ? live.history : !!history };
+}
+
+function stabilityEnabled() {
+	return mwan4Stability.supported(live.history, live.status);
+}
+
+function showHistoryModal(name) {
+	showMwan4Modal(_('Link history: %s').format(name), [
+		E('div', { class: 'mwan4-modal-grid' }, [ mwan4LinkHistory.renderPanel({ interface: name }) ]),
+		E('div', { class: 'right mwan4-modal-actions' }, [ E('button', { class: 'btn cbi-button cbi-button-neutral', click: closeModal }, [ _('Close') ]) ])
+	]);
 }
 
 function connectionsEnabled() {
@@ -353,6 +369,46 @@ function modalCheck(label, name, checked) {
 	]);
 }
 
+function stabilityField(name, values, globals, inherit) {
+	let fallback = mwan4Stability.effectiveDefault(name, globals);
+	let label = mwan4Stability.fieldLabels()[name];
+	let help = '%s %s'.format(mwan4Stability.fieldHelp()[name], inherit);
+
+	if (name == 'flap_damping')
+		return modalSelect(label, name, [ [ '1', _('On') ], [ '0', _('Off') ] ], values[name], _('Use default (%s)').format(fallback == '1' ? _('on') : _('off')), help);
+
+	return modalInput(label, name, values[name], { type: 'number', min: String(mwan4Stability.MINIMUMS[name]), placeholder: fallback }, help);
+}
+
+function stabilitySection(title, body, values, globals, inherit) {
+	return E('section', { class: 'mwan4-builder-section mwan4-stability-fields' }, [
+		E('div', { class: 'mwan4-builder-title' }, [ E('strong', [ title ]), E('span', [ body ]) ]),
+		E('div', { class: 'mwan4-modal-columns' }, mwan4Stability.STABILITY.map(function(name) { return stabilityField(name, values, globals, inherit); }))
+	]);
+}
+
+function stabilityDraft(modal) {
+	return Object.fromEntries(mwan4Stability.STABILITY.map(function(name) { return [ name, modalValue(modal, name) || '' ]; }));
+}
+
+function writeStability(sid, values) {
+	mwan4Stability.STABILITY.forEach(function(name) { uci.set('mwan4', sid, name, values[name] || null); });
+}
+
+function singleTargetWarning(targets) {
+	return E('small', { class: 'mwan4-modal-warning', role: 'status', 'data-mwan4-single-target': '1', hidden: mwan4Stability.singleTarget(targets) ? null : 'hidden' }, [
+		_('Single health check target: one lost probe can take this WAN link offline. Add a second target.')
+	]);
+}
+
+function bindSingleTargetWarning(modal) {
+	let input = modal && modal.querySelector('[name="track_ip"]');
+	let warning = modal && modal.querySelector('[data-mwan4-single-target]');
+
+	if (input && warning)
+		input.addEventListener('input', function() { warning.hidden = !mwan4Stability.singleTarget(splitTokens(input.value)); });
+}
+
 function pendingPreviewSlot() {
 	return E('div', { class: 'mwan4-change-preview-slot', 'data-mwan4-preview': '1', 'aria-live': 'polite', hidden: 'hidden' });
 }
@@ -474,7 +530,8 @@ function interfaceDraftFromModal(name) {
 		failure_latency:  modalValue(modal, 'failure_latency') || '1000',
 		failure_loss:     modalValue(modal, 'failure_loss') || '40',
 		recovery_latency: modalValue(modal, 'recovery_latency') || '500',
-		recovery_loss:    modalValue(modal, 'recovery_loss') || '10'
+		recovery_loss:    modalValue(modal, 'recovery_loss') || '10',
+		stability:        stabilityEnabled() ? stabilityDraft(modal) : null
 	};
 }
 
@@ -500,6 +557,9 @@ function writeInterfaceDraft(draft, existingName) {
 	uci.set('mwan4', sid, 'failure_loss', draft.failure_loss || '40');
 	uci.set('mwan4', sid, 'recovery_latency', draft.recovery_latency || '500');
 	uci.set('mwan4', sid, 'recovery_loss', draft.recovery_loss || '10');
+
+	if (draft.stability)
+		writeStability(sid, draft.stability);
 }
 
 function buildInterfaceChange(name) {
@@ -523,8 +583,9 @@ function buildInterfaceChange(name) {
 			[ _('Address families'), draft.family.join(', ') ],
 			[ _('Health check'), '%s: %s'.format(draft.track_method, draft.track_ip.join(', ')) ],
 			[ _('SLA'), sla ],
+			draft.stability ? [ _('Stability'), mwan4Stability.summary(draft.stability) ] : null,
 			[ _('State'), draft.enabled == '1' ? _('Enabled') : _('Disabled') ]
-		],
+		].filter(Boolean),
 		apply:   function() {
 			return writeInterfaceDraft(draft, name);
 		}
@@ -596,7 +657,8 @@ function showInterfaceModal(name) {
 				], familyChoice, null),
 				modalSelect(_('Health check method'), 'track_method', healthMethodOptions(section?.track_method || 'ping'), section?.track_method || 'ping', null)
 			]),
-			modalInput(_('Health check targets'), 'track_ip', asArray(section?.track_ip).join(' ') || '1.1.1.1 8.8.8.8', { placeholder: _('1.1.1.1 8.8.8.8') })
+			modalInput(_('Health check targets'), 'track_ip', asArray(section?.track_ip).join(' ') || '1.1.1.1 8.8.8.8', { placeholder: _('1.1.1.1 8.8.8.8') }),
+			singleTargetWarning(asArray(section?.track_ip))
 		]),
 		E('section', { class: 'mwan4-builder-section mwan4-advanced-fields' }, [
 			E('div', { class: 'mwan4-builder-title' }, [
@@ -616,14 +678,18 @@ function showInterfaceModal(name) {
 				modalInput(_('Recovery latency (ms)'), 'recovery_latency', section?.recovery_latency || '500', { type: 'number', min: '1' }),
 				modalInput(_('Recovery packet loss (%)'), 'recovery_loss', section?.recovery_loss || '10', { type: 'number', min: '0', max: '100' })
 			])
-		]),
-		pendingPreviewSlot()
+		])
 	);
 
-	showMwan4Modal(title, [
+	if (stabilityEnabled())
+		fields.push(stabilitySection(_('Stability'), _('Hold back unstable WAN links so short flaps do not move or drop healthy connections.'), section || {}, getGlobalSection(), _('Empty inherits the global default.')));
+
+	fields.push(pendingPreviewSlot());
+
+	bindSingleTargetWarning(showMwan4Modal(title, [
 		E('div', { class: 'mwan4-modal-grid' }, fields),
 		previewModalActions(function() { return buildInterfaceChange(name); }, name ? function() { return showInterfaceRemovalPreview(name); } : null)
-	]);
+	]));
 }
 
 function enabledInterfaceNames() {
@@ -1404,6 +1470,58 @@ function showRuleModal(name) {
 	bindRuleModal();
 }
 
+function strategyLimits(section) {
+	let limits = [ section.max_latency ? _('latency %s ms').format(section.max_latency) : null, section.max_loss ? _('loss %s%%').format(section.max_loss) : null ].filter(Boolean);
+
+	return limits.length ? limits.join(', ') : _('no limits');
+}
+
+function strategyQualityGaps(name) {
+	let interfaces = asArray(uci.get('mwan4', name, 'use_route')).map(function(route) { return uci.get('mwan4', route, 'interface'); });
+
+	return mwanInterfaces().filter(function(section) {
+		return section.check_quality != '1' && interfaces.some(function(value) { return asArray(value).includes(section['.name']); });
+	}).map(function(section) { return section['.name']; });
+}
+
+function buildStrategyChange(name) {
+	let modal = document.querySelector('.modal');
+	let draft = { max_latency: modalValue(modal, 'max_latency'), max_loss: modalValue(modal, 'max_loss') };
+
+	return {
+		summary: _('This will update the quality limits of this strategy before they are written to mwan4.'),
+		items:   [
+			[ _('Strategy'), name ],
+			[ _('Limits'), strategyLimits(draft) ]
+		],
+		apply:   function() {
+			Object.keys(draft).forEach(function(option) { uci.set('mwan4', name, option, draft[option] || null); });
+		}
+	};
+}
+
+function showStrategyModal(name) {
+	let section = uci.get('mwan4', name) || {};
+	let gaps = strategyQualityGaps(name);
+
+	showMwan4Modal(_('Strategy quality: %s').format(name), [
+		E('div', { class: 'mwan4-modal-grid' }, [
+			E('div', { class: 'mwan4-modal-title' }, [
+				E('strong', [ name ]),
+				E('span', [ _('A WAN link above a limit is skipped by this strategy only; it stays online elsewhere. If every link exceeds the limits, the least bad one is kept.') ])
+			]),
+			E('div', { class: 'mwan4-modal-columns' }, [
+				modalInput(_('Maximum latency (ms)'), 'max_latency', section.max_latency, { type: 'number', min: '1', placeholder: _('no limit') }),
+				modalInput(_('Maximum packet loss (%)'), 'max_loss', section.max_loss, { type: 'number', min: '0', max: '100', placeholder: _('no limit') })
+			]),
+			E('small', { class: 'mwan4-modal-help' }, [ mwan4Stability.qualityNote() ]),
+			gaps.length ? E('small', { class: 'mwan4-modal-warning', role: 'status' }, [ _('No latency/loss data from: %s').format(gaps.join(', ')) ]) : null,
+			pendingPreviewSlot()
+		]),
+		previewModalActions(function() { return buildStrategyChange(name); })
+	]);
+}
+
 function getGlobalSection() {
 	return uci.get('mwan4', 'globals') || {};
 }
@@ -1425,7 +1543,8 @@ function globalDraftFromModal() {
 		source_routing:  modalValue(modal, 'source_routing'),
 		rt_table_lookup: splitTokens(modalValue(modal, 'rt_table_lookup')),
 		logging:         modalValue(modal, 'logging'),
-		loglevel:        modalValue(modal, 'loglevel') || 'notice'
+		loglevel:        modalValue(modal, 'loglevel') || 'notice',
+		stability:       stabilityEnabled() ? stabilityDraft(modal) : null
 	};
 }
 
@@ -1436,6 +1555,9 @@ function writeGlobalDraft(draft) {
 	setList('mwan4', 'globals', 'rt_table_lookup', draft.rt_table_lookup);
 	uci.set('mwan4', 'globals', 'logging', draft.logging);
 	uci.set('mwan4', 'globals', 'loglevel', draft.loglevel);
+
+	if (draft.stability)
+		writeStability('globals', draft.stability);
 }
 
 function buildGlobalChange() {
@@ -1447,8 +1569,9 @@ function buildGlobalChange() {
 			[ _('Firewall mark mask'), draft.mmx_mask ],
 			[ _('Source routing'), draft.source_routing == '1' ? _('Enabled') : _('Disabled') ],
 			[ _('Additional tables'), draft.rt_table_lookup.length ? draft.rt_table_lookup.join(', ') : _('Default tables') ],
-			[ _('Logging'), draft.logging == '1' ? draft.loglevel : _('Off') ]
-		],
+			[ _('Logging'), draft.logging == '1' ? draft.loglevel : _('Off') ],
+			draft.stability ? [ _('Stability defaults'), mwan4Stability.summary(draft.stability) ] : null
+		].filter(Boolean),
 		apply:   function() {
 			return writeGlobalDraft(draft);
 		}
@@ -1473,6 +1596,7 @@ function showGlobalsModal() {
 				modalCheck(_('Enable source routing'), 'source_routing', globalValue(section, 'mwan4.source_routing', 'source_routing', '0') == '1'),
 				modalCheck(_('Log matching rules'), 'logging', section.logging == '1')
 			]),
+			stabilityEnabled() ? stabilitySection(_('Link stability defaults'), _('Defaults for every WAN link; a WAN link can override each value.'), section, {}, _('Empty uses the built-in default.')) : null,
 			pendingPreviewSlot()
 		]),
 		previewModalActions(buildGlobalChange)
@@ -1687,6 +1811,7 @@ function renderCommandCenter(status, progress) {
 					_('Service start, stop, restart, and per-WAN-link controls are hidden because this session lacks the mwan4 operator ACL.'))
 			]),
 			E('div', { class: 'mwan4-actions' }, [
+				E('button', { class: 'btn cbi-button cbi-button-neutral', 'aria-label': _('Configure global MultiWAN settings'), click: showGlobalsModal }, [ _('Global settings') ]),
 				hasAdvancedAccess ? E('a', { class: 'btn cbi-button cbi-button-neutral', href: L.url('admin/network/mwan4/advanced') }, [ _('Open Advanced') ]) : '',
 				hasDiagnosticsAccess ? E('a', { class: 'btn cbi-button cbi-button-neutral', href: L.url('admin/network/mwan4/diagnostics') }, [ _('Open Diagnostics') ]) : ''
 			]),
@@ -1820,6 +1945,32 @@ function renderTargetSummary(section, runtime) {
 	return E('ul', { class: 'mwan4-target-summary' }, rows);
 }
 
+function renderStateChips(runtime, state) {
+	let held = stabilityEnabled() ? mwan4Stability.heldInfo(runtime) : null;
+
+	return E('div', { class: 'mwan4-state-chips' }, [
+		held && state == 'held' ? null : renderPill(state, statusClass(state, runtime.up)),
+		held ? mwan4Stability.renderHeldChip(held) : null,
+		stabilityEnabled() ? mwan4Stability.renderDegradedChip(mwan4Stability.degradedStrategies(runtime)) : null
+	]);
+}
+
+function renderFlapsCell(runtime) {
+	let flaps = mwan4Stability.flapInfo(runtime);
+
+	return E('td', { class: 'mwan4-flaps-cell' }, [
+		flaps ? E('span', { title: mwan4Stability.flapsTitle(flaps) }, [ '%d / %d'.format(flaps.window, flaps.total) ]) : E('span', { class: 'mwan4-muted-line' }, [ '-' ])
+	]);
+}
+
+function renderAvailabilityCell(runtime) {
+	let availability = mwan4Stability.availabilityInfo(runtime);
+
+	return E('td', { class: 'mwan4-availability-cell' }, [
+		availability ? E('span', { title: mwan4Stability.availabilityTitle(availability) }, [ mwan4Stability.formatPct(availability.h24) ]) : E('span', { class: 'mwan4-muted-line' }, [ '-' ])
+	]);
+}
+
 function renderWanActions(name) {
 	let actions = [
 		E('button', { class: 'btn cbi-button cbi-button-edit mwan4-compact-button', 'aria-label': _('Edit WAN link %s').format(name), click: function() { return showInterfaceModal(name); } }, [ _('Edit') ])
@@ -1831,6 +1982,9 @@ function renderWanActions(name) {
 			E('button', { class: 'btn cbi-button cbi-button-reset mwan4-compact-button', 'aria-label': _('Take WAN link %s down').format(name), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'ifdown', name ], eventButton(ev)); } }, [ _('Down') ])
 		);
 	}
+
+	if (live.history)
+		actions.push(E('button', { class: 'btn cbi-button cbi-button-neutral mwan4-compact-button', 'aria-label': _('Show link history of WAN link %s').format(name), click: function() { return showHistoryModal(name); } }, [ _('History') ]));
 
 	return E('div', { class: 'mwan4-actions mwan4-wan-actions' }, actions);
 }
@@ -1857,9 +2011,11 @@ function renderWanRow(section, status) {
 			])
 		]),
 		E('td', [
-			renderPill(state, statusClass(state, runtime.up)),
+			renderStateChips(runtime, state),
 			E('small', [ formatDisplayValue(runtime.tracking || runtime.status, _('unknown')), runtime.up ? _(' / netifd up') : _(' / netifd down') ])
 		]),
+		stabilityEnabled() ? renderFlapsCell(runtime) : null,
+		stabilityEnabled() ? renderAvailabilityCell(runtime) : null,
 		E('td', [
 			E('strong', [ score ]),
 			E('small', [ runtime.score_current == null ? _('unmeasured') : _('%s/%s score').format(runtime.score_current, runtime.score_max || '10') ]),
@@ -1870,7 +2026,10 @@ function renderWanRow(section, status) {
 			E('small', [ _('down %s / up %s, reliability %s').format(section.down || '5', section.up || '5', section.reliability || '1') ]),
 			E('small', [ quality ? _('SLA: %s').format(sla) : _('SLA: availability only') ])
 		]),
-		E('td', [ renderTargetSummary(section, runtime) ]),
+		E('td', [
+			renderTargetSummary(section, runtime),
+			mwan4Stability.singleTarget(asArray(section.track_ip)) ? E('small', { class: 'mwan4-single-target-warning' }, [ _('Single health check target: add a second one.') ]) : null
+		]),
 		connectionsEnabled() ? E('td', [ mwan4Connections.renderCountButton(_('View active connections of WAN link %s').format(name), mwan4Connections.interfaceActive(name, status), { interface: name }, showConnectionsModal) ]) : null,
 		E('td', [
 			renderWanActions(name)
@@ -1900,6 +2059,8 @@ function renderWanWorkspace(status, counters) {
 				E('tr', [
 					E('th', [ _('WAN') ]),
 					E('th', [ _('State') ]),
+					stabilityEnabled() ? E('th', { title: _('Flaps in the current window / since start') }, [ _('Flaps') ]) : null,
+					stabilityEnabled() ? E('th', { title: _('Availability over the last 24 hours') }, [ _('Availability') ]) : null,
 					E('th', [ _('Score') ]),
 					E('th', [ _('Probe / SLA') ]),
 					E('th', [ _('Targets') ]),
@@ -1960,6 +2121,19 @@ function renderStrategyConnections() {
 	}).filter(Boolean);
 }
 
+function renderStrategyQuality() {
+	return strategies().map(function(section) {
+		let name = section['.name'];
+
+		return E('button', {
+			class:        'btn cbi-button cbi-button-neutral mwan4-compact-button',
+			title:        strategyLimits(section),
+			'aria-label': _('Edit quality limits of strategy %s').format(name),
+			click:        function() { return showStrategyModal(name); }
+		}, [ _('Quality: %s').format(name) ]);
+	});
+}
+
 function renderRouting() {
 	let strategyNames = strategies().map(function(section) { return section['.name']; });
 	let routes = uci.sections('mwan4', 'route');
@@ -1998,7 +2172,8 @@ function renderRouting() {
 				E('br'),
 				strategyNames.map(formatPolicyPath).join(', ') || _('No strategies')
 			]),
-			E('div', { id: 'mwan4-strategy-connections', class: 'mwan4-chips mwan4-strategy-connections' }, renderStrategyConnections())
+			E('div', { id: 'mwan4-strategy-connections', class: 'mwan4-chips mwan4-strategy-connections' }, renderStrategyConnections()),
+			stabilityEnabled() ? E('div', { class: 'mwan4-chips mwan4-strategy-quality' }, renderStrategyQuality()) : null
 		])
 	]));
 
@@ -2390,7 +2565,8 @@ return view.extend({
 			L.resolveDefault(callHostHints(), {}),
 			L.resolveDefault(callPbrImport(false), {}),
 			L.resolveDefault(callSessionAccess('access-group', 'luci-app-mwan4', 'write'), false),
-			mwan4Connections.probe()
+			mwan4Connections.probe(),
+			mwan4Stability.probe()
 		]);
 	},
 
@@ -2409,7 +2585,7 @@ return view.extend({
 		knownDevices = mwan4Rules.hostDevices(data[11]);
 		pbrPreview = data[12] || {};
 		hasConfigWrite = !!data[13];
-		setLive(status, counters, data[14]);
+		setLive(status, counters, data[14], data[15]);
 
 		poll.add(function() {
 			let commandCenter = byId('mwan4-command-center');

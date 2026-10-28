@@ -12,8 +12,10 @@ const jsFiles = [
 	'htdocs/luci-static/resources/mwan4/connections.js',
 	'htdocs/luci-static/resources/mwan4/advanced.js',
 	'htdocs/luci-static/resources/mwan4/diagnostics.js',
+	'htdocs/luci-static/resources/mwan4/linkhistory.js',
 	'htdocs/luci-static/resources/mwan4/overview.js',
 	'htdocs/luci-static/resources/mwan4/rules.js',
+	'htdocs/luci-static/resources/mwan4/stability.js',
 	'htdocs/luci-static/resources/view/mwan4/network/globals.js',
 	'htdocs/luci-static/resources/view/mwan4/network/advanced.js',
 	'htdocs/luci-static/resources/view/mwan4/network/interfaces.js',
@@ -133,7 +135,17 @@ for (const needle of [
 	'Domains and addresses',
 	'Add a known device',
 	'Everything else',
-	'Include router traffic'
+	'Include router traffic',
+	'Link history: %s',
+	'Flap damping',
+	'Flap hold-down (seconds)',
+	'Failback hold (seconds)',
+	'Connection flush grace (seconds)',
+	'Strategy quality: %s',
+	'Link stability defaults',
+	'Single health check target',
+	'held: %s',
+	'degraded (%d)'
 ])
 	assertContains(combined, needle);
 
@@ -282,7 +294,19 @@ for (const needle of [
 	'msgid "View connections"',
 	'msgid "No connections match these filters."',
 	'msgid "Showing the first %d of %d connections. Narrow the filters or show more."',
-	'msgid "Rule ID"'
+	'msgid "Rule ID"',
+	'msgid "Link history: %s"',
+	'msgid "Flap damping"',
+	'msgid "Flap hold-down (seconds)"',
+	'msgid "Failback hold (seconds)"',
+	'msgid "Connection flush grace (seconds)"',
+	'msgid "Strategy quality: %s"',
+	'msgid "Link stability defaults"',
+	'msgid "held: %s"',
+	'msgid "degraded (%d)"',
+	'msgid "Maximum latency (ms)"',
+	'msgid "Maximum packet loss (%)"',
+	'msgid "No state transitions recorded yet."'
 ])
 	assertContains(pot, needle, `POT is missing ${needle}`);
 

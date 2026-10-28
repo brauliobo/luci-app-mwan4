@@ -1,5 +1,5 @@
 const { test, expect } = require('@playwright/test');
-const { defaultConnections, defaultCounters, defaultDiagnostics, defaultPbrPreview, defaultStatus, defaultUci, renderDiagnostics, renderOverview, renderStatus } = require('./helpers/luci-rpc-mock');
+const { defaultConnections, defaultCounters, defaultDiagnostics, defaultLinkHistory, defaultPbrPreview, defaultStatus, defaultUci, renderDiagnostics, renderOverview, renderStatus, stableStatus } = require('./helpers/luci-rpc-mock');
 
 function uciWithRules() {
 	const uci = defaultUci();
@@ -886,7 +886,7 @@ test.describe('mocked mwan4 connection counting', () => {
 		const status = defaultStatus();
 		const counters = defaultCounters();
 
-		status.interfaces.wan_backup.active_connections = 9;
+		status.interfaces.wan_backup.active_connections = { ipv4: 9, ipv6: 0, total: 9 };
 		counters.rules.streaming.new_connections = { ipv4: 31, ipv6: 10, total: 41 };
 		await page.evaluate(next => {
 			window.__mwan4Mock.setStatus(next.status);
@@ -931,5 +931,233 @@ test.describe('mocked mwan4 connection counting', () => {
 
 		await renderDiagnostics(page, { diagnosticsAccess: false });
 		await expect(page.locator('#mwan4-diag-connections')).toHaveCount(0);
+	});
+});
+
+const setUciOption = (page, section, option, value) => page.evaluate(([ sid, name, v ]) => {
+	window.__mwan4Mock.getUci().mwan4.find(item => item['.name'] == sid)[name] = v;
+}, [ section, option, value ]);
+const uciSection = (page, name) => page.evaluate(sid => window.__mwan4Mock.getUci().mwan4.find(item => item['.name'] == sid), name);
+
+async function applyPending(page) {
+	await page.getByRole('button', { name: 'Preview changes' }).click();
+	await page.getByRole('button', { name: 'Apply pending changes' }).click();
+}
+
+test.describe('mocked mwan4 unstable WAN handling', () => {
+	const stable = () => ({ status: stableStatus(), history: defaultLinkHistory() });
+
+	test('shows held and degraded chips with flap and availability columns', async ({ page }) => {
+		await renderOverview(page, stable());
+
+		const primary = page.locator('[data-interface="wan_primary"]');
+		const backup = page.locator('[data-interface="wan_backup"]');
+
+		await expect(page.locator('.mwan4-wan-table th')).toContainText([ 'State', 'Flaps', 'Availability', 'Score' ]);
+		await expect(primary.locator('.mwan4-held-chip')).toContainText('held: flapping');
+		await expect(primary.locator('.mwan4-held-chip')).toContainText(/1m \d+s/);
+		await expect(primary.locator('.mwan4-state-chips .mwan4-pill')).toHaveCount(1);
+		await expect(primary.locator('.mwan4-flaps-cell span')).toHaveText('3 / 9');
+		await expect(primary.locator('.mwan4-flaps-cell span')).toHaveAttribute('title', '3 flap(s) in the current window, 9 since start');
+		await expect(primary.locator('.mwan4-availability-cell span')).toHaveText('99.2%');
+		await expect(primary.locator('.mwan4-availability-cell span')).toHaveAttribute('title', 'Last hour: 91.3%, last 24 hours: 99.2%');
+		await expect(backup.locator('.mwan4-held-chip')).toHaveCount(0);
+		await expect(backup.locator('.mwan4-degraded-chip')).toHaveText('degraded (2)');
+		await expect(backup.locator('.mwan4-degraded-chip')).toHaveAttribute('title', 'Skipped by: failover, streaming');
+		await expect(backup.locator('.mwan4-availability-cell span')).toHaveText('100%');
+	});
+
+	test('counts the hold down live between polls', async ({ page }) => {
+		await page.clock.install();
+		await renderOverview(page, stable());
+
+		const countdown = page.locator('[data-interface="wan_primary"] .mwan4-countdown');
+
+		await expect(countdown).toHaveText('1m 30s');
+		await page.clock.runFor(2100);
+		await expect(countdown).toHaveText('1m 28s');
+		await page.clock.runFor(100000);
+		await expect(countdown).toHaveText('0s');
+	});
+
+	test('opens the link history with a 24 hour strip and refreshes while open', async ({ page }) => {
+		await page.clock.install();
+		await renderOverview(page, stable());
+		await page.locator('[data-interface="wan_primary"]').getByRole('button', { name: 'Show link history of WAN link wan_primary' }).click();
+
+		const modal = page.locator('.modal .mwan4-link-history');
+		const rows = modal.locator('.mwan4-history-row');
+
+		await expect(rows).toHaveCount(5);
+		await expect(rows.first()).toContainText('held');
+		await expect(rows.first()).toContainText('flapping');
+		await expect(rows.last()).toContainText('start');
+		await expect(modal.locator('.mwan4-history-summary')).toContainText('Flaps: 3 in window / 9 total');
+		await expect(modal.locator('.mwan4-history-summary')).toContainText('Availability: 99.2% (1h 91.3%)');
+		await expect(modal.locator('.mwan4-history-summary .mwan4-held-chip')).toContainText('held: flapping');
+		await expect(modal.locator('svg.mwan4-strip')).toHaveAttribute('role', 'img');
+		await expect(modal.locator('svg.mwan4-strip rect')).toHaveCount(6);
+		await expect(modal.locator('svg.mwan4-strip rect.mwan4-offline')).toHaveCount(2);
+		await expect(modal.locator('svg.mwan4-strip rect.mwan4-warning')).toHaveCount(1);
+		await expect(page.locator('.modal details, .modal summary')).toHaveCount(0);
+
+		await page.evaluate(() => {
+			const next = JSON.parse(JSON.stringify(window.__mwan4Mock.getHistory()));
+
+			next.interfaces.wan_primary.events.push({ time: Math.floor(Date.now() / 1000), state: 'online', reason: 'holddown' });
+			window.__mwan4Mock.setHistory(next);
+		});
+		await page.clock.runFor(5100);
+		await expect(rows).toHaveCount(6);
+		await expect(rows.first()).toContainText('holddown');
+
+		await page.getByRole('button', { name: 'Close' }).click();
+		await page.clock.runFor(1000);
+
+		const before = await rpcCount(page, 'link_history');
+
+		await page.clock.runFor(20000);
+		expect(await rpcCount(page, 'link_history')).toBe(before);
+	});
+
+	test('shows an empty history and keeps working when the history call fails', async ({ page }) => {
+		await renderOverview(page, stable());
+		await page.locator('[data-interface="wan_backup"]').getByRole('button', { name: 'Show link history of WAN link wan_backup' }).click();
+		await expect(page.locator('.modal .mwan4-conn-empty')).toHaveText('No state transitions recorded yet.');
+		await expect(page.locator('.modal svg.mwan4-strip rect')).toHaveCount(1);
+		await page.evaluate(() => window.__mwan4Mock.setHistory(null));
+		await page.getByRole('button', { name: 'Close' }).click();
+		await page.locator('[data-interface="wan_backup"]').getByRole('button', { name: 'Show link history of WAN link wan_backup' }).click();
+		await expect(page.locator('.modal .mwan4-conn-notice')).toContainText('Link history is unavailable');
+	});
+
+	test('edits the stability fields of a WAN link with the effective global default as placeholder', async ({ page }) => {
+		await renderOverview(page, stable());
+		await setUciOption(page, 'globals', 'flap_window', '600');
+		await page.getByRole('button', { name: 'Edit WAN link wan_primary' }).click();
+
+		const modal = page.locator('.modal');
+
+		await expect(modal.locator('.mwan4-stability-fields')).toContainText('Flap damping');
+		await expect(modal.locator('input[name="flap_threshold"]')).toHaveAttribute('placeholder', '3');
+		await expect(modal.locator('input[name="flap_window"]')).toHaveAttribute('placeholder', '600');
+		await expect(modal.locator('input[name="flap_holddown"]')).toHaveAttribute('placeholder', '120');
+		await expect(modal.locator('input[name="recovery_hold"]')).toHaveAttribute('placeholder', '30');
+		await expect(modal.locator('input[name="flush_grace"]')).toHaveAttribute('placeholder', '10');
+		await expect(modal.locator('select[name="flap_damping"] option').first()).toHaveText('Use default (on)');
+		await expect(modal.locator('input[name="flap_threshold"]')).toHaveAttribute('min', '2');
+
+		await modal.locator('select[name="flap_damping"]').selectOption('0');
+		await modal.locator('input[name="flap_threshold"]').fill('4');
+		await modal.locator('input[name="flush_grace"]').fill('0');
+		await page.getByRole('button', { name: 'Preview changes' }).click();
+		await expect(modal).toContainText('Flap threshold 4');
+		await page.getByRole('button', { name: 'Apply pending changes' }).click();
+
+		const section = await uciSection(page, 'wan_primary');
+
+		expect(section).toMatchObject({ flap_damping: '0', flap_threshold: '4', flush_grace: '0' });
+		expect(section.flap_window).toBeFalsy();
+		expect(section.recovery_hold).toBeFalsy();
+	});
+
+	test('warns about a single health check target in the matrix and while editing', async ({ page }) => {
+		await renderOverview(page, stable());
+		await expect(page.locator('[data-interface="wan_backup"] .mwan4-single-target-warning')).toBeVisible();
+		await expect(page.locator('[data-interface="wan_primary"] .mwan4-single-target-warning')).toHaveCount(0);
+
+		await page.getByRole('button', { name: 'Edit WAN link wan_backup' }).click();
+
+		const warning = page.locator('.modal [data-mwan4-single-target]');
+
+		await expect(warning).toBeVisible();
+		await page.locator('.modal input[name="track_ip"]').fill('9.9.9.9 1.1.1.1');
+		await expect(warning).toBeHidden();
+		await page.locator('.modal input[name="track_ip"]').fill('9.9.9.9');
+		await expect(warning).toBeVisible();
+	});
+
+	test('edits strategy quality limits and explains the check_quality requirement', async ({ page }) => {
+		await renderOverview(page, stable());
+		await page.getByRole('button', { name: 'Edit quality limits of strategy failover' }).click();
+
+		const modal = page.locator('.modal');
+
+		await expect(modal).toContainText('check_quality');
+		await expect(modal).toContainText('No latency/loss data from: wan_backup');
+		await modal.locator('input[name="max_latency"]').fill('150');
+		await modal.locator('input[name="max_loss"]').fill('5');
+		await applyPending(page);
+
+		expect(await uciSection(page, 'failover')).toMatchObject({ max_latency: '150', max_loss: '5' });
+
+		await expect(page.getByRole('button', { name: 'Edit quality limits of strategy failover' })).toHaveAttribute('title', 'latency 150 ms, loss 5%');
+		await page.getByRole('button', { name: 'Edit quality limits of strategy failover' }).click();
+		await page.locator('.modal input[name="max_latency"]').fill('');
+		await applyPending(page);
+		expect((await uciSection(page, 'failover')).max_latency).toBeFalsy();
+	});
+
+	test('edits the global stability defaults', async ({ page }) => {
+		await renderOverview(page, stable());
+		await page.getByRole('button', { name: 'Configure global MultiWAN settings' }).click();
+
+		const modal = page.locator('.modal');
+
+		await expect(modal.locator('input[name="flap_holddown"]')).toHaveAttribute('placeholder', '120');
+		await expect(modal.locator('select[name="flap_damping"] option').first()).toHaveText('Use default (on)');
+		await modal.locator('input[name="recovery_hold"]').fill('45');
+		await applyPending(page);
+
+		expect(await uciSection(page, 'globals')).toMatchObject({ recovery_hold: '45' });
+	});
+
+	test('hides every stability surface against a backend without the new methods and fields', async ({ page }) => {
+		const errors = collectErrors(page);
+
+		await renderOverview(page);
+		await page.evaluate(() => window.__mwan4Mock.runPoll());
+
+		const workspace = page.locator('#mwan4-wan-workspace');
+
+		await expect(workspace.locator('[data-interface="wan_primary"]')).toBeVisible();
+		await expect(workspace.locator('th')).not.toContainText([ 'Flaps' ]);
+		await expect(workspace.getByRole('button', { name: /link history/ })).toHaveCount(0);
+		await expect(page.locator('.mwan4-held-chip, .mwan4-degraded-chip, .mwan4-strategy-quality button')).toHaveCount(0);
+
+		await page.getByRole('button', { name: 'Edit WAN link wan_primary' }).click();
+		await expect(page.locator('.modal .mwan4-stability-fields')).toHaveCount(0);
+		await page.getByRole('button', { name: 'Cancel' }).click();
+		await page.getByRole('button', { name: 'Configure global MultiWAN settings' }).click();
+		await expect(page.locator('.modal .mwan4-stability-fields')).toHaveCount(0);
+		expect(errors).toEqual([]);
+	});
+
+	test('shows the columns from status fields alone and offers no history without link_history', async ({ page }) => {
+		await renderOverview(page, { status: stableStatus() });
+
+		await expect(page.locator('.mwan4-wan-table th')).toContainText([ 'Flaps', 'Availability' ]);
+		await expect(page.locator('[data-interface="wan_primary"] .mwan4-held-chip')).toBeVisible();
+		await expect(page.getByRole('button', { name: /link history/ })).toHaveCount(0);
+	});
+
+	test('stability data follows the poll', async ({ page }) => {
+		await renderOverview(page, stable());
+		await page.evaluate(() => {
+			const status = JSON.parse(JSON.stringify(window.__mwan4Mock.getStatus()));
+
+			status.interfaces.wan_primary.held = { active: false };
+			status.interfaces.wan_primary.health_state = 'online';
+			status.interfaces.wan_primary.flaps = { count_window: 0, total: 10 };
+			window.__mwan4Mock.setStatus(status);
+
+			return window.__mwan4Mock.runPoll();
+		});
+
+		const primary = page.locator('[data-interface="wan_primary"]');
+
+		await expect(primary.locator('.mwan4-held-chip')).toHaveCount(0);
+		await expect(primary.locator('.mwan4-state-chips .mwan4-pill')).toHaveText('online');
+		await expect(primary.locator('.mwan4-flaps-cell span')).toHaveText('0 / 10');
 	});
 });

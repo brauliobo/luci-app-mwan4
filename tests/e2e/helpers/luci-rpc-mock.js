@@ -6,6 +6,8 @@ const commonPath = path.resolve(__dirname, '../../../htdocs/luci-static/resource
 const rulesModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/rules.js');
 const overviewModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/overview.js');
 const connectionsModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/connections.js');
+const linkHistoryModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/linkhistory.js');
+const stabilityModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/stability.js');
 const diagnosticsModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/diagnostics.js');
 const diagnosticsPath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/view/mwan4/status/diagnostics.js');
 const statusPath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/view/mwan4/status/overview.js');
@@ -69,6 +71,41 @@ function defaultConnections() {
 			{ family: 'ipv6', proto: 'tcp', src: '2001:db8::30', sport: 52000, dst: '2001:db8:ffff::10', dport: 443, state: 'ESTABLISHED', timeout: 90, packets: 40, bytes: 8000, rule: '', rule_label: '', interface: 'wan_primary', strategy: 'failover' }
 		]
 	};
+}
+
+function defaultLinkHistory() {
+	const NOW = Math.floor(Date.now() / 1000);
+
+	return {
+		ok:         true,
+		interfaces: {
+			wan_primary: {
+				events:       [
+					{ time: NOW - 80000, state: 'online', reason: 'start' },
+					{ time: NOW - 7200, state: 'offline', reason: 'tracker' },
+					{ time: NOW - 7100, state: 'online', reason: 'tracker' },
+					{ time: NOW - 600, state: 'offline', reason: 'tracker' },
+					{ time: NOW - 560, state: 'held', reason: 'flapping' }
+				],
+				flaps:        { count_window: 3, total: 9 },
+				availability: { pct_1h: 91.3, pct_24h: 99.2 },
+				held:         { active: true, reason: 'flapping', until: NOW + 90, remaining: 90 }
+			},
+			wan_backup: { events: [], flaps: { count_window: 0, total: 0 }, availability: { pct_1h: 100, pct_24h: 100 }, held: { active: false } }
+		}
+	};
+}
+
+function stableStatus() {
+	const NOW = Math.floor(Date.now() / 1000);
+	let status = defaultStatus();
+	let primary = status.interfaces.wan_primary;
+	let backup = status.interfaces.wan_backup;
+
+	Object.assign(primary, { health_state: 'held', flaps: { count_window: 3, total: 9 }, availability: { pct_1h: 91.3, pct_24h: 99.2 }, degraded_for: [], held: { active: true, reason: 'flapping', until: NOW + 90, remaining: 90 } });
+	Object.assign(backup, { flaps: { count_window: 0, total: 0 }, availability: { pct_1h: 100, pct_24h: 100 }, held: { active: false }, degraded_for: [ 'failover', 'streaming' ] });
+
+	return status;
 }
 
 function defaultStatus() {
@@ -358,6 +395,7 @@ async function renderOverview(page, options) {
 			diagnosticsAccess: !!args.diagnosticsAccess,
 			configWrite: !!args.configWrite,
 			connections: args.connections,
+			history: args.history,
 			hostHints: args.hostHints,
 			pbrPreview: args.pbrPreview,
 			rpcCalls: [],
@@ -527,6 +565,15 @@ async function renderOverview(page, options) {
 			return state.connections ? Promise.resolve(queryConnections(state, params)) : Promise.reject(new Error('Method not found'));
 		}
 
+		function historyRpc(state, params) {
+			if (!state.history)
+				return Promise.reject(new Error('Method not found'));
+
+			let interfaces = Object.fromEntries(Object.keys(state.history.interfaces).filter(function(name) { return !params[0] || params[0] == name; }).map(function(name) { return [ name, state.history.interfaces[name] ]; }));
+
+			return Promise.resolve({ ok: true, interfaces: interfaces });
+		}
+
 		const rpc = {
 			declare: function(spec) {
 				return function() {
@@ -535,6 +582,8 @@ async function renderOverview(page, options) {
 
 					if (spec.object == 'mwan4' && spec.method == 'connections')
 						return connectionsRpc(state, params);
+					if (spec.object == 'mwan4' && spec.method == 'link_history')
+						return historyRpc(state, params);
 					if (spec.object == 'mwan4' && spec.method == 'status')
 						return Promise.resolve(params[0] == 'counters' ? state.counters : state.status);
 					if (spec.object == 'luci-rpc' && spec.method == 'getHostHints')
@@ -593,7 +642,9 @@ async function renderOverview(page, options) {
 		const overviewModule = new Function('baseclass', 'mwan4Common', 'L', 'E', '_', args.overviewModuleSource)(baseclass, common, L, E, translate);
 		const rulesModule = new Function('baseclass', 'L', 'E', '_', args.rulesModuleSource)(baseclass, L, E, translate);
 		const connectionsModule = new Function('baseclass', 'rpc', 'mwan4Common', 'L', 'E', '_', args.connectionsModuleSource)(baseclass, rpc, common, L, E, translate);
-		const module = new Function('fs', 'poll', 'rpc', 'uci', 'ui', 'view', 'mwan4Common', 'mwan4Connections', 'mwan4Overview', 'mwan4Rules', 'L', 'E', '_', args.overviewSource)(fs, poll, rpc, uci, ui, view, common, connectionsModule, overviewModule, rulesModule, L, E, translate);
+		const stabilityModule = new Function('baseclass', 'rpc', 'mwan4Connections', 'L', 'E', '_', args.stabilityModuleSource)(baseclass, rpc, connectionsModule, L, E, translate);
+		const linkHistoryModule = new Function('baseclass', 'mwan4Common', 'mwan4Stability', 'L', 'E', '_', args.linkHistoryModuleSource)(baseclass, common, stabilityModule, L, E, translate);
+		const module = new Function('fs', 'poll', 'rpc', 'uci', 'ui', 'view', 'mwan4Common', 'mwan4Connections', 'mwan4LinkHistory', 'mwan4Overview', 'mwan4Rules', 'mwan4Stability', 'L', 'E', '_', args.overviewSource)(fs, poll, rpc, uci, ui, view, common, connectionsModule, linkHistoryModule, overviewModule, rulesModule, stabilityModule, L, E, translate);
 		const root = document.getElementById('test-root');
 
 		root.replaceChildren(module.render([
@@ -611,7 +662,8 @@ async function renderOverview(page, options) {
 			state.hostHints,
 			state.pbrPreview,
 			state.configWrite,
-			state.connections ? state.connections.items.length : null
+			state.connections ? state.connections.items.length : null,
+			!!state.history
 		]));
 
 		window.__mwan4Mock = {
@@ -622,6 +674,9 @@ async function renderOverview(page, options) {
 			},
 			setConnections: function(connections) { state.connections = connections; },
 			setCounters: function(counters) { state.counters = counters; },
+			getHistory: function() { return state.history; },
+			getStatus: function() { return state.status; },
+			setHistory: function(history) { state.history = history; },
 			setStatus: function(status) { state.status = status; },
 			setUci: function(uciData) { state.uci = uciData; }
 		};
@@ -630,6 +685,9 @@ async function renderOverview(page, options) {
 		overviewModuleSource: fs.readFileSync(overviewModulePath, 'utf8'),
 		connectionsModuleSource: fs.readFileSync(connectionsModulePath, 'utf8'),
 		connections: options.connections === undefined ? defaultConnections() : options.connections,
+		history: options.history || null,
+		linkHistoryModuleSource: fs.readFileSync(linkHistoryModulePath, 'utf8'),
+		stabilityModuleSource: fs.readFileSync(stabilityModulePath, 'utf8'),
 		rulesModuleSource: fs.readFileSync(rulesModulePath, 'utf8'),
 		commonSource: fs.readFileSync(commonPath, 'utf8'),
 		hostHints: options.hostHints || defaultHostHints(),
@@ -971,6 +1029,7 @@ async function renderStatus(page, options) {
 
 module.exports = {
 	defaultConnections,
+	defaultLinkHistory,
 	defaultCounters,
 	defaultDiagnostics,
 	defaultHostHints,
@@ -979,5 +1038,6 @@ module.exports = {
 	defaultUci,
 	renderDiagnostics,
 	renderOverview,
-	renderStatus
+	renderStatus,
+	stableStatus
 };
