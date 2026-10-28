@@ -16,6 +16,7 @@ This backlog tracks UX, status-contract, and advanced-networking issues discover
 - Kept PBR harmony and MPTCP workflow entry points out of the WAN workspace so the matrix remains focused on WAN health, SLA, and counters.
 - Added per-rule connection counting: rules list column, WAN workspace column, strategy chips, header stat, and a shared filterable connections modal that also backs a Diagnostics section; everything hides on a backend without the `connections` method.
 - Replaced the per-field traffic exception builder with a dense `Routing rules` list (ordering, enable toggle, match chips, via chips with live health, hit counters, locked defaults) and a three-question modal (What / Who / Via with one-click Prefer/Only presets). `Import from PBR` previews and applies the backend `pbr_import` conversion.
+- Added unstable WAN handling to the WAN workspace: held/degraded chips with live countdown, compact flaps and availability columns, a per-WAN Link history modal (SVG 24 h strip plus transition list), Stability fields in the WAN and Global settings modals, per-strategy quality limits, and a single-target warning. All of it hides on a backend without `link_history` or the new status fields.
 
 ## Immediate UI Fixes
 
@@ -26,6 +27,7 @@ This backlog tracks UX, status-contract, and advanced-networking issues discover
 
 ## Health And SLA Contract
 
+- Stability follow-ups: show the backend `quality_hold` once it is a documented option, surface per-strategy `degraded` reasons (measured latency/loss versus the limit) in the strategy quality modal, and add a flap-rate sparkline per WAN once the history log carries enough samples.
 - Stop deriving health percentage as `score * 10`; tracker max score is `down + up`, not always 10.
 - Add backend fields for `score_current`, `score_max`, `score_percent`, `failed_checks`, `health_state`, and `last_update_age`.
 - Return `null` for unmeasured latency and packet loss instead of mapping missing status files to `0`.
