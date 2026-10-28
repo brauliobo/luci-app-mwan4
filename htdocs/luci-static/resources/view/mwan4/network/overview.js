@@ -1960,17 +1960,19 @@ function renderStateChips(runtime, state) {
 function renderFlapsCell(runtime) {
 	let flaps = mwan4Stability.flapInfo(runtime);
 
-	return E('td', { class: 'mwan4-flaps-cell' }, [
-		flaps ? E('span', { title: mwan4Stability.flapsTitle(flaps) }, [ '%d / %d'.format(flaps.window, flaps.total) ]) : E('span', { class: 'mwan4-muted-line' }, [ '-' ])
-	]);
+	return E('td', { class: 'mwan4-flaps-cell' }, flaps
+		? [ E('strong', [ String(flaps.recent) ]), E('small', [ flaps.window == null ? _('%d total').format(flaps.total) : _('last %s, %d total').format(mwan4Stability.formatSpan(flaps.window), flaps.total) ]) ]
+		: [ E('span', { class: 'mwan4-muted-line' }, [ '-' ]) ]);
 }
 
 function renderAvailabilityCell(runtime) {
 	let availability = mwan4Stability.availabilityInfo(runtime);
+	let spans = availability ? mwan4Stability.availabilitySpans(availability) : null;
+	let daily = availability && availability.h24 != null;
 
-	return E('td', { class: 'mwan4-availability-cell' }, [
-		availability ? E('span', { title: mwan4Stability.availabilityTitle(availability) }, [ mwan4Stability.formatPct(availability.h24) ]) : E('span', { class: 'mwan4-muted-line' }, [ '-' ])
-	]);
+	return E('td', { class: 'mwan4-availability-cell', title: availability ? mwan4Stability.availabilityText(availability) : null }, availability
+		? [ E('strong', [ mwan4Stability.formatPct(daily ? availability.h24 : availability.h1) ]), E('small', [ daily ? spans.h24 : spans.h1 ]) ]
+		: [ E('span', { class: 'mwan4-muted-line' }, [ '-' ]) ]);
 }
 
 function renderWanActions(name) {
@@ -1998,7 +2000,9 @@ function renderWanRow(section, status) {
 	let method = runtime.track_method || section.track_method || 'ping';
 	let state = runtime.health_state || runtime.status || (runtime.up ? 'online' : enabled ? 'unknown' : 'disabled');
 	let score = metricText(runtime.score_percent, '%');
-	let failed = runtime.failed_checks == null ? _('Not measured') : String(runtime.failed_checks);
+	let failures = runtime.failed_checks == null
+		? _('failed checks not measured')
+		: _('%d failed checks, %d failed target(s)').format(runtime.failed_checks, Number(runtime.failed_targets || 0));
 	let quality = section.check_quality == '1';
 	let sla = quality
 		? _('fail %sms/%s%%, recover %sms/%s%%').format(section.failure_latency || '1000', section.failure_loss || '40', section.recovery_latency || '500', section.recovery_loss || '10')
@@ -2021,7 +2025,7 @@ function renderWanRow(section, status) {
 		E('td', [
 			E('strong', [ score ]),
 			E('small', [ runtime.score_current == null ? _('unmeasured') : _('%s/%s score').format(runtime.score_current, runtime.score_max || '10') ]),
-			E('small', [ _('%s failed, %d target(s)').format(failed, Number(runtime.failed_targets || 0)) ])
+			E('small', [ failures ])
 		]),
 		E('td', [
 			E('strong', [ method ]),
@@ -2061,8 +2065,8 @@ function renderWanWorkspace(status, counters) {
 				E('tr', [
 					E('th', [ _('WAN') ]),
 					E('th', [ _('State') ]),
-					stabilityEnabled() ? E('th', { title: _('Flaps in the current window / since start') }, [ _('Flaps') ]) : null,
-					stabilityEnabled() ? E('th', { title: _('Availability over the last 24 hours') }, [ _('Availability') ]) : null,
+					stabilityEnabled() ? E('th', { title: _('Online to offline transitions in the recent window, and in all recorded history') }, [ _('Flaps') ]) : null,
+					stabilityEnabled() ? E('th', { title: _('Share of recorded time the link was online. Shows the span actually recorded while it is shorter than 24 hours.') }, [ _('Availability') ]) : null,
 					E('th', [ _('Score') ]),
 					E('th', [ _('Probe / SLA') ]),
 					E('th', [ _('Targets') ]),
