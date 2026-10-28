@@ -12,7 +12,10 @@ var E = mwan4Common.element;
  * is read here, so a change in the backend JSON shape stays a one-file edit.
  */
 
+const HOUR      = 3600;
 const DAY       = 86400;
+// Link-health states of the transition log; `degraded` and `restored` describe one strategy, not the link.
+const LINK_STATE = { online: 'online', released: 'online', offline: 'offline', held: 'held' };
 const HISTORY   = 200;
 const DEFAULTS  = { flap_damping: '1', flap_threshold: '3', flap_window: '300', flap_holddown: '120', recovery_hold: '30', flush_grace: '10' };
 const STABILITY = [ 'flap_damping', 'flap_threshold', 'flap_window', 'flap_holddown', 'recovery_hold', 'flush_grace' ];
@@ -57,7 +60,7 @@ function flapInfo(entry) {
 	let flaps = (entry || {}).flaps;
 
 	return flaps && typeof flaps == 'object' && number(flaps.total) != null
-		? { window: number(flaps.count_window) || 0, total: number(flaps.total) }
+		? { recent: number(flaps.count_window) || 0, window: number(flaps.window), total: number(flaps.total) }
 		: null;
 }
 
@@ -66,7 +69,7 @@ function availabilityInfo(entry) {
 	let h1 = value ? number(value.pct_1h) : null;
 	let h24 = value ? number(value.pct_24h) : null;
 
-	return h1 == null && h24 == null ? null : { h1: h1, h24: h24 };
+	return h1 == null && h24 == null ? null : { h1: h1, h24: h24, observed1: number(value.observed_1h), observed24: number(value.observed_24h) };
 }
 
 function degradedStrategies(entry) {
@@ -90,7 +93,13 @@ function events(entry) {
 		.filter(event => event.time != null).sort((a, b) => a.time - b.time);
 }
 
-function strip(list, now, span) {
+function linkState(state) {
+	return LINK_STATE[state] || null;
+}
+
+function strip(events, now, span) {
+	let list = events.filter(event => linkState(event.state)).map(event => ({ time: event.time, state: linkState(event.state) }));
+
 	span = span || DAY;
 	now = Math.max(now, list.length ? list[list.length - 1].time : 0);
 
@@ -153,12 +162,33 @@ function formatPct(value) {
 	return value == null ? '-' : '%s%%'.format(Math.round(value * 10) / 10);
 }
 
-function flapsTitle(flaps) {
-	return _('%d flap(s) in the current window, %d since start').format(flaps.window, flaps.total);
+function formatSpan(seconds) {
+	let hours = Math.floor(seconds / HOUR);
+	let minutes = Math.floor(seconds % HOUR / 60);
+
+	return hours ? (minutes ? _('%dh %dm').format(hours, minutes) : _('%dh').format(hours)) : minutes ? _('%dm').format(minutes) : _('%ds').format(seconds);
 }
 
-function availabilityTitle(availability) {
-	return _('Last hour: %s, last 24 hours: %s').format(formatPct(availability.h1), formatPct(availability.h24));
+/* The span a figure was measured over: the full window once the log covers it, otherwise only what has been recorded. */
+function observedSpan(observed, window, full) {
+	return observed == null || observed >= window ? full : _('last %s').format(formatSpan(observed));
+}
+
+function availabilitySpans(availability) {
+	return { h1: observedSpan(availability.observed1, HOUR, _('last hour')), h24: observedSpan(availability.observed24, DAY, _('last 24 hours')) };
+}
+
+function flapsText(flaps) {
+	return flaps.window == null
+		? _('%d recent, %d total').format(flaps.recent, flaps.total)
+		: _('%d in the last %s, %d total').format(flaps.recent, formatSpan(flaps.window), flaps.total);
+}
+
+function availabilityText(availability) {
+	let spans = availabilitySpans(availability);
+
+	return [ [ availability.h24, spans.h24 ], [ availability.h1, spans.h1 ] ]
+		.filter(entry => entry[0] != null).map(entry => _('%s over the %s').format(formatPct(entry[0]), entry[1])).join(', ');
 }
 
 function singleTarget(targets) {
@@ -245,19 +275,22 @@ return baseclass.extend({
 	addFormOptions:       addFormOptions,
 	addQualityOptions:    addQualityOptions,
 	availabilityInfo:     availabilityInfo,
-	availabilityTitle:    availabilityTitle,
+	availabilitySpans:    availabilitySpans,
+	availabilityText:     availabilityText,
 	degradedStrategies:   degradedStrategies,
 	effectiveDefault:     effectiveDefault,
 	events:               events,
+	formatSpan:           formatSpan,
 	fieldHelp:            fieldHelp,
 	fieldLabels:          fieldLabels,
 	flapInfo:             flapInfo,
-	flapsTitle:           flapsTitle,
+	flapsText:            flapsText,
 	formatPct:            formatPct,
 	hasStabilityData:     hasStabilityData,
 	heldInfo:             heldInfo,
 	historyEntry:         historyEntry,
 	isHistory:            isHistory,
+	linkState:            linkState,
 	probe:                probe,
 	qualityNote:          qualityNote,
 	queryHistory:         queryHistory,

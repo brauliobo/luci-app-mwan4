@@ -25,19 +25,20 @@ const stability = new Function('baseclass', 'rpc', 'mwan4Common', 'mwan4Connecti
 
 const runtime = {
 	held:         { active: true, reason: 'flapping', until: 1700000300, remaining: 120 },
-	flaps:        { count_window: 3, total: 17 },
-	availability: { pct_1h: 91.25, pct_24h: 99.97 },
+	flaps:        { count_window: 3, window: 300, total: 17 },
+	availability: { pct_1h: 91.25, observed_1h: 3600, pct_24h: 99.97, observed_24h: 16500 },
 	degraded_for: [ 'failover', 'streaming' ]
 };
 
 assert.deepEqual(stability.heldInfo(runtime), { reason: 'flapping', remaining: 120, until: 1700000300 });
 assert.equal(stability.heldInfo({ held: { active: false } }), null, 'an inactive hold is not shown');
 assert.equal(stability.heldInfo({}), null, 'an old backend has no hold');
-assert.deepEqual(stability.flapInfo(runtime), { window: 3, total: 17 });
+assert.deepEqual(stability.flapInfo(runtime), { recent: 3, window: 300, total: 17 });
+assert.deepEqual(stability.flapInfo({ flaps: { count_window: 1, total: 2 } }), { recent: 1, window: null, total: 2 }, 'an older backend has no flap window');
 assert.equal(stability.flapInfo({}), null, 'missing flap counters stay unknown instead of 0');
 assert.equal(stability.flapInfo({ flaps: 5 }), null, 'a malformed flap field is ignored');
-assert.deepEqual(stability.availabilityInfo(runtime), { h1: 91.25, h24: 99.97 });
-assert.deepEqual(stability.availabilityInfo({ availability: { pct_24h: 100 } }), { h1: null, h24: 100 });
+assert.deepEqual(stability.availabilityInfo(runtime), { h1: 91.25, h24: 99.97, observed1: 3600, observed24: 16500 });
+assert.deepEqual(stability.availabilityInfo({ availability: { pct_24h: 100 } }), { h1: null, h24: 100, observed1: null, observed24: null });
 assert.equal(stability.availabilityInfo({}), null);
 assert.deepEqual(stability.degradedStrategies(runtime), [ 'failover', 'streaming' ]);
 assert.deepEqual(stability.degradedStrategies({ degraded_for: 'x' }), [], 'a non-list degraded_for is ignored');
@@ -45,6 +46,16 @@ assert.deepEqual(stability.degradedStrategies({ degraded_for: 'x' }), [], 'a non
 assert.equal(stability.formatPct(91.25), '91.3%');
 assert.equal(stability.formatPct(100), '100%');
 assert.equal(stability.formatPct(null), '-');
+
+assert.deepEqual([ 45, 600, 3600, 16500, 90000 ].map(stability.formatSpan), [ '45s', '10m', '1h', '4h 35m', '25h' ]);
+assert.deepEqual(stability.availabilitySpans(stability.availabilityInfo(runtime)), { h1: 'last hour', h24: 'last 4h 35m' },
+	'a log shorter than the window names the span it covers');
+assert.deepEqual(stability.availabilitySpans({ h1: 100, h24: 100, observed1: 3600, observed24: 86400 }), { h1: 'last hour', h24: 'last 24 hours' });
+assert.deepEqual(stability.availabilitySpans({ h1: 100, h24: 100, observed1: null, observed24: null }), { h1: 'last hour', h24: 'last 24 hours' },
+	'an older backend reports full windows');
+assert.equal(stability.availabilityText(stability.availabilityInfo(runtime)), '100% over the last 4h 35m, 91.3% over the last hour');
+assert.equal(stability.flapsText(stability.flapInfo(runtime)), '3 in the last 5m, 17 total');
+assert.equal(stability.flapsText({ recent: 1, window: null, total: 2 }), '1 recent, 2 total');
 
 assert.equal(stability.hasStabilityData({ interfaces: { wan: runtime } }), true);
 assert.equal(stability.hasStabilityData({ interfaces: { wan: { status: 'online' } } }), false, 'an old backend status carries no stability data');
@@ -70,6 +81,12 @@ assert.deepEqual(stability.strip(list, 400, 200), [
 	{ state: 'offline', from: 0.5, to: 1 }
 ], 'the strip starts with the state in force at the window start and ends at now');
 assert.deepEqual(stability.strip([], 1000, 100), [ { state: 'unknown', from: 0, to: 1 } ], 'no events render one unknown segment');
+assert.deepEqual(stability.strip([
+	{ time: 100, state: 'online' }, { time: 120, state: 'held' }, { time: 150, state: 'released' }, { time: 160, state: 'degraded' }, { time: 170, state: 'restored' }
+], 200, 100).map(segment => segment.state), [ 'online', 'held', 'online' ],
+'released returns to online and per-strategy events never recolour the link strip');
+assert.equal(stability.linkState('released'), 'online');
+assert.equal(stability.linkState('degraded'), null);
 assert.equal(stability.strip(list, 50, 100).slice(-1)[0].to, 1, 'events ahead of the browser clock still fit the strip');
 
 assert.equal(stability.remainingNow(120, 1000, 1000), 120);
