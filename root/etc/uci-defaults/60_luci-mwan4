@@ -6,10 +6,10 @@ if [ -f /etc/config/mwan4 ] && grep -qE "^config[[:space:]]+(member|policy)[[:sp
 		-e "s/^config[[:space:]]\\+member[[:space:]]/config route /" \
 		-e "s/^config[[:space:]]\\+policy[[:space:]]/config strategy /" \
 		/etc/config/mwan4
+	[ -x /etc/init.d/mwan4 ] && /etc/init.d/mwan4 reload
 fi
 
-[ -x /etc/init.d/rpcd ] && /etc/init.d/rpcd restart || true
-[ -x /etc/init.d/uhttpd ] && /etc/init.d/uhttpd restart || true
-[ -x /etc/init.d/mwan4 ] && /etc/init.d/mwan4 restart || true
+rm -f /tmp/luci-indexcache*
+[ -x /etc/init.d/rpcd ] && /etc/init.d/rpcd reload
 
 exit 0
