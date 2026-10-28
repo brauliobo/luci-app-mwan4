@@ -2,6 +2,8 @@
 'require form';
 'require uci';
 'require view';
+'require mwan4.stability as mwan4Stability';
+/* global mwan4Stability */
 
 function overviewDescription(text) {
 	return E('span', [
@@ -13,10 +15,10 @@ function overviewDescription(text) {
 
 return view.extend({
 	load: function() {
-		return uci.load('mwan4');
+		return Promise.all([ uci.load('mwan4'), mwan4Stability.probe() ]);
 	},
 
-	render: function() {
+	render: function(data) {
 		let m = new form.Map('mwan4', _('MultiWAN 4 - Strategies'),
 			overviewDescription(_('Strategies combine paths for failover or load balancing: the lowest healthy metric wins, equal metrics are balanced by weight.')));
 		let s = m.section(form.GridSection, 'strategy');
@@ -40,6 +42,9 @@ return view.extend({
 		o.value('blackhole', _('Fail closed (drop traffic)'));
 		o.value('default', _('Use main routing table'));
 		o.modalonly = true;
+
+		if (data[1])
+			mwan4Stability.addQualityOptions(s, form);
 
 		return m.render();
 	}

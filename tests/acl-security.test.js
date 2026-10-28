@@ -46,8 +46,8 @@ assert.deepEqual(keys(acl), [
 	'luci-app-mwan4-status'
 ], 'ACL should expose separate status, config, advanced, operator, and diagnostics roles');
 
-assert.deepEqual(ubusPermissions(acl['luci-app-mwan4-status'], 'read', 'mwan4'), [ 'connections', 'status' ],
-	'status ACL should only grant mwan4 ubus status and connections reads');
+assert.deepEqual(ubusPermissions(acl['luci-app-mwan4-status'], 'read', 'mwan4'), [ 'connections', 'link_history', 'status' ],
+	'status ACL should only grant mwan4 ubus status, connections, and link history reads');
 assert.equal(acl['luci-app-mwan4-status'].write, undefined,
 	'status ACL must not grant write permissions');
 assert.deepEqual(filePermissions(acl['luci-app-mwan4-status'], 'read'), {},
@@ -63,7 +63,7 @@ assert.deepEqual(keys(filePermissions(acl['luci-app-mwan4'], 'read')), [
 ], 'config ACL read file access should only list optional tracker binaries used by probe selectors');
 assert.deepEqual(keys(filePermissions(acl['luci-app-mwan4'], 'write')), [],
 	'config ACL must not grant service control exec permissions');
-assert.deepEqual(ubusPermissions(acl['luci-app-mwan4'], 'read', 'mwan4'), [ 'capabilities', 'connections', 'diagnostics', 'status', 'validate' ],
+assert.deepEqual(ubusPermissions(acl['luci-app-mwan4'], 'read', 'mwan4'), [ 'capabilities', 'connections', 'diagnostics', 'link_history', 'status', 'validate' ],
 	'config ACL should read status/capabilities/validation plus diagnostics needed by core config pages');
 assert.deepEqual(acl['luci-app-mwan4'].read?.uci, [ 'mwan4', 'network' ],
 	'config ACL should read only core mwan4 and netifd WAN configuration');
@@ -76,6 +76,15 @@ for (const role of Object.keys(acl))
 		`${role} must only grant the connections list at read level`);
 assert.match(read('htdocs/luci-static/resources/mwan4/connections.js'), /method: 'connections'/,
 	'the shared connections component calls the read-level connections method');
+for (const role of Object.keys(acl))
+	assert.ok(!ubusPermissions(acl[role], 'write', 'mwan4').includes('link_history'),
+		`${role} must only grant link history at read level`);
+for (const role of [ 'luci-app-mwan4', 'luci-app-mwan4-advanced', 'luci-app-mwan4-status' ])
+	assert.ok(ubusPermissions(acl[role], 'read', 'mwan4').includes('link_history'), `${role} reads link history`);
+for (const role of [ 'luci-app-mwan4-operator', 'luci-app-mwan4-diagnostics' ])
+	assert.ok(!ubusPermissions(acl[role], 'read', 'mwan4').includes('link_history'), `${role} has no use for link history`);
+assert.match(read('htdocs/luci-static/resources/mwan4/stability.js'), /method: 'link_history'/,
+	'the stability helper calls the read-level link_history method');
 assert.ok(!ubusPermissions(acl['luci-app-mwan4'], 'read', 'mwan4').includes('pbr_import'),
 	'read-only config sessions must not reach the PBR import apply path');
 
@@ -85,7 +94,7 @@ assert.deepEqual(keys(filePermissions(acl['luci-app-mwan4-advanced'], 'read')), 
 	'/usr/bin/nping',
 	'/usr/bin/nslookup'
 ], 'advanced ACL read file access should only list optional tracker binaries used by probe selectors');
-assert.deepEqual(ubusPermissions(acl['luci-app-mwan4-advanced'], 'read', 'mwan4'), [ 'capabilities', 'connections', 'diagnostics', 'status', 'validate' ],
+assert.deepEqual(ubusPermissions(acl['luci-app-mwan4-advanced'], 'read', 'mwan4'), [ 'capabilities', 'connections', 'diagnostics', 'link_history', 'status', 'validate' ],
 	'advanced ACL should read status/capabilities/validation/diagnostics for integration guidance');
 assert.deepEqual(ubusPermissions(acl['luci-app-mwan4-advanced'], 'write', 'mwan4'), [ 'advanced_control' ],
 	'advanced ACL should grant only the constrained advanced_control ubus method');

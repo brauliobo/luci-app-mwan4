@@ -3,6 +3,8 @@
 'require fs';
 'require uci';
 'require view';
+'require mwan4.stability as mwan4Stability';
+/* global mwan4Stability */
 
 function overviewDescription(text) {
 	return E('span', [
@@ -37,7 +39,9 @@ return view.extend({
 			L.resolveDefault(fs.stat('/usr/bin/nping'), {}),
 			L.resolveDefault(fs.stat('/usr/bin/arping'), {}),
 			L.resolveDefault(fs.stat('/usr/bin/nslookup'), {}),
-			uci.load('network')
+			uci.load('network'),
+			uci.load('mwan4'),
+			mwan4Stability.probe()
 		]);
 	},
 
@@ -87,7 +91,7 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.DynamicList, 'track_ip', _('Health check targets'));
-		o.description = _('Hosts or addresses used to decide whether this WAN link is healthy.');
+		o.description = _('Hosts or addresses used to decide whether this WAN link is healthy. Use at least two: with a single target one lost probe can flap the link.');
 		o.datatype = 'host';
 
 		o = s.option(form.ListValue, 'track_method', _('Health check method'));
@@ -169,6 +173,9 @@ return view.extend({
 		o.description = _('Keep probing at the failure interval until the WAN link recovers.');
 		o.default = '0';
 		o.modalonly = true;
+
+		if (stats[6])
+			mwan4Stability.addFormOptions(s, form, uci.get('mwan4', 'globals') || {}, true);
 
 		return m.render();
 	}

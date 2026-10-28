@@ -2,6 +2,8 @@
 'require form';
 'require uci';
 'require view';
+'require mwan4.stability as mwan4Stability';
+/* global mwan4Stability */
 
 function overviewDescription(text) {
 	return E('span', [
@@ -21,7 +23,11 @@ function validatePositiveMark(section_id, value) {
 }
 
 return view.extend({
-	render: function() {
+	load: function() {
+		return mwan4Stability.probe();
+	},
+
+	render: function(stabilitySupported) {
 		let m = new form.Map('mwan4', _('MultiWAN 4 - Global Settings'),
 			overviewDescription(_('Global settings affect all WAN links, strategies, paths, and traffic policies.')));
 		let s = m.section(form.NamedSection, 'globals', 'globals');
@@ -65,6 +71,9 @@ return view.extend({
 		o.default = 'notice';
 		[ 'debug', 'info', 'notice', 'warning', 'err' ].forEach(function(v) { o.value(v); });
 		o.description = _('Syslog priority used for logged mwan4 policy matches and service messages.');
+
+		if (stabilitySupported)
+			mwan4Stability.addFormOptions(s, form, {});
 
 		return m.render();
 	}
