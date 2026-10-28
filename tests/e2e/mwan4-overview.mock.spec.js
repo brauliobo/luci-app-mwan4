@@ -70,6 +70,18 @@ test.describe('mocked mwan4 overview workspace', () => {
 		await expect(page.locator('body')).not.toContainText('[object Object]');
 	});
 
+	test('never renders empty children as the text null or undefined', async ({ page }) => {
+		await renderOverview(page, { uci: uciWithRules() });
+
+		const stray = await page.evaluate(function() {
+			return Array.from(document.querySelectorAll('body *')).filter(function(node) {
+				return Array.from(node.childNodes).some(function(child) { return child.nodeType == 3 && /^(null|undefined|false)+$/.test(child.textContent.trim()); });
+			}).map(function(node) { return node.className || node.tagName; });
+		});
+
+		expect(stray).toEqual([]);
+	});
+
 	test('moves advanced diagnostics shortcuts out of the compact WAN workspace', async ({ page }) => {
 		await renderOverview(page);
 

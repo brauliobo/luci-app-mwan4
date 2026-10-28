@@ -425,7 +425,8 @@ async function renderOverview(page, options) {
 				return;
 
 			if (Array.isArray(child)) {
-				child.forEach(function(item) { appendChild(node, item); });
+				// real LuCI dom.append stringifies null/undefined/false array items
+				child.forEach(function(item) { item == null || item === false ? node.appendChild(document.createTextNode(String(item))) : appendChild(node, item); });
 				return;
 
 			}
@@ -642,7 +643,7 @@ async function renderOverview(page, options) {
 		const overviewModule = new Function('baseclass', 'mwan4Common', 'L', 'E', '_', args.overviewModuleSource)(baseclass, common, L, E, translate);
 		const rulesModule = new Function('baseclass', 'L', 'E', '_', args.rulesModuleSource)(baseclass, L, E, translate);
 		const connectionsModule = new Function('baseclass', 'rpc', 'mwan4Common', 'L', 'E', '_', args.connectionsModuleSource)(baseclass, rpc, common, L, E, translate);
-		const stabilityModule = new Function('baseclass', 'rpc', 'mwan4Connections', 'L', 'E', '_', args.stabilityModuleSource)(baseclass, rpc, connectionsModule, L, E, translate);
+		const stabilityModule = new Function('baseclass', 'rpc', 'mwan4Common', 'mwan4Connections', 'L', 'E', '_', args.stabilityModuleSource)(baseclass, rpc, common, connectionsModule, L, E, translate);
 		const linkHistoryModule = new Function('baseclass', 'mwan4Common', 'mwan4Stability', 'L', 'E', '_', args.linkHistoryModuleSource)(baseclass, common, stabilityModule, L, E, translate);
 		const module = new Function('fs', 'poll', 'rpc', 'uci', 'ui', 'view', 'mwan4Common', 'mwan4Connections', 'mwan4LinkHistory', 'mwan4Overview', 'mwan4Rules', 'mwan4Stability', 'L', 'E', '_', args.overviewSource)(fs, poll, rpc, uci, ui, view, common, connectionsModule, linkHistoryModule, overviewModule, rulesModule, stabilityModule, L, E, translate);
 		const root = document.getElementById('test-root');
@@ -738,7 +739,8 @@ async function renderDiagnostics(page, options) {
 				return;
 
 			if (Array.isArray(child)) {
-				child.forEach(function(item) { appendChild(node, item); });
+				// real LuCI dom.append stringifies null/undefined/false array items
+				child.forEach(function(item) { item == null || item === false ? node.appendChild(document.createTextNode(String(item))) : appendChild(node, item); });
 				return;
 			}
 
@@ -930,7 +932,8 @@ async function renderStatus(page, options) {
 				return;
 
 			if (Array.isArray(child)) {
-				child.forEach(function(item) { appendChild(node, item); });
+				// real LuCI dom.append stringifies null/undefined/false array items
+				child.forEach(function(item) { item == null || item === false ? node.appendChild(document.createTextNode(String(item))) : appendChild(node, item); });
 				return;
 			}
 

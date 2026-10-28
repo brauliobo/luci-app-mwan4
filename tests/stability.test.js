@@ -17,11 +17,11 @@ const rpc = { declare: spec => (...args) => { calls.push([ spec.method, args ]);
 const baseclass = { extend: definition => definition };
 const identity = text => text;
 const connections = new Function('baseclass', 'rpc', 'mwan4Common', 'L', 'E', '_', read('htdocs/luci-static/resources/mwan4/connections.js'))(
-	baseclass, rpc, { formatBytes: String }, {}, () => null, identity);
+	baseclass, rpc, { formatBytes: String, element: () => null }, {}, () => null, identity);
 const L = { resolveDefault: (promise, fallback) => Promise.resolve(promise).catch(() => fallback) };
 const E = (tag, attrs, children) => ({ tag, attrs, children });
-const stability = new Function('baseclass', 'rpc', 'mwan4Connections', 'L', 'E', '_', read('htdocs/luci-static/resources/mwan4/stability.js'))(
-	baseclass, rpc, connections, L, E, identity);
+const stability = new Function('baseclass', 'rpc', 'mwan4Common', 'mwan4Connections', 'L', 'E', '_', read('htdocs/luci-static/resources/mwan4/stability.js'))(
+	baseclass, rpc, { element: E }, connections, L, E, identity);
 
 const runtime = {
 	held:         { active: true, reason: 'flapping', until: 1700000300, remaining: 120 },
