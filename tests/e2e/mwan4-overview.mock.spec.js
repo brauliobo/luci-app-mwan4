@@ -969,14 +969,16 @@ test.describe('mocked mwan4 unstable WAN handling', () => {
 		await expect(primary.locator('.mwan4-held-chip')).toContainText('held: flapping');
 		await expect(primary.locator('.mwan4-held-chip')).toContainText(/1m \d+s/);
 		await expect(primary.locator('.mwan4-state-chips .mwan4-pill')).toHaveCount(1);
-		await expect(primary.locator('.mwan4-flaps-cell span')).toHaveText('3 / 9');
-		await expect(primary.locator('.mwan4-flaps-cell span')).toHaveAttribute('title', '3 flap(s) in the current window, 9 since start');
-		await expect(primary.locator('.mwan4-availability-cell span')).toHaveText('99.2%');
-		await expect(primary.locator('.mwan4-availability-cell span')).toHaveAttribute('title', 'Last hour: 91.3%, last 24 hours: 99.2%');
+		await expect(primary.locator('.mwan4-flaps-cell strong')).toHaveText('3');
+		await expect(primary.locator('.mwan4-flaps-cell small')).toHaveText('last 5m, 9 total');
+		await expect(primary.locator('.mwan4-availability-cell strong')).toHaveText('99.2%');
+		await expect(primary.locator('.mwan4-availability-cell small')).toHaveText('last 4h 35m');
+		await expect(primary.locator('.mwan4-availability-cell')).toHaveAttribute('title', '99.2% over the last 4h 35m, 91.3% over the last hour');
 		await expect(backup.locator('.mwan4-held-chip')).toHaveCount(0);
 		await expect(backup.locator('.mwan4-degraded-chip')).toHaveText('degraded (2)');
 		await expect(backup.locator('.mwan4-degraded-chip')).toHaveAttribute('title', 'Skipped by: failover, streaming');
-		await expect(backup.locator('.mwan4-availability-cell span')).toHaveText('100%');
+		await expect(backup.locator('.mwan4-availability-cell strong')).toHaveText('100%');
+		await expect(backup.locator('.mwan4-availability-cell small')).toHaveText('last 24 hours');
 	});
 
 	test('counts the hold down live between polls', async ({ page }) => {
@@ -1004,8 +1006,10 @@ test.describe('mocked mwan4 unstable WAN handling', () => {
 		await expect(rows.first()).toContainText('held');
 		await expect(rows.first()).toContainText('flapping');
 		await expect(rows.last()).toContainText('start');
-		await expect(modal.locator('.mwan4-history-summary')).toContainText('Flaps: 3 in window / 9 total');
-		await expect(modal.locator('.mwan4-history-summary')).toContainText('Availability: 99.2% (1h 91.3%)');
+		await expect(modal.locator('.mwan4-history-summary')).toContainText('Flaps: 3 in the last 5m, 9 total');
+		await expect(modal.locator('.mwan4-history-summary')).toContainText('Availability: 99.2% over the last 4h 35m, 91.3% over the last hour');
+		await expect(modal.locator('.mwan4-strip-legend .mwan4-pill')).toHaveText([ 'Online', 'Held', 'Offline', 'No data' ]);
+		await expect(modal.getByText(/Nothing was recorded before/)).toBeVisible();
 		await expect(modal.locator('.mwan4-history-summary .mwan4-held-chip')).toContainText('held: flapping');
 		await expect(modal.locator('svg.mwan4-strip')).toHaveAttribute('role', 'img');
 		await expect(modal.locator('svg.mwan4-strip rect')).toHaveCount(6);
@@ -1160,7 +1164,7 @@ test.describe('mocked mwan4 unstable WAN handling', () => {
 
 			status.interfaces.wan_primary.held = { active: false };
 			status.interfaces.wan_primary.health_state = 'online';
-			status.interfaces.wan_primary.flaps = { count_window: 0, total: 10 };
+			status.interfaces.wan_primary.flaps = { count_window: 0, window: 300, total: 10 };
 			window.__mwan4Mock.setStatus(status);
 
 			return window.__mwan4Mock.runPoll();
@@ -1170,6 +1174,7 @@ test.describe('mocked mwan4 unstable WAN handling', () => {
 
 		await expect(primary.locator('.mwan4-held-chip')).toHaveCount(0);
 		await expect(primary.locator('.mwan4-state-chips .mwan4-pill')).toHaveText('online');
-		await expect(primary.locator('.mwan4-flaps-cell span')).toHaveText('0 / 10');
+		await expect(primary.locator('.mwan4-flaps-cell strong')).toHaveText('0');
+		await expect(primary.locator('.mwan4-flaps-cell small')).toHaveText('last 5m, 10 total');
 	});
 });

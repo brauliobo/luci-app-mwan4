@@ -3391,7 +3391,7 @@ msgid "%s/%s score"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "%s failed, %d target(s)"
+msgid "%d failed checks, %d failed target(s)"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
@@ -3823,14 +3823,6 @@ msgid "degraded (%d)"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
-msgid "%d flap(s) in the current window, %d since start"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
-msgid "Last hour: %s, last 24 hours: %s"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
 msgid "Flap damping"
 msgstr ""
 
@@ -3935,7 +3927,7 @@ msgid "Reason"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/linkhistory.js
-msgid "Flaps: %d in window / %d total"
+msgid "Flaps: %s"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/linkhistory.js
@@ -3943,7 +3935,7 @@ msgid "Flaps: -"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/linkhistory.js
-msgid "Availability: %s (1h %s)"
+msgid "Availability: %s"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/linkhistory.js
@@ -4043,7 +4035,7 @@ msgid "Single health check target: add a second one."
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Flaps in the current window / since start"
+msgid "Online to offline transitions in the recent window, and in all recorded history"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
@@ -4051,7 +4043,7 @@ msgid "Flaps"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Availability over the last 24 hours"
+msgid "Share of recorded time the link was online. Shows the span actually recorded while it is shorter than 24 hours."
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
@@ -4068,4 +4060,60 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js
 msgid "Hosts or addresses used to decide whether this WAN link is healthy. Use at least two: with a single target one lost probe can flap the link."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "%d recent, %d total"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "%d in the last %s, %d total"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "%s over the %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "last %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "last hour"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "last 24 hours"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "%dh"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "%dm"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "%d total"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "last %s, %d total"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "failed checks not measured"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Held"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "No data"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Nothing was recorded before %s, so earlier time is not counted."
 msgstr ""

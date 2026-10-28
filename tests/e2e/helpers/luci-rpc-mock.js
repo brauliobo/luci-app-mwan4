@@ -81,17 +81,17 @@ function defaultLinkHistory() {
 		interfaces: {
 			wan_primary: {
 				events:       [
-					{ time: NOW - 80000, state: 'online', reason: 'start' },
+					{ time: NOW - 16500, state: 'online', reason: 'start' },
 					{ time: NOW - 7200, state: 'offline', reason: 'tracker' },
 					{ time: NOW - 7100, state: 'online', reason: 'tracker' },
 					{ time: NOW - 600, state: 'offline', reason: 'tracker' },
 					{ time: NOW - 560, state: 'held', reason: 'flapping' }
 				],
-				flaps:        { count_window: 3, total: 9 },
-				availability: { pct_1h: 91.3, pct_24h: 99.2 },
+				flaps:        { count_window: 3, window: 300, total: 9 },
+				availability: { pct_1h: 91.3, observed_1h: 3600, pct_24h: 99.2, observed_24h: 16500 },
 				held:         { active: true, reason: 'flapping', until: NOW + 90, remaining: 90 }
 			},
-			wan_backup: { events: [], flaps: { count_window: 0, total: 0 }, availability: { pct_1h: 100, pct_24h: 100 }, held: { active: false } }
+			wan_backup: { events: [], flaps: { count_window: 0, window: 300, total: 0 }, availability: { pct_1h: 100, observed_1h: 3600, pct_24h: 100, observed_24h: 86400 }, held: { active: false } }
 		}
 	};
 }
@@ -102,8 +102,8 @@ function stableStatus() {
 	let primary = status.interfaces.wan_primary;
 	let backup = status.interfaces.wan_backup;
 
-	Object.assign(primary, { health_state: 'held', flaps: { count_window: 3, total: 9 }, availability: { pct_1h: 91.3, pct_24h: 99.2 }, degraded_for: [], held: { active: true, reason: 'flapping', until: NOW + 90, remaining: 90 } });
-	Object.assign(backup, { flaps: { count_window: 0, total: 0 }, availability: { pct_1h: 100, pct_24h: 100 }, held: { active: false }, degraded_for: [ 'failover', 'streaming' ] });
+	Object.assign(primary, { health_state: 'held', flaps: { count_window: 3, window: 300, total: 9 }, availability: { pct_1h: 91.3, observed_1h: 3600, pct_24h: 99.2, observed_24h: 16500 }, degraded_for: [], held: { active: true, reason: 'flapping', until: NOW + 90, remaining: 90 } });
+	Object.assign(backup, { flaps: { count_window: 0, window: 300, total: 0 }, availability: { pct_1h: 100, observed_1h: 3600, pct_24h: 100, observed_24h: 86400 }, held: { active: false }, degraded_for: [ 'failover', 'streaming' ] });
 
 	return status;
 }
