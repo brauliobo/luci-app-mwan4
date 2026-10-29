@@ -17,6 +17,13 @@ This backlog tracks UX, status-contract, and advanced-networking issues discover
 - Added per-rule connection counting: rules list column, WAN workspace column, strategy chips, header stat, and a shared filterable connections modal that also backs a Diagnostics section; everything hides on a backend without the `connections` method.
 - Replaced the per-field traffic exception builder with a dense `Routing rules` list (ordering, enable toggle, match chips, via chips with live health, hit counters, locked defaults) and a three-question modal (What / Who / Via with one-click Prefer/Only presets). `Import from PBR` previews and applies the backend `pbr_import` conversion.
 - Added unstable WAN handling to the WAN workspace: held/degraded chips with live countdown, compact flaps and availability columns, a per-WAN Link history modal (SVG 24 h strip plus transition list), Stability fields in the WAN and Global settings modals, per-strategy quality limits, and a single-target warning. All of it hides on a backend without `link_history` or the new status fields.
+- Usability redesign (ISO 9241-11, see `USABILITY.md`): the overview now reads status, WAN links, routing rules. The command center is one status sentence, one next action, three metrics and a footer with the service controls (stop asks first), **Test traffic**, **Terms**, **Global settings**, **Refresh** and **Diagnostics**.
+- WAN links are one row per connection (IPv4 and IPv6 siblings together) with one plain health line, readable check targets, and Edit, Up, Down and History for the whole link. **Add WAN link** offers free interfaces first and picks the IP family from the interface; helper-missing health check methods are marked in the method list.
+- The WAN link dialog starts with a health profile (Sensitive, Balanced, Tolerant) that fills the numbers and the hold times and shows a live sentence; editing a number switches to Custom.
+- Routing rules read as sentences with the link used now, rule checks (shadowed, duplicate, link down or missing, no DNS control), a Needs attention filter, search, and ordering by drag or buttons. Templates start the common rules in two fields; names and addresses of one rule are saved as two rules.
+- **Test traffic** evaluates the saved rules in order for a destination, device, protocol and port with live link health (the route-decision simulator for routing rules). **Change default routing** replaced the Routing mode panel.
+- The raw tabs speak the overview vocabulary: tabs **WAN Links**, **Link priorities**, **Paths**, **Routing rules**, **Global settings**; each opens with a purpose line, a button back to the overview and a **Terms** list; every option has a plain label, an empty-field description and a placeholder or default. Stability and health check fields are defined once (`mwan4/stability.js`, `mwan4/fields.js`) and shared with the overview.
+- The runtime warning alert is plain language, does not link to the Diagnostics page it is shown on, and offers no link to sessions without the diagnostics ACL; jargon words that remain carry glossary tooltips.
 
 ## Immediate UI Fixes
 
@@ -40,18 +47,14 @@ This backlog tracks UX, status-contract, and advanced-networking issues discover
 ## WAN Links Redesign
 
 - Keep each WAN matrix row scannable: name, enabled state, family chips, netifd/tracker state, score percent, targets, thresholds, and edit/up/down actions.
-- Group IPv4 and IPv6 under the same WAN link when they are the same uplink, but keep family status separate.
 - Show health targets as rows with columns for target, state, latency, packet loss, and threshold result.
 - Show SLA config inline: method, required healthy targets, interval, timeout, down/up hysteresis, failure thresholds, and recovery thresholds.
-- Add helper-missing warnings beside affected methods, not only in diagnostics.
-- Let quick setup select IPv4, IPv6, or both; advanced page already supports multiple families.
 
 ## Advanced Tools Integration
 
 - Replace the collapsed raw-editor link strip with contextual tools inside each section.
 - Keep raw WAN sections, route tables, strategies, rules, globals, and diagnostics in LuCI tabs; do not reintroduce overview deep-link clusters.
 - Routing mode should include effective path inspection: active, standby, offline, fallback, and why each path is selected or skipped.
-- Routing rules should include a route-decision simulator for source, destination, protocol, port, and family.
 - Diagnostics should remain available, but the overview should summarize the same data with actionable fixes.
 - Add copyable diagnostic commands only where they explain an observed issue.
 - Add preset preview diffs before changing generated routes, strategies, or default rules.
@@ -84,3 +87,12 @@ This backlog tracks UX, status-contract, and advanced-networking issues discover
 - Phase 3: Expand backend status contract for explicit health, SLA, per-family state, counters, and strategy selection.
 - Phase 4: Redesign overview around WAN workspace, effective routing, traffic policy simulator, and contextual diagnostics.
 - Phase 5: Add advanced MPTCP, tunnel, PBR collision, ECMP, and source-routing tooling.
+
+## Remaining Backlog
+
+- User-test the redesign with the SUS procedure and the three tasks of `USABILITY.md` (How to evaluate with users); feed the confusing words back into the vocabulary table and the glossary.
+- Localise the new strings: the POT is complete, but no translation exists yet for the plain-language copy (rule sentences, health lines, field help, Terms).
+- Merge the IPv4 and IPv6 sections of one link in the raw **WAN Links** and **Link priorities** tabs (and the editors of paths) the way the overview already shows them as one link.
+- Explain why a specific connection took its path: open the rule, the path decision and the link health at that moment from the connections modal.
+- Make **Test traffic** resolve a typed name on the router (through dnsmasq) so a domain rule can be tested against the addresses it really matches; today a name is matched against rule domains only.
+- Offer the same plain-language hints for the Advanced and Diagnostics workflows (tunnels, PBR, VRF, FRR/BFD), which still use expert wording.

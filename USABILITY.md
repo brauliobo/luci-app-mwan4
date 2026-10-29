@@ -60,18 +60,56 @@ ISO 9241-11 defines usability as the extent to which **specified users** can ach
 | Health check | probe, track, SLA | How a link is tested |
 | Check targets | track_ip | Addresses pinged to test a link |
 | Hold | damping, held | Link kept out of use until it stays healthy |
+| Link priority | route, member | One WAN link with an order and a weight inside a path (tab **Link priorities**) |
+| Terms | | The glossary behind the **Terms** button (`mwan4Explain.glossary()`) |
 
 7. **No hidden state.** Disclosure stays visible (no expanders); advanced fields are grouped under their own heading and describe themselves.
 
+## Status
+
+Every task has an owner in the UI. Interaction budgets are enforced by `tests/e2e/mwan4-usability.mock.spec.js`; the other rows are covered by the named tests.
+
+| # | Where it is implemented | Enforced by |
+|---|-------------------------|-------------|
+| T1 | Overview, **Add routing rule** > template *Send a site through one link* (`mwan4/templates.js`, `mwan4/rulesui.js`); the saved rule reads as a sentence (`mwan4Explain.ruleSentence`) | `T1: a site through a chosen link takes at most 3 clicks and 2 fields before the preview` |
+| T2 | Template *Make a device use a link* with the device picker (hostnames from `luci-rpc getHostHints`) | `T2: a device on a chosen link takes at most 4 clicks and 1 typed field using the device picker` |
+| T3 | Templates *Keep a site on one link only (never leak)* and *Keep a device on a VPN or tunnel*; the path sentence says "stops if %s is unavailable" (`mwan4Explain.pathSummary`) | `tests/templates.test.js`, `tests/explain.test.js`, mock spec `Only preset creates a fail-closed strategy and reuses it for the next rule` |
+| T4 | Overview command center footer **Test traffic** (`mwan4/routetest.js`): destination, device, protocol, port against the saved rules with live link health; **Connections** modal for live flows | `T4: where a typed domain goes takes 1 click and 1 field from the overview`, `tests/routetest.test.js` |
+| T5 | Rule checks (`mwan4/rulecheck.js`): shadowed, duplicate, down or missing link, no DNS control; badge and **Needs attention** filter on the rules list | `tests/rulecheck.test.js`, mock spec `marks rules that cannot work with a badge and filters them as needing attention` |
+| T6 | **Add WAN link** dialog (`mwan4/wanform.js`): free interfaces first, address family from the interface, health profile, state visible in the WAN links table | `T6: a new link saved up to the preview takes at most 4 clicks and 1 typed field`, `tests/wanform.test.js` |
+| T7 | Health profiles *Sensitive*, *Balanced*, *Tolerant* in the WAN link dialog (`mwan4/templates.js`), also setting the hold times; Fine tuning keeps the numbers visible | `T7: calmer or more sensitive failover takes at most 3 clicks and no typing`, `T7 with stability settings: the profile also sets the hold times` |
+| T8 | Overview **Routing rules**: one sentence per rule, drag or move buttons, locked default rows, search and filters | mock spec `lists rules in priority order ...`, `reorders rules with the move buttons and by dragging ...`, `searches and filters the rules ...` |
+
+Vocabulary and discoverability (principles 6 and 7):
+- The raw tabs (**WAN Links**, **Link priorities**, **Paths**, **Routing rules**, **Global settings**, **Advanced**, **MPTCP**, **Diagnostics**) open with a purpose line, a button back to the overview for the common task and a **Terms** button (`mwan4/guide.js`). Enforced by `tests/e2e/mwan4-rawtabs.mock.spec.js` and `tests/guide.test.js`.
+- Every option of the raw tabs has a plain label, a description that says what an empty field means and a placeholder or default; retired words (strategy, member, track_ip, fails closed, probe, SLA, policy) are rejected by `tests/rawtabs.test.js` and `tests/i18n-copy.test.js`. Field texts shared by tabs live in `mwan4/fields.js` (health checks, marks, globals) and `mwan4/stability.js` (`fieldLabels()`, `fieldHelp()`), so the overview and the raw tabs cannot drift.
+- Jargon that remains (Hold, Flaps, Check targets, DSCP, Sticky, Path) carries the glossary sentence as a tooltip (`mwan4Explain.termHint`).
+- The runtime warning alert is plain language and does not link to the Diagnostics page it is shown on (`mwan4Common.renderRuntimeWarnings`).
+
+## How to evaluate with users
+
+Run this after each release that changes the overview or the raw tabs. It needs 5 or more people from the primary user group (home or small-office owners), a router with two WAN links and no pre-existing mwan4 rules, and the LuCI session already open on the overview. Do not demonstrate the page first.
+
+1. **Brief** each person in one sentence per task and then stay quiet. Ask them to think aloud.
+2. **Tasks** (about 15 minutes in total):
+   - T1: "Make YouTube use the second internet connection."
+   - T4: "Find out which connection `netflix.com` uses right now, and why."
+   - T6: "Add the third internet connection (an interface that is not yet a WAN link) and make it calmer about short outages."
+3. **Record per task**: completed correctly (yes, with help, no), time on task, clicks, typed fields, wrong turns, and any moment they open a raw tab, the **Terms** list or a tooltip. Compare clicks and typed fields with the budgets under Measures.
+4. **Satisfaction**: after the tasks, each person answers the 10 SUS statements on a 1 to 5 scale. Convert odd items as (answer - 1) and even items as (5 - answer), add them up and multiply by 2.5. Target mean at or above 80.
+5. **Free text**: ask "what confused you?" and write the answers down in the person's own words; map each to a row of the vocabulary table or to a missing glossary entry.
+6. **Report**: completion rate per task, median time, SUS mean and range, and the list of confusing words. Feed the words back into the vocabulary table, `mwan4Explain.glossary()` and the field help.
+
 ## Baseline findings (before this work)
 
-Observed on the live overview and modals:
-- Rules show three rows of technical chips and `tim_first (ordered failover), fails closed`; six chips per rule for three links.
-- No indication of the link a rule uses *now*.
+Observed on the live overview and modals before the redesign. They are kept as history: each one has an owner in the Status table above.
+
+- Rules showed three rows of technical chips and `tim_first (ordered failover), fails closed`; six chips per rule for three links.
+- No indication of the link a rule used *now*.
 - No way to test a destination, and no warning for shadowed or ineffective rules.
-- WAN table: IPv4 and IPv6 of one link are separate rows; "score", "reliability", "down 3 / up 3" unexplained; target addresses overlap the status column.
-- Command center: "7 modes", "27 paths", duplicated *Open Diagnostics* buttons, *Stop* beside *Refresh* without confirmation.
-- Rule editor: the name is required before anything else; *Enabled* sits inside "Extra match and logging"; expert fields (nft set, sticky) are as prominent as the site field; no live summary.
-- Health tuning shows five numeric fields with no guidance.
-- The overview is 5,500 px tall; the main task (rules) is below three panels.
-- The raw tabs use older vocabulary (strategy, member, track_ip).
+- The WAN table listed IPv4 and IPv6 of one link as separate rows; "score", "reliability", "down 3 / up 3" were unexplained; target addresses overlapped the status column.
+- The command center showed "7 modes" and "27 paths", duplicated *Open Diagnostics* buttons, and put *Stop* beside *Refresh* without confirmation.
+- The rule editor required a name before anything else; *Enabled* sat inside "Extra match and logging"; expert fields (nft set, sticky) were as prominent as the site field; there was no live summary.
+- Health tuning showed five numeric fields with no guidance.
+- The overview was 5,500 px tall; the main task (rules) was below three panels.
+- The raw tabs used older vocabulary (strategy, member, track_ip) and options without descriptions.
