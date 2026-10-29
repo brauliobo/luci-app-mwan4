@@ -110,6 +110,7 @@ function renderRuntimeWarnings(status, options) {
 	let diagnostics = diagnosticsData(status);
 	let warnings = diagnostics.warnings || [];
 	let canOpenDiagnostics = !options || options.diagnosticsAccess !== false;
+	let showLink = canOpenDiagnostics && !(options && options.link === false);
 
 	if (!Array.isArray(warnings))
 		warnings = warnings ? [ warnings ] : [];
@@ -124,7 +125,7 @@ function renderRuntimeWarnings(status, options) {
 			E('strong', [ _('Runtime attention needed') ]),
 			E('span', [ _('%d warning(s)').format(warnings.length) ])
 		]),
-		E('p', [ _('mwan4 is configured but runtime state is incomplete. Failover strategies and traffic policies may not be enforced.') ]),
+		E('p', [ _('mwan4 is configured but runtime state is incomplete. Failover and routing rules may not be enforced.') ]),
 		E('ul', visibleWarnings.map(function(warning) {
 			let message = formatDisplayValue(warning && warning.message ? warning.message : warning && warning.code ? warning.code : warning, _('Runtime warning'));
 			let action = warning && warning.action ? formatDisplayValue(warning.action) : null;
@@ -141,7 +142,7 @@ function renderRuntimeWarnings(status, options) {
 		E('p', { class: 'mwan4-alert-action' }, [ canOpenDiagnostics
 			? _('Recommended action: restart mwan4, then check Diagnostics if the warning remains.')
 			: _('Recommended action: restart mwan4, then ask an administrator with diagnostics access to inspect remaining warnings.') ]),
-		canOpenDiagnostics ? E('p', { class: 'mwan4-alert-action' }, [
+		showLink ? E('p', { class: 'mwan4-alert-action' }, [
 			E('a', { class: 'btn cbi-button cbi-button-neutral', href: L.url('admin/network/mwan4/diagnostics') }, [ _('Open Diagnostics') ])
 		]) : ''
 	]);

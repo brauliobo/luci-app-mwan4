@@ -169,8 +169,8 @@ assert.doesNotMatch(networkView, /fs\.exec_direct|\/usr\/sbin\/mwan4/,
 	'network overview must not execute mwan4 commands directly');
 assert.match(networkView, /L\.resolveDefault\(callSessionAccess\('access-group', 'luci-app-mwan4-operator', 'write'\), false\)/,
 	'network overview should treat missing operator checks as no access');
-assert.match(networkView, /luci-app-mwan4-advanced/,
-	'network overview should check advanced ACL before rendering the Advanced workspace link');
+assert.match(networkView, /luci-app-mwan4-diagnostics/,
+	'network overview should check the diagnostics ACL before rendering the Diagnostics link');
 assert.match(networkView, /if \(hasOperatorAccess\) \{/,
 	'network overview should gate interface controls on operator access');
 assert.match(networkView, /hasOperatorAccess\s*\?\s*runMwan4\(\[ 'restart' \]\)/,
@@ -197,8 +197,8 @@ assert.doesNotMatch(networkView, /E\('details'|E\('summary'/,
 	'network overview should not hide controls behind expandable details blocks');
 assert.doesNotMatch(networkView, /PBR harmony|MPTCP workflow|Tunnel diagnostics|Run PBR|Run MPTCP/,
 	'network overview should not reintroduce advanced PBR/MPTCP shortcut clutter into the WAN workspace');
-assert.match(networkView, /Open Advanced/,
-	'network overview should expose an Advanced workspace entry point outside the WAN matrix when allowed');
+assert.doesNotMatch(networkView, /Open Advanced|Open Diagnostics/,
+	'network overview should not duplicate the LuCI tabs with Open Advanced or Open Diagnostics buttons');
 assert.match(advancedView, /method:\s*'diagnostics'/,
 	'advanced view should use diagnostics readback for integration status strips');
 assert.match(advancedView, /method:\s*'advanced_control'/,

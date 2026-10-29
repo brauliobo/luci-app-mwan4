@@ -102,8 +102,8 @@ test.describe('mocked mwan4 overview workspace', () => {
 		expect(stray).toEqual([]);
 	});
 
-	test('moves advanced diagnostics shortcuts out of the compact WAN workspace', async ({ page }) => {
-		await renderOverview(page);
+	test('keeps the command center to a status, one sentence, one action, three metrics and one footer', async ({ page }) => {
+		await renderOverview(page, { operatorAccess: true });
 
 		const workspace = page.locator('#mwan4-wan-workspace');
 		const commandCenter = page.locator('#mwan4-command-center');
@@ -111,8 +111,64 @@ test.describe('mocked mwan4 overview workspace', () => {
 		await expect(workspace.locator('.mwan4-advanced-signals')).toHaveCount(0);
 		await expect(workspace).not.toContainText('PBR');
 		await expect(workspace).not.toContainText('MPTCP');
-		await expect(commandCenter.getByRole('link', { name: 'Open Advanced' })).toHaveAttribute('href', /admin\/network\/mwan4\/advanced/);
-		await expect(commandCenter.getByRole('link', { name: 'Open Diagnostics' })).toHaveAttribute('href', /admin\/network\/mwan4\/diagnostics/);
+		await expect(workspace.getByRole('link')).toHaveCount(0);
+		await expect(commandCenter.locator('h2')).toHaveText('MultiWAN 4');
+		await expect(commandCenter.locator('.mwan4-pill').first()).toHaveText('Ready');
+		await expect(commandCenter.locator('.mwan4-command-copy p')).toHaveText('Everything is working: all 2 WAN links are online.');
+		await expect(commandCenter.locator('.mwan4-next-action button')).toHaveText('Add routing rule');
+		await expect(commandCenter.locator('.mwan4-command-metric')).toHaveCount(3);
+		await expect(commandCenter.locator('.mwan4-command-metric span')).toHaveText([ 'WAN links', 'Active rules', 'Active connections' ]);
+		await expect(commandCenter).not.toContainText('modes');
+		await expect(commandCenter).not.toContainText('Routing');
+		await expect(commandCenter.getByRole('link', { name: 'Diagnostics', exact: true })).toHaveAttribute('href', /admin\/network\/mwan4\/diagnostics/);
+		await expect(commandCenter.getByRole('link', { name: /Open (Advanced|Diagnostics)/ })).toHaveCount(0);
+		await expect(commandCenter.locator('.mwan4-command-footer .mwan4-actions button')).toHaveText([ 'Test traffic', 'Global settings', 'Refresh' ]);
+		await expect(commandCenter.locator('.mwan4-service-controls button')).toHaveText([ 'Start', 'Restart', 'Stop' ]);
+
+		for (const name of [ 'Start', 'Restart', 'Stop' ])
+			await expect(commandCenter.locator('.mwan4-service-controls button', { hasText: new RegExp('^%s$'.replace('%s', name)) })).toHaveAttribute('title', /\w+ \w+ \w+ \w+/);
+	});
+
+	test('counts active and disabled rules in the command center', async ({ page }) => {
+		await renderOverview(page, { uci: uciWithRules() });
+
+		const metric = page.locator('#mwan4-command-center .mwan4-command-metric').nth(1);
+
+		await expect(metric).toContainText('Active rules');
+		await expect(metric.locator('strong')).toHaveText('2');
+		await expect(metric.locator('small')).toHaveText('1 disabled');
+	});
+
+	test('asks before stopping mwan4 and stops only after the confirmation', async ({ page }) => {
+		await renderOverview(page, { operatorAccess: true });
+
+		const controls = () => page.evaluate(() => window.__mwan4Mock.rpcCalls.filter(call => call.object == 'mwan4' && call.method == 'control').map(call => call.params[0]));
+
+		await page.getByRole('button', { name: 'Stop MultiWAN 4 service' }).click();
+		await expect(page.locator('.modal h2')).toHaveText('Stop mwan4?');
+		await expect(page.locator('.modal')).toContainText('Stopping mwan4 removes all routing rules and failover until it is started again.');
+		expect(await controls()).toEqual([]);
+
+		await page.locator('.modal').getByRole('button', { name: 'Cancel' }).click();
+		await expect(page.locator('.modal')).toHaveCount(0);
+		expect(await controls()).toEqual([]);
+
+		await page.getByRole('button', { name: 'Stop MultiWAN 4 service' }).click();
+		await page.locator('.modal').getByRole('button', { name: 'Stop', exact: true }).click();
+		await expect.poll(controls).toEqual([ 'stop' ]);
+		await expect(page.locator('.modal')).toHaveCount(0);
+
+		await page.getByRole('button', { name: 'Start MultiWAN 4 service', exact: true }).click();
+		await expect.poll(controls).toEqual([ 'stop', 'start' ]);
+	});
+
+	test('tests traffic and opens global settings from the command center', async ({ page }) => {
+		await renderOverview(page);
+		await page.locator('#mwan4-command-center').getByRole('button', { name: 'Test traffic' }).click();
+		await expect(page.locator('.modal h2')).toHaveText('Test traffic');
+		await page.locator('.modal').getByRole('button', { name: 'Close' }).click();
+		await page.locator('#mwan4-command-center').getByRole('button', { name: 'Configure global MultiWAN settings' }).click();
+		await expect(page.locator('.modal h2')).toHaveText('Global settings');
 	});
 
 	test('counts only enabled health-online runtime interface sections as WAN links', async ({ page }) => {
@@ -134,13 +190,13 @@ test.describe('mocked mwan4 overview workspace', () => {
 		await expect(commandCenter).toContainText('Degraded');
 	});
 
-	test('hides advanced workspace link without the advanced ACL', async ({ page }) => {
-		await renderOverview(page, { advancedAccess: false });
+	test('shows the Diagnostics link only with the diagnostics ACL and never an Advanced link', async ({ page }) => {
+		await renderOverview(page, { advancedAccess: true });
+		await expect(page.locator('#mwan4-command-center').getByRole('link', { name: 'Diagnostics' })).toBeVisible();
+		await expect(page.getByRole('link', { name: /Advanced/ })).toHaveCount(0);
 
-		const commandCenter = page.locator('#mwan4-command-center');
-
-		await expect(commandCenter.getByRole('link', { name: 'Open Advanced' })).toHaveCount(0);
-		await expect(commandCenter.getByRole('link', { name: 'Open Diagnostics' })).toBeVisible();
+		await renderOverview(page, { diagnosticsAccess: false });
+		await expect(page.locator('#mwan4-command-center').getByRole('link', { name: 'Diagnostics' })).toHaveCount(0);
 	});
 
 	test('gates status, config, operator, diagnostics, and advanced surfaces by mocked ACL role', async ({ page }) => {
@@ -159,8 +215,8 @@ test.describe('mocked mwan4 overview workspace', () => {
 		await expect(page.getByRole('button', { name: 'Edit WAN link wan_primary' })).toBeVisible();
 		await expect(page.getByRole('button', { name: /Bring WAN link/ })).toHaveCount(0);
 		await expect(page.getByRole('button', { name: /Take WAN link/ })).toHaveCount(0);
-		await expect(page.getByRole('link', { name: 'Open Advanced' })).toHaveCount(0);
-		await expect(page.getByRole('link', { name: 'Open Diagnostics' })).toHaveCount(0);
+		await expect(page.getByRole('link', { name: /Advanced/ })).toHaveCount(0);
+		await expect(page.getByRole('link', { name: 'Diagnostics' })).toHaveCount(0);
 
 		await renderDiagnostics(page, { diagnosticsAccess: false, operatorAccess: true });
 		await expect(page.getByRole('button', { name: 'Run Summary diagnostics' })).toBeDisabled();
@@ -182,7 +238,7 @@ test.describe('mocked mwan4 overview workspace', () => {
 
 		const workspace = page.locator('#mwan4-wan-workspace');
 
-		await expect(page.locator('#mwan4-command-center')).toContainText('No WAN links are configured');
+		await expect(page.locator('#mwan4-command-center')).toContainText('No WAN links are set up yet');
 		await expect(workspace).toContainText('No WAN links configured.');
 		await expect(workspace).not.toContainText('PBR');
 		await expect(workspace).not.toContainText('MPTCP');
