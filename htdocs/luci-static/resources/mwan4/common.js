@@ -106,42 +106,60 @@ function setBusy(node, busy) {
 	node.setAttribute('aria-busy', busy ? 'true' : 'false');
 }
 
+function warningAdvice(canOpenDiagnostics, onDiagnostics) {
+	if (onDiagnostics)
+		return _('Try restarting MultiWAN 4. If this message stays, run Full diagnostics below.');
+
+	return canOpenDiagnostics
+		? _('Try restarting MultiWAN 4. If this message stays, open Diagnostics.')
+		: _('Try restarting MultiWAN 4. If this message stays, ask an administrator who can open Diagnostics.');
+}
+
+function warningMore(canOpenDiagnostics, onDiagnostics) {
+	if (onDiagnostics)
+		return _('Run Full diagnostics to see the other warnings.');
+
+	return canOpenDiagnostics ? _('Open Diagnostics to see the other warnings.') : _('Ask an administrator who can open Diagnostics for the other warnings.');
+}
+
+function renderWarningItem(warning) {
+	let message = formatDisplayValue(warning && warning.message ? warning.message : warning && warning.code ? warning.code : warning, _('Runtime warning'));
+	let action = warning && warning.action ? formatDisplayValue(warning.action) : null;
+	let check = warning && warning.check ? formatDisplayValue(warning.check) : null;
+
+	return E('li', [
+		E('span', [ message ]),
+		action ? E('small', [ _('What to do: %s').format(action) ]) : '',
+		check ? E('small', [ _('How to check: %s').format(check) ]) : ''
+	]);
+}
+
+/* options.diagnosticsAccess: may the session open Diagnostics; options.link: false drops the link; options.here: the page is Diagnostics. */
 function renderRuntimeWarnings(status, options) {
-	let diagnostics = diagnosticsData(status);
-	let warnings = diagnostics.warnings || [];
-	let canOpenDiagnostics = !options || options.diagnosticsAccess !== false;
-	let showLink = canOpenDiagnostics && !(options && options.link === false);
+	options = options || {};
+
+	let warnings = diagnosticsData(status).warnings || [];
+	let canOpenDiagnostics = options.diagnosticsAccess !== false;
+	let showLink = canOpenDiagnostics && options.link !== false && !options.here;
 
 	if (!Array.isArray(warnings))
 		warnings = warnings ? [ warnings ] : [];
 
-	let visibleWarnings = warnings.slice(0, 3);
-
 	if (!warnings.length)
 		return E('div');
 
+	let visibleWarnings = warnings.slice(0, 3);
+
 	return E('div', { class: 'mwan4-alert mwan4-alert-warning mwan4-runtime-warning', role: 'alert', 'aria-live': 'polite' }, [
 		E('div', { class: 'mwan4-alert-heading' }, [
-			E('strong', [ _('Runtime attention needed') ]),
+			E('strong', [ _('MultiWAN 4 needs attention') ]),
 			E('span', [ _('%d warning(s)').format(warnings.length) ])
 		]),
-		E('p', [ _('mwan4 is configured but runtime state is incomplete. Failover and routing rules may not be enforced.') ]),
-		E('ul', visibleWarnings.map(function(warning) {
-			let message = formatDisplayValue(warning && warning.message ? warning.message : warning && warning.code ? warning.code : warning, _('Runtime warning'));
-			let action = warning && warning.action ? formatDisplayValue(warning.action) : null;
-			let check = warning && warning.check ? formatDisplayValue(warning.check) : null;
-
-			return E('li', [
-				E('span', [ message ]),
-				action ? E('small', [ _('Action: %s').format(action) ]) : '',
-				check ? E('small', [ _('Check: %s').format(check) ]) : ''
-			]);
-		}).concat(warnings.length > visibleWarnings.length ? [
-			E('li', { class: 'mwan4-muted-line' }, [ _('Open Diagnostics to inspect the remaining warning details.') ])
+		E('p', [ _('MultiWAN 4 is set up but is not fully running, so failover and routing rules may not be applied.') ]),
+		E('ul', visibleWarnings.map(renderWarningItem).concat(warnings.length > visibleWarnings.length ? [
+			E('li', { class: 'mwan4-muted-line' }, [ warningMore(canOpenDiagnostics, options.here) ])
 		] : [])),
-		E('p', { class: 'mwan4-alert-action' }, [ canOpenDiagnostics
-			? _('Recommended action: restart mwan4, then check Diagnostics if the warning remains.')
-			: _('Recommended action: restart mwan4, then ask an administrator with diagnostics access to inspect remaining warnings.') ]),
+		E('p', { class: 'mwan4-alert-action' }, [ warningAdvice(canOpenDiagnostics, options.here) ]),
 		showLink ? E('p', { class: 'mwan4-alert-action' }, [
 			E('a', { class: 'btn cbi-button cbi-button-neutral', href: L.url('admin/network/mwan4/diagnostics') }, [ _('Open Diagnostics') ])
 		]) : ''

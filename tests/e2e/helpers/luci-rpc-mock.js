@@ -1032,6 +1032,11 @@ async function renderStatus(page, options) {
 				if (value == null || value === false)
 					return;
 
+				if (typeof value == 'function') {
+					node.addEventListener(key, value);
+					return;
+				}
+
 				if (key == 'class') {
 					node.className = value;
 					return;
@@ -1083,7 +1088,16 @@ async function renderStatus(page, options) {
 		};
 
 		const common = new Function('baseclass', 'L', 'E', '_', args.commonSource)(baseclass, L, E, translate);
-		const module = new Function('rpc', 'view', 'mwan4Common', 'L', 'E', '_', args.statusSource)(rpc, view, common, L, E, translate);
+		const ui = {
+			hideModal: function() { document.querySelectorAll('.modal').forEach(function(node) { node.remove(); }); },
+			showModal: function(title, nodes, cls) {
+				this.hideModal();
+				document.body.appendChild(E('div', { class: 'modal ' + (cls || '') }, [ E('h2', [ title ]), nodes ]));
+			}
+		};
+		const explainModule = new Function('baseclass', '_', args.explainModuleSource)(baseclass, translate);
+		const guideModule = new Function('baseclass', 'ui', 'mwan4Common', 'mwan4Explain', 'L', 'E', '_', args.guideModuleSource)(baseclass, ui, common, explainModule, L, E, translate);
+		const module = new Function('rpc', 'view', 'mwan4Common', 'mwan4Guide', 'L', 'E', '_', args.statusSource)(rpc, view, common, guideModule, L, E, translate);
 		const root = document.getElementById('test-root');
 
 		root.replaceChildren(module.render([
@@ -1097,6 +1111,8 @@ async function renderStatus(page, options) {
 		};
 	}, {
 		statusSource: fs.readFileSync(statusPath, 'utf8'),
+		explainModuleSource: fs.readFileSync(explainModulePath, 'utf8'),
+		guideModuleSource: fs.readFileSync(guideModulePath, 'utf8'),
 		commonSource: fs.readFileSync(commonPath, 'utf8'),
 		status: options.status || defaultStatus(),
 		configAccess: options.configAccess,

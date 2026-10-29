@@ -204,7 +204,7 @@ function renderStatusSummary(status) {
 	let nft = status.nft || {};
 
 	return E('div', [
-		mwan4Common.renderRuntimeWarnings({ diagnostics: status }),
+		mwan4Common.renderRuntimeWarnings({ diagnostics: status }, { here: true }),
 		mwan4Common.renderNextSteps({ diagnostics: status }),
 		E('div', { class: 'mwan4-grid' }, [
 			renderKeyValues(_('Runtime state'), [

@@ -2,9 +2,11 @@
 'require rpc';
 'require view';
 'require mwan4.common as mwan4Common';
+'require mwan4.guide as mwan4Guide';
 
 var E = mwan4Common.element;
 /* global mwan4Common */
+/* global mwan4Guide */
 
 const callStatus = rpc.declare({
 	object: 'mwan4',
@@ -51,22 +53,22 @@ return view.extend({
 		let actions = [];
 
 		if (hasConfigAccess)
-			actions.push(E('a', { class: 'btn cbi-button cbi-button-apply', href: L.url('admin/network/mwan4/overview') }, [ _('Open network overview') ]));
+			actions.push(E('a', { class: 'btn cbi-button cbi-button-apply', href: L.url('admin/network/mwan4/overview') }, [ _('Open the overview') ]));
 		if (hasDiagnosticsAccess)
 			actions.push(E('a', { class: 'btn cbi-button cbi-button-neutral', href: L.url('admin/network/mwan4/diagnostics') }, [ _('Open diagnostics') ]));
 
 		return E('div', { class: 'cbi-map' }, [
 			E('h2', [ _('MultiWAN 4') ]),
 			E('div', { class: 'cbi-section' }, [
-				E('p', [ _('Read-only runtime summary. Configuration and diagnostics links are shown only when this session has the matching ACL.') ]),
+				E('p', [ _('A read-only summary of MultiWAN 4. The buttons below appear only if this account may open those pages.') ]),
 				mwan4Common.renderRuntimeWarnings(status, { diagnosticsAccess: hasDiagnosticsAccess }),
 				mwan4Common.renderNextSteps(status),
 				E('div', { class: 'mwan4-state-grid mwan4-compact-metrics' }, [
-					statusCard(_('WAN links'), String(countObject(interfaces)), _('Configured interfaces reported by mwan4 status')),
-					statusCard(_('Service'), diagnostics.service_running ? _('Running') : _('Not running'), _('Runtime state reported by the backend')),
-					statusCard(_('Trackers'), _('%d / %d').format(diagnostics.trackers_running || 0, diagnostics.trackers_expected || 0), _('Health-check tracker processes'))
+					statusCard(_('WAN links'), String(countObject(interfaces)), _('Internet connections MultiWAN 4 knows about')),
+					statusCard(_('Service'), diagnostics.service_running ? _('Running') : _('Not running'), _('Whether MultiWAN 4 is running right now')),
+					statusCard(_('Health checks running'), _('%d / %d').format(diagnostics.trackers_running || 0, diagnostics.trackers_expected || 0), _('Processes that test the WAN links'))
 				]),
-				E('div', { class: 'mwan4-actions' }, actions.length ? actions : [ E('span', { class: 'mwan4-muted-line' }, [ _('No configuration or diagnostics ACL is available for this session.') ]) ])
+				E('div', { class: 'mwan4-actions' }, (actions.length ? actions : [ E('span', { class: 'mwan4-muted-line' }, [ _('This account cannot open the overview or diagnostics.') ]) ]).concat([ mwan4Guide.termsButton() ]))
 			])
 		]);
 	},

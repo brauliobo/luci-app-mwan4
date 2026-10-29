@@ -169,10 +169,6 @@ msgstr ""
 msgid "A WAN link with that name already exists."
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:116
-msgid "Action: %s"
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1585
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1624
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1690
@@ -274,10 +270,6 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:77
 msgid "Chains present"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:117
-msgid "Check: %s"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/rulesui.js
@@ -681,10 +673,6 @@ msgstr ""
 msgid "Open Diagnostics"
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:120
-msgid "Open Diagnostics to inspect the remaining warning details."
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/rulesui.js
 msgid "Other"
 msgstr ""
@@ -746,12 +734,6 @@ msgstr ""
 msgid "Ready"
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:122
-msgid ""
-"Recommended action: restart mwan4, then check Diagnostics if the warning "
-"remains."
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:342
 msgid "Remove"
 msgstr ""
@@ -778,10 +760,6 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:204
 msgid "Running %s diagnostics..."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:105
-msgid "Runtime attention needed"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:73
@@ -917,7 +895,6 @@ msgid "Total"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:76
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js
 msgid "Trackers"
 msgstr ""
 
@@ -3361,14 +3338,6 @@ msgstr ""
 msgid "Domains and IP addresses are detected automatically. Listing both creates one rule for each kind."
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js
-msgid "mwan4 is configured but runtime state is incomplete. Failover and routing rules may not be enforced."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js
-msgid "Recommended action: restart mwan4, then ask an administrator with diagnostics access to inspect remaining warnings."
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/summary.js
 msgid "No WAN links are set up yet, so all traffic uses the router's normal routing."
 msgstr ""
@@ -5633,31 +5602,7 @@ msgid "MPTCP management is disabled because this session lacks the mwan4 configu
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js
-msgid "Open network overview"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js
 msgid "Open diagnostics"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js
-msgid "Read-only runtime summary. Configuration and diagnostics links are shown only when this session has the matching ACL."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js
-msgid "Configured interfaces reported by mwan4 status"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js
-msgid "Runtime state reported by the backend"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js
-msgid "Health-check tracker processes"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js
-msgid "No configuration or diagnostics ACL is available for this session."
 msgstr ""
 
 #: luci-app-mwan4/root/usr/share/luci/menu.d/luci-app-mwan4.json
@@ -6375,4 +6320,72 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "Counted as online to offline transitions in the recent window, and in all recorded history."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js
+msgid "Try restarting MultiWAN 4. If this message stays, run Full diagnostics below."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js
+msgid "Try restarting MultiWAN 4. If this message stays, open Diagnostics."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js
+msgid "Try restarting MultiWAN 4. If this message stays, ask an administrator who can open Diagnostics."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js
+msgid "Run Full diagnostics to see the other warnings."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js
+msgid "Open Diagnostics to see the other warnings."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js
+msgid "Ask an administrator who can open Diagnostics for the other warnings."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js
+msgid "What to do: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js
+msgid "How to check: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js
+msgid "MultiWAN 4 needs attention"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js
+msgid "MultiWAN 4 is set up but is not fully running, so failover and routing rules may not be applied."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js
+msgid "Open the overview"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js
+msgid "A read-only summary of MultiWAN 4. The buttons below appear only if this account may open those pages."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js
+msgid "Internet connections MultiWAN 4 knows about"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js
+msgid "Whether MultiWAN 4 is running right now"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js
+msgid "Health checks running"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js
+msgid "Processes that test the WAN links"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js
+msgid "This account cannot open the overview or diagnostics."
 msgstr ""

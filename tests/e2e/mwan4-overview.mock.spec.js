@@ -48,6 +48,48 @@ async function ruleSection(page, name) {
 	}, name);
 }
 
+test.describe('mocked mwan4 runtime warnings', () => {
+	function withWarnings(count) {
+		const diagnostics = defaultDiagnostics();
+
+		diagnostics.summary.diagnostics.summary.status.warnings = Array.from({ length: count }, (_, index) => ({ message: 'Tracker %d is not running'.replace('%d', index + 1), action: 'Restart MultiWAN 4', check: 'Look at the service state' }));
+
+		return diagnostics;
+	}
+
+	test('the Diagnostics page does not link to itself and tells what to do in plain words', async ({ page }) => {
+		await renderDiagnostics(page, { diagnostics: withWarnings(5) });
+
+		const alert = page.locator('.mwan4-runtime-warning');
+
+		await expect(alert).toBeVisible();
+		await expect(alert).toContainText('MultiWAN 4 needs attention');
+		await expect(alert).toContainText('MultiWAN 4 is set up but is not fully running');
+		await expect(alert).toContainText('What to do: Restart MultiWAN 4');
+		await expect(alert).toContainText('How to check: Look at the service state');
+		await expect(alert).toContainText('Try restarting MultiWAN 4. If this message stays, run Full diagnostics below.');
+		await expect(alert).toContainText('Run Full diagnostics to see the other warnings.');
+		await expect(alert).not.toContainText(/Open Diagnostics|Recommended action|mwan4/);
+		await expect(alert.getByRole('link')).toHaveCount(0);
+	});
+
+	test('the read-only status page links to Diagnostics only for sessions that may open it', async ({ page }) => {
+		const status = defaultStatus();
+
+		status.diagnostics = Object.assign({}, status.diagnostics, { warnings: [ { message: 'No trackers are running' } ] });
+
+		await renderStatus(page, { status, configAccess: true, diagnosticsAccess: true });
+		await expect(page.locator('.mwan4-runtime-warning')).toContainText('If this message stays, open Diagnostics.');
+		await expect(page.locator('.mwan4-runtime-warning').getByRole('link', { name: 'Open Diagnostics' })).toBeVisible();
+
+		await renderStatus(page, { status, configAccess: true, diagnosticsAccess: false });
+		await expect(page.locator('.mwan4-runtime-warning')).toContainText('ask an administrator who can open Diagnostics');
+		await expect(page.locator('.mwan4-runtime-warning').getByRole('link')).toHaveCount(0);
+		await expect(page.getByText('Health checks running')).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Terms', exact: true })).toBeVisible();
+	});
+});
+
 test.describe('mocked mwan4 overview glossary', () => {
 	test('the command center Terms button lists the glossary in a dialog and gives focus back', async ({ page }) => {
 		await renderOverview(page);
@@ -330,13 +372,13 @@ test.describe('mocked mwan4 overview workspace', () => {
 	test('gates status, config, operator, diagnostics, and advanced surfaces by mocked ACL role', async ({ page }) => {
 		await renderStatus(page, { configAccess: false, diagnosticsAccess: false });
 		await expect(page.getByRole('heading', { name: 'MultiWAN 4' })).toBeVisible();
-		await expect(page.getByText('Read-only runtime summary. Configuration and diagnostics links are shown only when this session has the matching ACL.')).toBeVisible();
-		await expect(page.getByRole('link', { name: 'Open network overview' })).toHaveCount(0);
+		await expect(page.getByText('A read-only summary of MultiWAN 4. The buttons below appear only if this account may open those pages.')).toBeVisible();
+		await expect(page.getByRole('link', { name: 'Open the overview' })).toHaveCount(0);
 		await expect(page.getByRole('link', { name: 'Open diagnostics' })).toHaveCount(0);
-		await expect(page.getByText('No configuration or diagnostics ACL is available for this session.')).toBeVisible();
+		await expect(page.getByText('This account cannot open the overview or diagnostics.')).toBeVisible();
 
 		await renderStatus(page, { configAccess: true, diagnosticsAccess: true });
-		await expect(page.getByRole('link', { name: 'Open network overview' })).toBeVisible();
+		await expect(page.getByRole('link', { name: 'Open the overview' })).toBeVisible();
 		await expect(page.getByRole('link', { name: 'Open diagnostics' })).toBeVisible();
 
 		await renderOverview(page, { operatorAccess: false, advancedAccess: false, diagnosticsAccess: false });

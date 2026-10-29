@@ -125,7 +125,7 @@ test('overview exposes pending change previews for high-impact modal flows', asy
 	expect(common).toContain('function renderRuntimeWarnings');
 	expect(common).toContain('function rpcErrorMessage');
 	expect(common).toContain('function setBusy');
-	expect(common).toContain('Recommended action');
+	expect(common).toContain('Try restarting MultiWAN 4');
 	expect(overview).toContain("require mwan4.common as mwan4Common");
 	expect(overview).toContain("require mwan4.overview as mwan4Overview");
 	expect(advanced).toContain("require mwan4.common as mwan4Common");
@@ -149,8 +149,8 @@ test('overview exposes pending change previews for high-impact modal flows', asy
 	expect(advanced).toContain('function showBfdWorkflow');
 	expect(advanced).toContain('VRF and ownership');
 	expect(overview).toContain('mwan4Common.renderRuntimeWarnings');
-	expect(status).toContain('Read-only runtime summary. Configuration and diagnostics links are shown only when this session has the matching ACL.');
-	expect(status).toContain('No configuration or diagnostics ACL is available for this session.');
+	expect(status).toContain('A read-only summary of MultiWAN 4. The buttons below appear only if this account may open those pages.');
+	expect(status).toContain('This account cannot open the overview or diagnostics.');
 	expect(overview).toContain('function showMwan4Modal');
 	expect(overview).toContain("modal.setAttribute('role', 'dialog')");
 	expect(overview).toContain("modal.setAttribute('aria-modal', 'true')");
@@ -381,7 +381,7 @@ test('DIAG-090 DIAG-091 diagnostics report surfaces are represented statically',
 	expect(diagnostics).toContain('renderGenericDiagnosticsSection');
 	expect(diagnostics).toContain('mwan4Common.renderNextSteps');
 	expect(common).toContain('function renderRuntimeWarnings');
-	expect(common).toContain('Recommended action');
+	expect(common).toContain('Try restarting MultiWAN 4');
 });
 
 test('ROLL-100 ROLL-101 rollback and resilience UX keeps validation previews static', async () => {
@@ -397,7 +397,7 @@ test('ROLL-100 ROLL-101 rollback and resilience UX keeps validation previews sta
 	expect(overview).toContain('buildInterfaceChange');
 	expect(overview).toContain('buildRuleChange');
 	expect(overview).toContain('buildGlobalChange');
-	expect(status).toContain('Open network overview');
+	expect(status).toContain('Open the overview');
 	expect(status).toContain("method: 'status'");
 	expect(status).not.toContain('window.location.replace');
 });
