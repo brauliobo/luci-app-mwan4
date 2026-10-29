@@ -45,6 +45,13 @@ assert.equal(connections.formatEndpoint('192.0.2.1', 443), '192.0.2.1:443');
 assert.equal(connections.formatEndpoint('2001:db8::1', 443), '[2001:db8::1]:443', 'IPv6 endpoints with a port are bracketed');
 assert.equal(connections.formatEndpoint('192.0.2.1', ''), '192.0.2.1', 'ICMP has no port');
 
+const source = read('htdocs/luci-static/resources/mwan4/connections.js');
+
+assert.match(source, /_\('Rule'\), _\('WAN link'\) \]/, 'the column says which WAN link carries the connection');
+assert.match(source, /field\('interface', _\('WAN link'\), _\('Any WAN link'\)\)/, 'the interface filter is a WAN link filter');
+assert.match(source, /field\('strategy', _\('Path'\), _\('Any path'\)\)/, 'the strategy filter is a path filter');
+assert.ok(!/Via WAN|Any strategy|_\('Strategy'\)/.test(source), 'no strategy or Via WAN wording is left');
+
 assert.match(read('htdocs/luci-static/resources/view/mwan4/network/rules.js'), /form\.DummyValue, 'rule_id'/, 'the raw Rules tab shows rule_id read-only');
 
 console.log('connections tests passed');

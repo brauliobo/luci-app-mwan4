@@ -2078,10 +2078,6 @@ msgid "No targets"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "WAN"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "Policy counter summary"
 msgstr ""
 
@@ -2282,10 +2278,6 @@ msgid "%d packets"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
-msgid "Via WAN"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
 msgid "TTL"
 msgstr ""
 
@@ -2323,14 +2315,6 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
 msgid "Any rule"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
-msgid "Any WAN"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
-msgid "Any strategy"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
@@ -4203,4 +4187,16 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "Healthy again below (% packet loss)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "Any WAN link"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/connections.js
+msgid "Any path"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
+msgid "Latency and loss limits need \"Also check latency and packet loss\" (check_quality) turned on for the WAN links of this path."
 msgstr ""

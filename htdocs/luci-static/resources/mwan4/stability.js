@@ -222,7 +222,7 @@ function fieldHelp() {
 }
 
 function qualityNote() {
-	return _('Latency and loss limits need "Also check latency and packet loss" (check_quality) enabled on the WAN links of this strategy.');
+	return _('Latency and loss limits need "Also check latency and packet loss" (check_quality) turned on for the WAN links of this path.');
 }
 
 function summary(values) {

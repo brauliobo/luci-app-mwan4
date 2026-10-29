@@ -1364,7 +1364,7 @@ test.describe('mocked mwan4 connection counting', () => {
 		await expect(page.locator('.modal')).toHaveCount(0);
 	});
 
-	test('filters by rule, WAN, strategy, family, protocol, and free text, with an empty state', async ({ page }) => {
+	test('filters by rule, WAN link, path, family, protocol, and free text, with an empty state', async ({ page }) => {
 		await renderOverview(page, { uci: uciWithRules() });
 		await page.getByRole('button', { name: 'View all active connections' }).click();
 
@@ -1373,6 +1373,9 @@ test.describe('mocked mwan4 connection counting', () => {
 
 		await expect(rows).toHaveCount(3);
 		await expect(rows.nth(2)).toContainText('Default routing');
+		await expect(modal.locator('.mwan4-conn-filters > label > span')).toHaveText([ 'Rule', 'WAN link', 'Path', 'Family', 'Protocol', 'Search' ]);
+		await expect(modal.locator('select[name="strategy"] option').first()).toHaveText('Any path');
+		await expect(modal).not.toContainText('Strategy');
 		await modal.locator('select[name="interface"]').selectOption('wan_backup');
 		await expect(rows).toHaveCount(1);
 		await expect(rows.first()).toContainText('UDP');
@@ -1407,7 +1410,7 @@ test.describe('mocked mwan4 connection counting', () => {
 		await renderOverview(page, { uci: uciWithRules(), connections });
 		await page.getByRole('button', { name: 'View all active connections' }).click();
 
-		await expect(page.locator('.modal .mwan4-conn-table th')).toHaveText([ 'Protocol', 'Source', 'Destination', 'State', 'Rule', 'Via WAN', 'TTL' ]);
+		await expect(page.locator('.modal .mwan4-conn-table th')).toHaveText([ 'Protocol', 'Source', 'Destination', 'State', 'Rule', 'WAN link', 'TTL' ]);
 	});
 
 	test('refreshes while open and stops polling after close', async ({ page }) => {
@@ -1543,7 +1546,7 @@ test.describe('mocked mwan4 connection counting', () => {
 		await expect(section.locator('.mwan4-conn-row')).toHaveCount(3);
 		await section.locator('select[name="interface"]').selectOption('wan_backup');
 		await expect(section.locator('.mwan4-conn-row')).toHaveCount(1);
-		await expect(section.locator('select[name="interface"] option')).toContainText([ 'Any WAN', 'wan_backup', 'wan_primary' ]);
+		await expect(section.locator('select[name="interface"] option')).toContainText([ 'Any WAN link', 'wan_backup', 'wan_primary' ]);
 
 		await renderDiagnostics(page, { connections: null });
 		await expect(page.locator('#mwan4-diag-connections')).toHaveCount(0);

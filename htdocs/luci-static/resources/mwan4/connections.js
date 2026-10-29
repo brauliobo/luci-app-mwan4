@@ -136,7 +136,7 @@ function renderRow(item, accounting) {
 }
 
 function renderHead(accounting) {
-	let labels = [ _('Protocol'), _('Source'), _('Destination'), _('State'), _('Rule'), _('Via WAN') ];
+	let labels = [ _('Protocol'), _('Source'), _('Destination'), _('State'), _('Rule'), _('WAN link') ];
 
 	return E('tr', labels.concat(accounting ? [ _('Bytes') ] : [], [ _('TTL') ]).map(label => E('th', [ label ])));
 }
@@ -262,8 +262,8 @@ function renderPanel(options) {
 	root = E('div', { class: 'mwan4-connections', 'aria-busy': 'false' }, [
 		E('div', { class: 'mwan4-conn-filters' }, [
 			field('rule', _('Rule'), _('Any rule')),
-			field('interface', _('WAN'), _('Any WAN')),
-			field('strategy', _('Strategy'), _('Any strategy')),
+			field('interface', _('WAN link'), _('Any WAN link')),
+			field('strategy', _('Path'), _('Any path')),
 			field('family', _('Family'), _('IPv4 and IPv6')),
 			field('proto', _('Protocol'), _('Any protocol')),
 			E('label', { class: 'mwan4-modal-field' }, [ E('span', [ _('Search') ]), search ])
