@@ -39,7 +39,7 @@ return view.extend({
 	},
 
 	render: function() {
-		let m = new form.Map('mwan4', _('MultiWAN 4 - Traffic Policies'),
+		let m = new form.Map('mwan4', _('MultiWAN 4 - Routing rules'),
 			overviewDescription(_('Traffic policies are evaluated from top to bottom and choose a policy path, the main routing table, or a fail-closed action for matching traffic.')));
 		let s = m.section(form.GridSection, 'rule');
 		let o;

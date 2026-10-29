@@ -19,7 +19,7 @@ return view.extend({
 	},
 
 	render: function(data) {
-		let m = new form.Map('mwan4', _('MultiWAN 4 - Strategies'),
+		let m = new form.Map('mwan4', _('MultiWAN 4 - Paths'),
 			overviewDescription(_('Strategies combine paths for failover or load balancing: the lowest healthy metric wins, equal metrics are balanced by weight.')));
 		let s = m.section(form.GridSection, 'strategy');
 		let o;

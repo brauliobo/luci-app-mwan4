@@ -27,10 +27,10 @@ const mwan4ReadmePath = path.resolve(__dirname, '../../../mwan4/README.md');
 
 const advancedPages = [
 	{ id: 'interfaces', route: 'admin/network/mwan4/interfaces', title: 'MultiWAN 4 - WAN Links' },
-	{ id: 'routes', route: 'admin/network/mwan4/routes', title: 'MultiWAN 4 - Path Members' },
-	{ id: 'strategies', route: 'admin/network/mwan4/strategies', title: 'MultiWAN 4 - Strategies' },
-	{ id: 'rules', route: 'admin/network/mwan4/rules', title: 'MultiWAN 4 - Traffic Policies' },
-	{ id: 'globals', route: 'admin/network/mwan4/globals', title: 'MultiWAN 4 - Global Settings' },
+	{ id: 'routes', route: 'admin/network/mwan4/routes', title: 'MultiWAN 4 - Link priorities' },
+	{ id: 'strategies', route: 'admin/network/mwan4/strategies', title: 'MultiWAN 4 - Paths' },
+	{ id: 'rules', route: 'admin/network/mwan4/rules', title: 'MultiWAN 4 - Routing rules' },
+	{ id: 'globals', route: 'admin/network/mwan4/globals', title: 'MultiWAN 4 - Global settings' },
 	{ id: 'advanced', route: 'admin/network/mwan4/advanced', title: 'MultiWAN 4 - Advanced' }
 ];
 

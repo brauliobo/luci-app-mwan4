@@ -28,7 +28,7 @@ return view.extend({
 	},
 
 	render: function(stabilitySupported) {
-		let m = new form.Map('mwan4', _('MultiWAN 4 - Global Settings'),
+		let m = new form.Map('mwan4', _('MultiWAN 4 - Global settings'),
 			overviewDescription(_('Global settings affect all WAN links, strategies, paths, and traffic policies.')));
 		let s = m.section(form.NamedSection, 'globals', 'globals');
 		let o;

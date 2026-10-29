@@ -47,7 +47,7 @@
 		}
 	},
 	"admin/network/mwan4/routes": {
-		"title": "Paths",
+		"title": "Link priorities",
 		"order": 110,
 		"firstchild_ineligible": true,
 		"action": {
@@ -61,7 +61,7 @@
 		}
 	},
 	"admin/network/mwan4/strategies": {
-		"title": "Strategies",
+		"title": "Paths",
 		"order": 120,
 		"firstchild_ineligible": true,
 		"action": {
@@ -75,7 +75,7 @@
 		}
 	},
 	"admin/network/mwan4/rules": {
-		"title": "Rules",
+		"title": "Routing rules",
 		"order": 130,
 		"firstchild_ineligible": true,
 		"action": {
@@ -89,7 +89,7 @@
 		}
 	},
 	"admin/network/mwan4/globals": {
-		"title": "Globals",
+		"title": "Global settings",
 		"order": 140,
 		"firstchild_ineligible": true,
 		"action": {

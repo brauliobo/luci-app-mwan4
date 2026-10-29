@@ -17,7 +17,7 @@ return view.extend({
 	},
 
 	render: function() {
-		let m = new form.Map('mwan4', _('MultiWAN 4 - Path Members'),
+		let m = new form.Map('mwan4', _('MultiWAN 4 - Link priorities'),
 			overviewDescription(_('Path members bind a WAN link to a priority metric and weight. Strategies choose one or more paths.')));
 		let s = m.section(form.GridSection, 'route');
 		let o;

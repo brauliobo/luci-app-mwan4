@@ -175,10 +175,20 @@ for (const needle of [
 ])
 	assertContains(combined, needle);
 
+const tabTitles = Object.fromEntries(Object.entries(JSON.parse(menu)).map(([ route, entry ]) => [ route.split('/').pop(), entry.title ]));
+
+assert.deepEqual([ 'overview', 'interfaces', 'routes', 'strategies', 'rules', 'globals', 'advanced', 'mptcp', 'diagnostics' ].map(tab => tabTitles[tab]), [
+	'Overview', 'WAN Links', 'Link priorities', 'Paths', 'Routing rules', 'Global settings', 'Advanced', 'MPTCP', 'Diagnostics'
+], 'tab titles follow the vocabulary of USABILITY.md');
+
 for (const needle of [
 	"_('MultiWAN 4 - Interfaces')",
 	"_('MultiWAN 4 - Routes')",
 	"_('MultiWAN 4 - Rules')",
+	"_('MultiWAN 4 - Path Members')",
+	"_('MultiWAN 4 - Strategies')",
+	"_('MultiWAN 4 - Traffic Policies')",
+	"_('MultiWAN 4 - Global Settings')",
 	"_('Traffic rules')",
 	"_('No policy rules yet.')",
 	"_('Add policy rule')",
