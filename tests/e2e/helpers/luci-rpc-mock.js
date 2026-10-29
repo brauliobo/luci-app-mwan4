@@ -689,8 +689,9 @@ async function renderOverview(page, options) {
 		const linkHistoryModule = new Function('baseclass', 'mwan4Common', 'mwan4Stability', 'L', 'E', '_', args.linkHistoryModuleSource)(baseclass, common, stabilityModule, L, E, translate);
 		const summaryModule = new Function('baseclass', '_', args.summaryModuleSource)(baseclass, translate);
 		const wanformModule = new Function('baseclass', 'mwan4Templates', '_', args.wanformModuleSource)(baseclass, templatesModule, translate);
+		const guideModule = new Function('baseclass', 'ui', 'mwan4Common', 'mwan4Explain', 'L', 'E', '_', args.guideModuleSource)(baseclass, ui, common, explainModule, L, E, translate);
 		const modules = {
-			mwan4Common: common, mwan4Connections: connectionsModule, mwan4Explain: explainModule, mwan4LinkHistory: linkHistoryModule, mwan4Overview: overviewModule,
+			mwan4Common: common, mwan4Connections: connectionsModule, mwan4Explain: explainModule, mwan4Guide: guideModule, mwan4LinkHistory: linkHistoryModule, mwan4Overview: overviewModule,
 			mwan4Routetest: routetestModule, mwan4Rules: rulesModule, mwan4Rulesui: rulesuiModule, mwan4Stability: stabilityModule, mwan4Summary: summaryModule,
 			mwan4Templates: templatesModule, mwan4Wanform: wanformModule
 		};
@@ -734,6 +735,7 @@ async function renderOverview(page, options) {
 	}, {
 		overviewSource: fs.readFileSync(overviewPath, 'utf8'),
 		overviewModuleSource: fs.readFileSync(overviewModulePath, 'utf8'),
+		guideModuleSource: fs.readFileSync(guideModulePath, 'utf8'),
 		connectionsModuleSource: fs.readFileSync(connectionsModulePath, 'utf8'),
 		connections: options.connections === undefined ? defaultConnections() : options.connections,
 		history: options.history || null,

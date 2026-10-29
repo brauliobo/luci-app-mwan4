@@ -147,7 +147,7 @@ function reasonLabel(reason) {
 }
 
 function renderHeldChip(held) {
-	return E('span', { class: 'mwan4-pill mwan4-warning mwan4-held-chip', title: _('Held out of routing strategies until it stays healthy') }, [
+	return E('span', { class: 'mwan4-pill mwan4-warning mwan4-held-chip', title: _('A link is kept out of use until it has stayed healthy for a while.') }, [
 		_('held: %s').format(reasonLabel(held.reason) || _('unknown')), held.remaining == null ? null : ' ', renderCountdown(held.remaining)
 	]);
 }

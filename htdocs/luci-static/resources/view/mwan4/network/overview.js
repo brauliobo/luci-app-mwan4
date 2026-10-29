@@ -8,6 +8,7 @@
 'require mwan4.common as mwan4Common';
 'require mwan4.connections as mwan4Connections';
 'require mwan4.explain as mwan4Explain';
+'require mwan4.guide as mwan4Guide';
 'require mwan4.linkhistory as mwan4LinkHistory';
 'require mwan4.overview as mwan4Overview';
 'require mwan4.routetest as mwan4Routetest';
@@ -22,6 +23,7 @@ var E = mwan4Common.element;
 /* global mwan4Common */
 /* global mwan4Connections */
 /* global mwan4Explain */
+/* global mwan4Guide */
 /* global mwan4LinkHistory */
 /* global mwan4Overview */
 /* global mwan4Routetest */
@@ -377,6 +379,11 @@ function configuredEnabledInterfaceNames() {
 	}).map(function(section) {
 		return section['.name'];
 	});
+}
+
+/* A jargon word that stays in the UI explains itself in a tooltip taken from the glossary. */
+function termLabel(term, label) {
+	return E('span', { class: 'mwan4-term', title: mwan4Explain.termHint(term) }, [ label ]);
 }
 
 function modalInput(label, name, value, attrs, help) {
@@ -1606,7 +1613,7 @@ function renderRuleOptions(draft) {
 		E('div', { class: 'mwan4-option-group' }, [
 			E('strong', [ _('Extra matching') ]),
 			E('div', { class: 'mwan4-modal-columns' }, [
-				withError(modalInput(_('DSCP value'), 'dscp', draft.dscp, { type: 'number', min: '1', max: '63' },
+				withError(modalInput(termLabel(_('DSCP'), _('DSCP value')), 'dscp', draft.dscp, { type: 'number', min: '1', max: '63' },
 					_('A priority tag that some apps put on their traffic, such as calls or games (1-63).')), 'dscp'),
 				withError(modalInput(_('Source port'), 'src_port', draft.src_port, { placeholder: _('Any') },
 					_('Needs TCP or UDP. The port the device sends from; usually left empty.')), 'src_port'),
@@ -1618,7 +1625,7 @@ function renderRuleOptions(draft) {
 			E('strong', [ _('Behaviour') ]),
 			E('div', { class: 'mwan4-modal-columns' }, [
 				modalCheck(_('Also route traffic from this router'), 'local', draft.local == '1', _('Includes traffic the router sends itself, such as updates and DNS.')),
-				modalCheck(_('Keep each device on the same link (sticky)'), 'sticky', draft.sticky == '1',
+				modalCheck(termLabel(_('Sticky session'), _('Keep each device on the same link (sticky)')), 'sticky', draft.sticky == '1',
 					_('New connections from a device follow its earlier ones instead of being spread out.')),
 				withError(modalInput(_('Keep for (seconds)'), 'timeout', draft.timeout, { type: 'number', min: '1' }, _('Only used while "sticky" is on.')), 'timeout'),
 				modalCheck(_('Log matches'), 'logging', draft.logging == '1', _('Writes a line to the system log for every new connection this rule matches.'))
@@ -2087,6 +2094,10 @@ function commandCenterState(status, progress) {
 	return Object.assign({}, state, { action: Object.assign({}, state.action, { click: commandActions()[state.action.id] }) });
 }
 
+function showTermsModal() {
+	showMwan4Modal(_('Terms'), mwan4Guide.termsContent(closeModal));
+}
+
 function renderCommandMetric(label, value, body) {
 	return E('div', { class: 'mwan4-command-metric' }, [
 		E('span', [ label ]),
@@ -2142,6 +2153,7 @@ function renderCommandCenter(status, progress) {
 			renderServiceActions(),
 			E('div', { class: 'mwan4-actions' }, [
 				E('button', { class: 'btn cbi-button cbi-button-neutral', click: function() { return showTesterModal(); } }, [ _('Test traffic') ]),
+				E('button', { class: 'btn cbi-button cbi-button-neutral', click: showTermsModal }, [ _('Terms') ]),
 				E('button', { class: 'btn cbi-button cbi-button-neutral', 'aria-label': _('Configure global MultiWAN settings'), click: showGlobalsModal }, [ _('Global settings') ]),
 				E('button', { class: 'btn cbi-button cbi-button-neutral', 'aria-busy': 'false', click: commandActions().refresh }, [ _('Refresh') ]),
 				hasDiagnosticsAccess ? E('a', { class: 'btn cbi-button cbi-button-neutral', href: L.url('admin/network/mwan4/diagnostics') }, [ _('Diagnostics') ]) : null
@@ -2293,12 +2305,21 @@ function renderTargetCell(members) {
 	]));
 }
 
+function renderStatePill(state) {
+	let pill = renderPill(state.text, state.cls);
+
+	if (state.state == 'held')
+		pill.setAttribute('title', mwan4Explain.termHint(_('Hold')));
+
+	return pill;
+}
+
 function renderStateChips(members, state) {
 	let held = stabilityEnabled() ? members.map(function(member) { return mwan4Stability.heldInfo(member.runtime); }).find(Boolean) : null;
 	let degraded = stabilityEnabled() ? members.flatMap(function(member) { return mwan4Stability.degradedStrategies(member.runtime); }) : [];
 
 	return E('div', { class: 'mwan4-state-chips' }, [
-		held && state.state == 'held' ? null : renderPill(state.text, state.cls),
+		held && state.state == 'held' ? null : renderStatePill(state),
 		held ? mwan4Stability.renderHeldChip(held) : null,
 		stabilityEnabled() ? mwan4Stability.renderDegradedChip(degraded.filter(function(name, index) { return degraded.indexOf(name) == index; })) : null
 	]);
@@ -2424,9 +2445,9 @@ function renderWanWorkspace(status, counters) {
 					E('th', [ _('WAN link') ]),
 					E('th', [ _('State') ]),
 					E('th', [ _('Health') ]),
-					stabilityEnabled() ? E('th', { title: _('Online to offline transitions in the recent window, and in all recorded history') }, [ _('Flaps') ]) : null,
+					stabilityEnabled() ? E('th', { title: '%s %s'.format(mwan4Explain.termHint(_('Flap')), _('Counted as online to offline transitions in the recent window, and in all recorded history.')) }, [ _('Flaps') ]) : null,
 					stabilityEnabled() ? E('th', { title: _('Share of recorded time the link was online. Shows the span actually recorded while it is shorter than 24 hours.') }, [ _('Availability') ]) : null,
-					E('th', [ _('Check targets') ]),
+					E('th', { title: mwan4Explain.termHint(_('Check target')) }, [ _('Check targets') ]),
 					connectionsEnabled() ? E('th', [ _('Active connections') ]) : null,
 					E('th', [ _('Actions') ])
 				])
@@ -2855,7 +2876,7 @@ function showPbrImportModal(preview) {
 				E('span', [ _('Nothing is written until you confirm. PBR itself is not changed or stopped; rules keep the PBR order and go before the default routing.') ])
 			]),
 			E('table', { class: 'table mwan4-import-table' }, [
-				E('tr', [ E('th', [ _('PBR policy') ]), E('th', [ _('Result') ]), E('th', [ _('Rule') ]), E('th', [ _('Path') ]) ])
+				E('tr', [ E('th', [ _('PBR policy') ]), E('th', [ _('Result') ]), E('th', [ _('Rule') ]), E('th', { title: mwan4Explain.termHint(_('Path')) }, [ _('Path') ]) ])
 			].concat(policies.map(renderImportRow))),
 			renderImportList(_('WAN links to create:'), preview.interfaces),
 			renderImportList(_('Paths to create:'), preview.strategies),

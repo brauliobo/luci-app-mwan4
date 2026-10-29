@@ -19,7 +19,7 @@ function createLoader(options) {
 
 	const calls = [];
 	const uciData = options.uci || {};
-	const element = (tag, attrs, children) => ({ tag, attrs, children });
+	const element = (tag, attrs, children) => Array.isArray(attrs) || typeof attrs != 'object' || attrs === null ? { tag, attrs: {}, children: attrs } : { tag, attrs, children };
 	const L = { resolveDefault: (promise, fallback) => Promise.resolve(promise).catch(() => fallback), url: (...parts) => '/' + parts.join('/'), resource: name => name };
 	const baseclass = { extend: definition => definition };
 	const cache = {};

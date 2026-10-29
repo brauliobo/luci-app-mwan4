@@ -1851,3 +1851,9 @@ button.mwan4-command-metric:hover,
 .mwan4-terms dd {
 	margin: 0;
 }
+
+.mwan4-term {
+	text-decoration: underline dotted;
+	text-underline-offset: 2px;
+	cursor: help;
+}

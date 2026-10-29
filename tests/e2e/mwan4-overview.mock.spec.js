@@ -48,6 +48,41 @@ async function ruleSection(page, name) {
 	}, name);
 }
 
+test.describe('mocked mwan4 overview glossary', () => {
+	test('the command center Terms button lists the glossary in a dialog and gives focus back', async ({ page }) => {
+		await renderOverview(page);
+
+		const button = page.locator('#mwan4-command-center').getByRole('button', { name: 'Terms', exact: true });
+
+		await button.focus();
+		await button.click();
+
+		const modal = page.locator('.modal.mwan4-modal');
+		const terms = await modal.locator('dt').allInnerTexts();
+
+		await expect(modal).toHaveAttribute('role', 'dialog');
+		expect(terms).toEqual([ ...terms ].sort((a, b) => a.localeCompare(b)));
+		expect(terms).toEqual(expect.arrayContaining([ 'Hold', 'Flap', 'Sticky session', 'DSCP', 'Check target', 'Path', 'Link priority' ]));
+		await expect(modal.getByRole('button', { name: 'Close' })).toBeFocused();
+		await expect(modal.locator('dd').first()).not.toBeEmpty();
+
+		await modal.getByRole('button', { name: 'Close' }).click();
+		await expect(modal).toHaveCount(0);
+		await expect(button).toBeFocused();
+	});
+
+	test('jargon that stays in the overview explains itself with the glossary text', async ({ page }) => {
+		await renderOverview(page, { history: defaultLinkHistory() });
+
+		await expect(page.locator('th', { hasText: 'Check targets' })).toHaveAttribute('title', 'An address that is pinged to test a link.');
+		await expect(page.locator('th', { hasText: 'Flaps' })).toHaveAttribute('title', /^A link that keeps going up and down\./);
+
+		await openCustomRule(page);
+		await expect(page.locator('.modal .mwan4-term', { hasText: 'DSCP value' })).toHaveAttribute('title', /priority tag/);
+		await expect(page.locator('.modal .mwan4-term', { hasText: 'sticky' })).toHaveAttribute('title', 'Keeps a device on the same link for a while.');
+	});
+});
+
 test.describe('mocked mwan4 overview workspace', () => {
 	test('puts the WAN links panel after the command center and the routing rules directly after it', async ({ page }) => {
 		await renderOverview(page);
@@ -215,7 +250,7 @@ test.describe('mocked mwan4 overview workspace', () => {
 		await expect(commandCenter).not.toContainText('Routing');
 		await expect(commandCenter.getByRole('link', { name: 'Diagnostics', exact: true })).toHaveAttribute('href', /admin\/network\/mwan4\/diagnostics/);
 		await expect(commandCenter.getByRole('link', { name: /Open (Advanced|Diagnostics)/ })).toHaveCount(0);
-		await expect(commandCenter.locator('.mwan4-command-footer .mwan4-actions button')).toHaveText([ 'Test traffic', 'Global settings', 'Refresh' ]);
+		await expect(commandCenter.locator('.mwan4-command-footer .mwan4-actions button')).toHaveText([ 'Test traffic', 'Terms', 'Global settings', 'Refresh' ]);
 		await expect(commandCenter.locator('.mwan4-service-controls button')).toHaveText([ 'Start', 'Restart', 'Stop' ]);
 
 		for (const name of [ 'Start', 'Restart', 'Stop' ])
