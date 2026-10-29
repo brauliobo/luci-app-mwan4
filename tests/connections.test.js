@@ -18,8 +18,8 @@ const connections = new Function('baseclass', 'rpc', 'mwan4Common', 'L', 'E', '_
 	{ extend: definition => definition }, rpc, { formatBytes: String }, {}, () => null, text => text);
 
 assert.deepEqual(connections.queryArgs({ rule: 'streaming', family: 'ipv6' }, 50),
-	[ 'streaming', null, null, 'ipv6', null, null, 50, 0 ], 'filters map to positional rpc params, empty filters are omitted');
-assert.deepEqual(connections.queryArgs({}), [ null, null, null, null, null, null, 200, 0 ], 'the default limit is 200');
+	[ 'streaming', undefined, undefined, 'ipv6', undefined, undefined, 50, 0 ], 'filters map to positional rpc params, empty filters are undefined, never null: LuCI would send JSON null and ubus rejects the call');
+assert.deepEqual(connections.queryArgs({}), [ undefined, undefined, undefined, undefined, undefined, undefined, 200, 0 ], 'the default limit is 200');
 
 assert.equal(connections.probeTotal({ ok: true, total: 7, items: [] }), 7, 'a connections reply yields the total');
 for (const bad of [ null, {}, { ok: false, items: [] }, { total: 3 }, { ok: true, total: 3, items: 'x' } ])

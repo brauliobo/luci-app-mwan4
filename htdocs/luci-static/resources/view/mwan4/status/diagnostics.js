@@ -1056,16 +1056,16 @@ function runRouteExplain(button) {
 
 	return callRouteExplainDiagnostics(
 		'explain',
-		null,
-		tuple.family || null,
-		tuple.src_ip || null,
-		tuple.dest_ip || null,
-		tuple.proto || null,
-		tuple.src_port || null,
-		tuple.dest_port || null,
-		tuple.src_iface || null,
-		tuple.ipset || null,
-		tuple.strategy || null
+		undefined,
+		tuple.family || undefined,
+		tuple.src_ip || undefined,
+		tuple.dest_ip || undefined,
+		tuple.proto || undefined,
+		tuple.src_port || undefined,
+		tuple.dest_port || undefined,
+		tuple.src_iface || undefined,
+		tuple.ipset || undefined,
+		tuple.strategy || undefined
 	).then(function(result) {
 		let node = document.getElementById('mwan4-diag-output');
 		if (node)

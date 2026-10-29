@@ -617,6 +617,10 @@ async function renderOverview(page, options) {
 					let params = Array.from(arguments);
 					state.rpcCalls.push({ object: spec.object, method: spec.method, params: params });
 
+					// LuCI sends a null argument as JSON null and ubus rejects the whole call ([2], invalid argument).
+					if (params.indexOf(null) >= 0)
+						return Promise.reject(new Error('Invalid argument: null passed to %s.%s'.replace('%s', spec.object).replace('%s', spec.method)));
+
 					if (spec.object == 'mwan4' && spec.method == 'connections')
 						return connectionsRpc(state, params);
 					if (spec.object == 'mwan4' && spec.method == 'link_history')
@@ -880,6 +884,10 @@ async function renderDiagnostics(page, options) {
 					let params = Array.from(arguments);
 					state.rpcCalls.push({ object: spec.object, method: spec.method, params: params });
 
+					// LuCI sends a null argument as JSON null and ubus rejects the whole call ([2], invalid argument).
+					if (params.indexOf(null) >= 0)
+						return Promise.reject(new Error('Invalid argument: null passed to %s.%s'.replace('%s', spec.object).replace('%s', spec.method)));
+
 					if (spec.object == 'mwan4' && spec.method == 'connections')
 						return connectionsRpc(state, params);
 					if (spec.object == 'session' && spec.method == 'access') {
@@ -1062,6 +1070,10 @@ async function renderStatus(page, options) {
 				return function() {
 					let params = Array.from(arguments);
 					state.rpcCalls.push({ object: spec.object, method: spec.method, params: params });
+
+					// LuCI sends a null argument as JSON null and ubus rejects the whole call ([2], invalid argument).
+					if (params.indexOf(null) >= 0)
+						return Promise.reject(new Error('Invalid argument: null passed to %s.%s'.replace('%s', spec.object).replace('%s', spec.method)));
 
 					if (spec.object == 'mwan4' && spec.method == 'status')
 						return Promise.resolve(state.status);

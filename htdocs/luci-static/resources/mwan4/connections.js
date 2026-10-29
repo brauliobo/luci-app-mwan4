@@ -21,7 +21,7 @@ const callConnections = rpc.declare({
 });
 
 function queryArgs(filters, limit) {
-	let args = [ 'rule', 'interface', 'strategy', 'family', 'proto', 'search' ].map(name => (filters || {})[name] || null);
+	let args = [ 'rule', 'interface', 'strategy', 'family', 'proto', 'search' ].map(name => (filters || {})[name] || undefined);
 
 	return args.concat([ limit || PAGE, 0 ]);
 }

@@ -544,7 +544,7 @@ test.describe('mocked mwan4 overview workspace', () => {
 		const calls = await page.evaluate(function() { return window.__mwan4Mock.rpcCalls; });
 		const explainCall = calls.find(function(call) { return call.object == 'mwan4' && call.method == 'diagnostics' && call.params[0] == 'explain'; });
 
-		expect(explainCall.params.slice(2, 11)).toEqual([ 'ipv4', '192.0.2.10', '1.1.1.1', 'tcp', null, '443', 'lan', 'streaming', 'failover' ]);
+		expect(explainCall.params.slice(2, 11)).toEqual([ 'ipv4', '192.0.2.10', '1.1.1.1', 'tcp', undefined, '443', 'lan', 'streaming', 'failover' ]);
 	});
 
 	test('resets grouped counters through constrained control rpc', async ({ page }) => {
@@ -1435,7 +1435,7 @@ test.describe('mocked mwan4 connection counting', () => {
 		await expect(modal.locator('select[name="rule"]')).toHaveValue('streaming');
 		await expect(modal.locator('.mwan4-conn-total')).toHaveText('1 active connection(s)');
 		await expect(page.locator('.modal details')).toHaveCount(0);
-		expect((await lastConnectionsCall(page)).slice(0, 6)).toEqual([ 'streaming', null, null, null, null, null ]);
+		expect((await lastConnectionsCall(page)).slice(0, 6)).toEqual([ 'streaming', undefined, undefined, undefined, undefined, undefined ]);
 
 		await page.getByRole('button', { name: 'Close' }).click();
 		await expect(page.locator('.modal')).toHaveCount(0);

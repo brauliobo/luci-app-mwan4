@@ -31,7 +31,7 @@ const callLinkHistory = rpc.declare({
 });
 
 function queryHistory(name, limit) {
-	return callLinkHistory(name || null, null, limit || HISTORY);
+	return callLinkHistory(name || undefined, undefined, limit || HISTORY);
 }
 
 function isHistory(result) {

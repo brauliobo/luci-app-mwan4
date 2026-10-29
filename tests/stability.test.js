@@ -133,9 +133,9 @@ assert.match(added[0].description, /If left empty, there is no latency limit/, '
 (async () => {
 	calls.length = 0;
 	assert.equal(await stability.probe(), false, 'an empty reply is not a link_history backend');
-	assert.deepEqual(calls[0], [ 'link_history', [ null, null, 1 ] ]);
+	assert.deepEqual(calls[0], [ 'link_history', [ undefined, undefined, 1 ] ]);
 	await stability.queryHistory('wan', 50);
-	assert.deepEqual(calls[1], [ 'link_history', [ 'wan', null, 50 ] ]);
+	assert.deepEqual(calls[1], [ 'link_history', [ 'wan', undefined, 50 ] ]);
 
 	for (const file of [ 'interfaces', 'strategies', 'globals' ])
 		assert.match(read(`htdocs/luci-static/resources/view/mwan4/network/${file}.js`), /mwan4Stability\.(probe|addFormOptions|addQualityOptions)/, `the raw ${file} tab uses the stability helper`);

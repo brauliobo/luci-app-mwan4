@@ -248,7 +248,7 @@ function runControl(action, iface, feature, button, successMessage) {
 
 	setButtonBusy(button, true);
 
-	return callAdvancedControl(action, iface || null, feature || null).then(function(result) {
+	return callAdvancedControl(action, iface || undefined, feature || undefined).then(function(result) {
 		if (result && result.ok === false)
 			throw new Error(resultErrors(result, _('Control action failed.')));
 

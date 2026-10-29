@@ -178,7 +178,7 @@ function runMwan4(args, button) {
 	if (!hasOperatorAccess)
 		return Promise.resolve();
 
-	return withButtonBusy(button, function() { return callControl(args[0], args[1] || null); }).then(function(result) {
+	return withButtonBusy(button, function() { return callControl(args[0], args[1] || undefined); }).then(function(result) {
 		let message = mwan4Common.rpcErrorMessage(result, _('Control request failed'));
 		if (message)
 			throw new Error(message);
