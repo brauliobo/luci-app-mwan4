@@ -48,7 +48,7 @@ function runtimeState(live, warnings, operator) {
 		return result('warning', _('Starting'), _('Waiting for the first link status from mwan4. If this stays empty, restart it.'), restartOrCheck(operator));
 
 	if (live.offline)
-		return result('warning', _('Degraded'), _('%d of %d WAN links are offline, so there is less backup. Traffic avoids them.').format(live.offline, live.total),
+		return result('warning', _('Degraded'), _('%d of %d WAN links are not fully online, so there is less backup. Traffic avoids them.').format(live.offline, live.total),
 			action('reviewLinks', _('Review WAN links'), 'cbi-button-edit'));
 
 	return null;

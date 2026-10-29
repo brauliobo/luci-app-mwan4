@@ -42,7 +42,7 @@ assert.equal(state({}, { online: 0, offline: 0, total: 0 }, 0, false).action.id,
 let degraded = state({}, { online: 1, offline: 1, total: 2 });
 
 assert.deepEqual([ degraded.label, degraded.tone, degraded.action.id ], [ 'Degraded', 'warning', 'reviewLinks' ]);
-assert.equal(degraded.summary, '1 of 2 WAN links are offline, so there is less backup. Traffic avoids them.');
+assert.equal(degraded.summary, '1 of 2 WAN links are not fully online, so there is less backup. Traffic avoids them.');
 assert.equal(state({ hasLinks: false }, up, 3).label, 'Setup needed', 'setup comes before runtime warnings');
 
 // plain words: none of the old technical vocabulary

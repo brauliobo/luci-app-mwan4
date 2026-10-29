@@ -2,10 +2,6 @@ msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Probe / SLA"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "Health tuning"
 msgstr ""
 
@@ -138,10 +134,6 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:106
 msgid "%d warning(s)"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1549
-msgid "%d%%"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1380
@@ -1119,10 +1111,6 @@ msgstr ""
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1585
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1620
 msgid "SLA"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:161
-msgid "Score"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:68
@@ -2121,15 +2109,7 @@ msgid "Not measured"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "%d%s"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "Per-family health"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "configured"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
@@ -2137,55 +2117,7 @@ msgid "No targets"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "fail %sms/%s%%, recover %sms/%s%%"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Availability-only health checks; latency/loss SLA is not enforced."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid " / netifd up"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid " / netifd down"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "unmeasured"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "%s/%s score"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "%d failed checks, %d failed target(s)"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "down %s / up %s, reliability %s"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "SLA: %s"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "SLA: availability only"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Add each internet uplink once, then mwan4 can track health, SLA state, and strategy paths from one workspace."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "WAN"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Targets"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
@@ -2782,10 +2714,6 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
 msgid "last %s, %d total"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
-msgid "failed checks not measured"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
@@ -4013,10 +3941,6 @@ msgid "Waiting for the first link status from mwan4. If this stays empty, restar
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/summary.js
-msgid "%d of %d WAN links are offline, so there is less backup. Traffic avoids them."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/summary.js
 msgid "Everything is working: all %d WAN links are online."
 msgstr ""
 
@@ -4138,4 +4062,100 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "Your internet connections and how they pass their health checks. IPv4 and IPv6 of one link are shown together."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/explain.js
+msgid "answering"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/explain.js
+msgid "not answering"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/explain.js
+msgid "skipped"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/explain.js
+msgid "not checked yet"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/explain.js
+msgid "Not tested while disabled"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/explain.js
+msgid "No check targets, so this link is not tested"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/explain.js
+msgid "%d of %d checks failing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/explain.js
+msgid "Waiting for the first check"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/explain.js
+msgid "%d of %d checks passing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/explain.js
+msgid "All checks passing"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/explain.js
+msgid "Limits: degraded above %d ms or %d%% loss"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/explain.js
+msgid "Interface up"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/explain.js
+msgid "Interface down"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/explain.js
+msgid "%s interface %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/explain.js
+msgid "up"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/explain.js
+msgid "down"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/summary.js
+msgid "%d of %d WAN links are not fully online, so there is less backup. Traffic avoids them."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Health"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Partly enabled"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "%d%% loss"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "degraded"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Edit %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Add each internet connection once, then mwan4 tests it and moves traffic away when it fails."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Check targets"
 msgstr ""

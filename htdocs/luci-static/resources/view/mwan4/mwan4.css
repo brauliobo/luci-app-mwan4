@@ -449,15 +449,17 @@ button.mwan4-command-metric:hover,
 }
 
 .mwan4-command-footer {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) auto;
-	gap: 12px;
-	align-items: start;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px 16px;
 	margin-top: 12px;
 }
 
 .mwan4-command-notices {
 	display: grid;
+	flex: 1 1 100%;
 	gap: 8px;
 }
 
@@ -471,8 +473,6 @@ button.mwan4-command-metric:hover,
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 8px;
-	justify-self: end;
-	min-width: max-content;
 }
 
 .mwan4-guide-next {
@@ -659,7 +659,7 @@ button.mwan4-command-metric:hover,
 }
 
 .mwan4-wan-table {
-	min-width: 940px;
+	min-width: 1040px;
 	margin: 0;
 	border: 0;
 }
@@ -707,28 +707,82 @@ button.mwan4-command-metric:hover,
 	gap: 6px;
 }
 
+.mwan4-wan-raw {
+	font-family: monospace;
+	font-size: 11px;
+	overflow-wrap: anywhere;
+}
+
+.mwan4-targets-cell {
+	width: 24%;
+	min-width: 190px;
+}
+
+.mwan4-target-group {
+	display: grid;
+	gap: 2px;
+	min-width: 0;
+}
+
+.mwan4-target-group + .mwan4-target-group {
+	margin-top: 6px;
+}
+
+.mwan4-wan-table .mwan4-target-family {
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
 .mwan4-target-summary {
 	list-style: none;
 	margin: 0;
 	padding: 0;
 	display: grid;
-	gap: 4px;
+	gap: 5px;
+	min-width: 0;
 }
 
 .mwan4-target-summary li {
-	display: grid;
-	grid-template-columns: minmax(92px, 1fr) 72px 62px 48px;
-	gap: 6px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0 8px;
+	min-width: 0;
 	color: var(--text-color-medium);
 	font-size: 12px;
-	white-space: nowrap;
+}
+
+.mwan4-target-ip {
+	flex: 1 1 100%;
+	min-width: 0;
+	overflow-wrap: anywhere;
+	color: var(--text-color-high, inherit);
+	font-family: monospace;
+}
+
+.mwan4-target-state.is-bad {
+	color: #b02a37;
+	font-weight: 600;
+}
+
+.mwan4-conn-family {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.mwan4-history-heading {
+	margin: 8px 0 4px;
+	font-size: 13px;
 }
 
 .mwan4-wan-actions {
-	flex-wrap: nowrap;
+	flex-wrap: wrap;
+	gap: 4px;
 	justify-content: flex-start;
 	margin-top: 0;
-	white-space: nowrap;
+	max-width: 210px;
 }
 
 .mwan4-compact-button {
@@ -1189,11 +1243,6 @@ button.mwan4-command-metric:hover,
 	.mwan4-primary-action {
 		justify-self: stretch;
 		text-align: center;
-	}
-
-	.mwan4-service-controls {
-		justify-self: start;
-		min-width: 0;
 	}
 
 	.mwan4-empty-state {

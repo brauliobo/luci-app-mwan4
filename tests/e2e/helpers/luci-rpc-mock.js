@@ -170,6 +170,30 @@ function defaultStatus() {
 	};
 }
 
+/* A dual-stack link configured as two sections, wan_x (IPv4, online) and wan_x6 (IPv6, offline), next to the two default links. */
+function withSiblingPair(options) {
+	const uci = (options && options.uci) || defaultUci();
+	const status = (options && options.status) || defaultStatus();
+	const section = (name, family, targets) => ({
+		'.type': 'interface', '.name': name, enabled: '1', family: [ family ], track_method: 'ping', track_ip: targets, reliability: '1', interval: '10', down: '5', up: '5', check_quality: '0'
+	});
+	const runtime = (family, state, targets) => ({
+		active_connections: { ipv4: family == 'ipv4' ? 3 : 0, ipv6: 0, total: family == 'ipv4' ? 3 : 0 },
+		status: state, health_state: state, up: true, tracking: 'tracking', track_method: 'ping', score_percent: state == 'online' ? 100 : 0, score_current: 10, score_max: 10,
+		failed_checks: state == 'online' ? 0 : 3, failed_targets: state == 'online' ? 0 : 2, families: { [family]: { status: state, health_state: state, up: true } },
+		track_ip: targets.map(ip => ({ ip: ip, status: state == 'online' ? 'up' : 'down', latency: state == 'online' ? 18 : null, packetloss: state == 'online' ? 0 : 100 }))
+	});
+	const v4 = [ '1.1.1.1', '9.9.9.9' ];
+	const v6 = [ '2606:4700:4700::1111', '2001:4860:4860:0:0:0:0:8888' ];
+
+	uci.mwan4.splice(uci.mwan4.findIndex(item => item['.type'] == 'route'), 0, section('wan_x', 'ipv4', v4), section('wan_x6', 'ipv6', v6));
+	uci.mwan4.forEach((item, index) => { item['.index'] = index; });
+	status.interfaces.wan_x = runtime('ipv4', 'online', v4);
+	status.interfaces.wan_x6 = runtime('ipv6', 'offline', v6);
+
+	return Object.assign({}, options, { uci: uci, status: status });
+}
+
 function defaultCounters() {
 	return {
 		counters: {
@@ -1067,5 +1091,6 @@ module.exports = {
 	renderDiagnostics,
 	renderOverview,
 	renderStatus,
-	stableStatus
+	stableStatus,
+	withSiblingPair
 };

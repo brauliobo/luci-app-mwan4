@@ -194,6 +194,37 @@ assert.match(health({ track_ip: [ '1.1.1.1' ], check_quality: '1', failure_laten
 	/above 300 ms or 20% loss, and healthy again below 100 ms and 2%$/);
 assert.equal(health({}), 'No check targets are set, so this link is not tested');
 
+// health line, limits and interface text of a link
+const member = (targets, section) => ({ section: Object.assign({ enabled: '1', track_ip: targets.map(item => item[0]) }, section), runtime: { track_ip: targets.map(item => ({ ip: item[0], status: item[1] })) } });
+const line = (...members) => explain.healthLine(members);
+
+assert.equal(line(member([ [ '1.1.1.1', 'up' ], [ '8.8.8.8', 'up' ] ])), 'All checks passing');
+assert.equal(line(member([ [ '1.1.1.1', 'online' ], [ '8.8.8.8', 'online' ] ])), 'All checks passing', 'online reads like up');
+assert.equal(line(member([ [ '1.1.1.1', 'up' ], [ '8.8.8.8', 'down' ] ])), '1 of 2 checks failing');
+assert.equal(line(member([ [ '1.1.1.1', 'up' ], [ '8.8.8.8', 'down' ] ]), member([ [ '::1', 'down' ], [ '::2', 'down' ], [ '::3', 'down' ], [ '::4', 'up' ] ])),
+	'4 of 6 checks failing', 'the checks of IPv4 and IPv6 are counted together');
+assert.equal(line(member([ [ '1.1.1.1', 'up' ], [ '8.8.8.8', 'unknown' ] ])), '1 of 2 checks passing');
+assert.equal(line(member([ [ '1.1.1.1', 'unknown' ] ])), 'Waiting for the first check');
+assert.equal(line({ section: { enabled: '1', track_ip: [ '1.1.1.1' ] }, runtime: {} }), 'Waiting for the first check', 'no runtime data yet');
+assert.equal(line(member([ [ '1.1.1.1', 'timeout' ] ])), '1 of 1 checks failing');
+assert.equal(line({ section: { enabled: '1' }, runtime: {} }), 'No check targets, so this link is not tested');
+assert.equal(line(member([ [ '1.1.1.1', 'up' ] ], { enabled: '0' })), 'Not tested while disabled');
+assert.deepEqual([ 'up', 'down', 'unknown', 'skipped', undefined ].map(status => explain.targetState(status).text),
+	[ 'answering', 'not answering', 'not checked yet', 'skipped', 'not checked yet' ]);
+assert.equal(explain.limitsLine({ check_quality: '1', failure_latency: '800', failure_loss: '20' }), 'Limits: degraded above 800 ms or 20% loss');
+assert.equal(explain.limitsLine({ check_quality: '1' }), 'Limits: degraded above 1000 ms or 40% loss');
+assert.equal(explain.limitsLine({ check_quality: '0', failure_latency: '800' }), '', 'nothing is said while limits are off');
+assert.equal(explain.limitsLine({}), '');
+
+const pair = explain.groupLinks([ 'wan_tim', 'wan_tim6' ])[0];
+const runtime = up => ({ up: up });
+
+assert.equal(explain.interfaceText(pair, { interfaces: { wan_tim: runtime(true), wan_tim6: runtime(true) } }), 'Interface up');
+assert.equal(explain.interfaceText(pair, { interfaces: { wan_tim: runtime(false), wan_tim6: runtime(false) } }), 'Interface down');
+assert.equal(explain.interfaceText(pair, { interfaces: { wan_tim: runtime(true), wan_tim6: runtime(false) } }), 'IPv4 interface up, IPv6 interface down');
+assert.equal(explain.interfaceText(pair, {}), 'Interface down');
+assert.equal(explain.familyName('wan_tim6'), 'IPv6');
+
 // glossary
 const terms = explain.glossary();
 for (const term of [ 'WAN link', 'Routing rule', 'Path', 'Use first', 'Use only', 'Balance', 'Stops if unavailable', 'Uses normal routing if unavailable',

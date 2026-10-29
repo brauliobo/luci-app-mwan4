@@ -171,7 +171,7 @@ assert.match(networkView, /L\.resolveDefault\(callSessionAccess\('access-group',
 	'network overview should treat missing operator checks as no access');
 assert.match(networkView, /luci-app-mwan4-diagnostics/,
 	'network overview should check the diagnostics ACL before rendering the Diagnostics link');
-assert.match(networkView, /if \(hasOperatorAccess\) \{/,
+assert.match(networkView, /if \(hasOperatorAccess\)/,
 	'network overview should gate interface controls on operator access');
 assert.match(networkView, /hasOperatorAccess\s*\?\s*runMwan4\(\[ 'restart' \]\)/,
 	'network overview should restart through control rpc only when operator access is present');

@@ -55,7 +55,6 @@ for (const needle of [
 	'Health check',
 	'health check',
 	'WAN links',
-	'Probe / SLA',
 	'DNS probe',
 	'Probe helper availability',
 	'Health tuning',
@@ -202,6 +201,13 @@ for (const needle of [
 	"_('Add exception')",
 	"_('Traffic exception builder')",
 	"_('Traffic exception summary')",
+	"_('Probe / SLA')",
+	"_('WAN health matrix')",
+	"_('WAN workspace')",
+	"_('unmeasured')",
+	"_(' / netifd up')",
+	"_('Open Advanced')",
+	"_('Routing mode')",
 	'Each card combines saved WAN/SLA settings'
 ])
 	assert.equal(combined.includes(needle), false, `stale or ambiguous copy remains: ${needle}`);
@@ -238,7 +244,6 @@ for (const needle of [
 	'msgid "Traffic policies"',
 	'msgid "Policy path"',
 	'msgid "WAN links"',
-	'msgid "Probe / SLA"',
 	'msgid "DNS probe"',
 	'msgid "Probe helper availability"',
 	'msgid "Health tuning"',

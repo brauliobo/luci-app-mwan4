@@ -366,6 +366,48 @@ function healthSentence(section) {
 	].filter(Boolean).join('; ');
 }
 
+const TARGET_UP   = [ 'up', 'online' ];
+const TARGET_DOWN = [ 'down', 'offline', 'timeout', 'failed' ];
+
+function targetState(status) {
+	return TARGET_UP.indexOf(status) >= 0 ? { ok: true, text: _('answering') }
+		: TARGET_DOWN.indexOf(status) >= 0 ? { ok: false, text: _('not answering') }
+		: { ok: null, text: status == 'skipped' ? _('skipped') : _('not checked yet') };
+}
+
+/* members: [ { section, runtime } ] of one link (its IPv4 and IPv6 siblings): the plain state of its health checks. */
+function healthLine(members) {
+	let total = members.reduce((sum, member) => sum + asList(member.section.track_ip).length, 0);
+	let results = members.flatMap(member => asList(member.runtime.track_ip)).map(target => targetState(target.status).ok);
+	let passing = results.filter(ok => ok === true).length;
+	let failing = results.filter(ok => ok === false).length;
+
+	if (members.every(member => member.section.enabled == '0'))
+		return _('Not tested while disabled');
+	if (!total)
+		return _('No check targets, so this link is not tested');
+	if (failing)
+		return _('%d of %d checks failing').format(failing, total);
+
+	return !passing ? _('Waiting for the first check') : passing < total ? _('%d of %d checks passing').format(passing, total) : _('All checks passing');
+}
+
+/* Only when latency and loss limits are on; the recovery figures are in the sentence of healthSentence(). */
+function limitsLine(section) {
+	return isOn(section.check_quality) ? _('Limits: degraded above %d ms or %d%% loss').format(section.failure_latency || 1000, section.failure_loss || 40) : '';
+}
+
+function interfaceText(group, status) {
+	let ups = group.members.map(name => !!((status.interfaces || {})[name] || {}).up);
+
+	if (ups.every(Boolean))
+		return _('Interface up');
+	if (!ups.some(Boolean))
+		return _('Interface down');
+
+	return group.members.map((name, index) => _('%s interface %s').format(familyName(name), ups[index] ? _('up') : _('down'))).join(', ');
+}
+
 function glossary() {
 	return {
 		[_('WAN link')]:                         _('One internet connection. Its IPv4 and IPv6 addresses are shown together.'),
@@ -387,13 +429,19 @@ function glossary() {
 }
 
 return baseclass.extend({
+	familyName:     familyName,
 	glossary:       glossary,
 	groupLinks:     groupLinks,
+	healthLine:     healthLine,
 	healthSentence: healthSentence,
+	interfaceText:  interfaceText,
+	limitsLine:     limitsLine,
 	linkLabel:      linkLabel,
 	linkState:      linkState,
 	nowVia:         nowVia,
 	pathSummary:    pathSummary,
 	ruleParts:      ruleParts,
-	ruleSentence:   ruleSentence
+	ruleSentence:   ruleSentence,
+	stateWord:      stateWord,
+	targetState:    targetState
 });

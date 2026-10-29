@@ -1,5 +1,5 @@
 const { test, expect } = require('@playwright/test');
-const { defaultConnections, defaultCounters, defaultDiagnostics, defaultLinkHistory, defaultPbrPreview, defaultStatus, defaultUci, renderDiagnostics, renderOverview, renderStatus, stableStatus } = require('./helpers/luci-rpc-mock');
+const { defaultConnections, defaultCounters, defaultDiagnostics, defaultLinkHistory, defaultPbrPreview, defaultStatus, defaultUci, renderDiagnostics, renderOverview, renderStatus, stableStatus, withSiblingPair } = require('./helpers/luci-rpc-mock');
 
 function uciWithRules() {
 	const uci = defaultUci();
@@ -89,14 +89,98 @@ test.describe('mocked mwan4 overview workspace', () => {
 		await expect(workspace.locator('h3')).toHaveText('WAN links');
 		await expect(workspace).toContainText('Your internet connections and how they pass their health checks.');
 		await expect(workspace).not.toContainText('WAN health matrix');
-		await expect(row).toContainText('IPv4: online');
-		await expect(row).toContainText('IPv6: degraded');
-		await expect(row).toContainText('Not measured');
-		await expect(row).toContainText('unmeasured');
-		await expect(row).toContainText('SLA: fail 1000ms/40%, recover 500ms/10%');
+		await expect(row).toContainText('IPv4 online');
+		await expect(row).toContainText('IPv6 degraded');
+		await expect(row).toContainText('1 of 2 checks passing');
+		await expect(row).toContainText('Limits: degraded above 1000 ms or 40% loss');
+		await expect(row).toContainText('Interface up');
+		await expect(row.locator('.mwan4-health-cell')).toHaveAttribute('title', /^Pings 1\.1\.1\.1 and 8\.8\.8\.8 every 10 s; marked down after 5 failed checks/);
+		for (const jargon of [ 'netifd', 'unmeasured', 'Not measured', 'score', 'SLA', 'Probe', 'reliability' ])
+			await expect(workspace).not.toContainText(jargon, { ignoreCase: true });
 		await expect(missingTarget).toContainText('-');
 		await expect(missingTarget).not.toContainText('0%');
 		await expect(page.locator('body')).not.toContainText('[object Object]');
+	});
+
+	test('shows the IPv4 and IPv6 sections of one link as one row with one pill per family', async ({ page }) => {
+		await renderOverview(page, withSiblingPair({ operatorAccess: true }));
+
+		const rows = page.locator('#mwan4-wan-workspace .mwan4-wan-row');
+		const pair = page.locator('[data-interface="wan_x"]');
+
+		await expect(rows).toHaveCount(3);
+		await expect(page.locator('[data-interface="wan_x6"]')).toHaveCount(0);
+		await expect(pair).toHaveAttribute('data-members', 'wan_x wan_x6');
+		await expect(pair.locator('.mwan4-wan-name strong')).toHaveText('X');
+		await expect(pair.locator('.mwan4-wan-raw')).toHaveText('wan_x, wan_x6');
+		await expect(pair.locator('.mwan4-state-chips .mwan4-pill')).toHaveText([ 'online' ]);
+		await expect(pair.locator('.mwan4-family-pills .mwan4-pill')).toHaveText([ 'IPv4 online', 'IPv6 offline' ]);
+		await expect(pair.locator('.mwan4-family-pills .mwan4-pill').nth(1)).toHaveClass(/mwan4-offline/);
+		await expect(pair.locator('.mwan4-health-cell strong')).toHaveText('2 of 4 checks failing');
+		await expect(pair.locator('.mwan4-target-group')).toHaveCount(2);
+		await expect(pair.locator('.mwan4-target-family')).toHaveText([ 'IPv4', 'IPv6' ]);
+		await expect(pair.locator('.mwan4-target-summary li')).toHaveCount(4);
+		await expect(pair.locator('.cbi-button-edit')).toHaveText([ 'Edit IPv4', 'Edit IPv6' ]);
+		await expect(pair.locator('.cbi-button-action')).toHaveText([ 'Up' ]);
+		await expect(pair.locator('.mwan4-conn-family')).toHaveCount(2);
+		await expect(page.locator('[data-interface="wan_primary"] .cbi-button-edit')).toHaveText([ 'Edit' ]);
+		await expect(page.locator('[data-interface="wan_primary"] .mwan4-family-pills .mwan4-pill')).toHaveText([ 'IPv4 online', 'IPv6 online' ]);
+		await expect(page.locator('[data-interface="wan_backup"] .mwan4-family-pills')).toHaveCount(0);
+		await expect(page.locator('#mwan4-command-center')).toContainText('2/3 online');
+	});
+
+	test('edits, brings up and takes down every section of a link group', async ({ page }) => {
+		await renderOverview(page, withSiblingPair({ operatorAccess: true }));
+
+		const pair = page.locator('[data-interface="wan_x"]');
+		const controls = () => page.evaluate(() => window.__mwan4Mock.rpcCalls.filter(call => call.object == 'mwan4' && call.method == 'control').map(call => call.params.join(':')));
+
+		await pair.getByRole('button', { name: 'Edit WAN link wan_x6' }).click();
+		await expect(page.locator('.modal h2')).toHaveText('WAN link: wan_x6');
+		await page.getByRole('button', { name: 'Cancel' }).click();
+		await pair.getByRole('button', { name: 'Take WAN link X down' }).click();
+		await expect.poll(controls).toEqual([ 'ifdown:wan_x', 'ifdown:wan_x6' ]);
+		await pair.getByRole('button', { name: 'Bring WAN link X up' }).click();
+		await expect.poll(controls).toEqual([ 'ifdown:wan_x', 'ifdown:wan_x6', 'ifup:wan_x', 'ifup:wan_x6' ]);
+	});
+
+	test('shows one history modal per link with a panel for each section', async ({ page }) => {
+		const history = defaultLinkHistory();
+
+		history.interfaces.wan_x = { events: [ { time: Math.floor(Date.now() / 1000) - 60, state: 'online', reason: 'start' } ], flaps: { count_window: 0, window: 300, total: 0 } };
+		history.interfaces.wan_x6 = { events: [ { time: Math.floor(Date.now() / 1000) - 60, state: 'offline', reason: 'tracker' } ], flaps: { count_window: 1, window: 300, total: 1 } };
+		await renderOverview(page, withSiblingPair({ history: history }));
+		await page.locator('[data-interface="wan_x"]').getByRole('button', { name: 'Show link history of WAN link X' }).click();
+
+		await expect(page.locator('.modal h2')).toHaveText('Link history: X');
+		await expect(page.locator('.modal .mwan4-link-history')).toHaveCount(2);
+		await expect(page.locator('.modal .mwan4-history-heading')).toHaveText([ 'IPv4', 'IPv6' ]);
+		await expect(page.locator('.modal .mwan4-link-history[data-interface="wan_x6"] .mwan4-history-row')).toContainText('offline');
+	});
+
+	test('lets long IPv6 check targets wrap inside their column without overlapping the neighbours', async ({ page }) => {
+		await page.setViewportSize({ width: 1280, height: 900 });
+		await renderOverview(page, withSiblingPair());
+
+		const boxes = await page.evaluate(() => {
+			const rect = node => { const box = node.getBoundingClientRect(); return { left: box.left, right: box.right, top: box.top, bottom: box.bottom }; };
+			const cell = document.querySelector('[data-interface="wan_x"] .mwan4-targets-cell');
+			const neighbour = cell.nextElementSibling;
+
+			return {
+				cell:      rect(cell),
+				neighbour: rect(neighbour),
+				inside:    Array.from(cell.querySelectorAll('li > span')).map(rect),
+				overflow:  cell.scrollWidth > cell.clientWidth + 1
+			};
+		});
+
+		expect(boxes.overflow).toBe(false);
+		expect(boxes.cell.right).toBeLessThanOrEqual(boxes.neighbour.left + 1);
+		for (const box of boxes.inside) {
+			expect(box.left).toBeGreaterThanOrEqual(boxes.cell.left - 1);
+			expect(box.right).toBeLessThanOrEqual(boxes.cell.right + 1);
+		}
 	});
 
 	test('never renders empty children as the text null or undefined', async ({ page }) => {
@@ -180,7 +264,7 @@ test.describe('mocked mwan4 overview workspace', () => {
 		await expect(page.locator('.modal h2')).toHaveText('Global settings');
 	});
 
-	test('counts only enabled health-online runtime interface sections as WAN links', async ({ page }) => {
+	test('counts a link as online only when all its enabled IPv4 and IPv6 sections are health-online', async ({ page }) => {
 		const status = defaultStatus();
 		status.interfaces = {
 			wan_vivo: { enabled: true, health_state: 'online', status: 'online', up: true },
@@ -195,7 +279,7 @@ test.describe('mocked mwan4 overview workspace', () => {
 		await renderOverview(page, { status });
 
 		const commandCenter = page.locator('#mwan4-command-center');
-		await expect(commandCenter).toContainText('2/6 online');
+		await expect(commandCenter).toContainText('1/3 online');
 		await expect(commandCenter).toContainText('Degraded');
 	});
 
@@ -1489,7 +1573,7 @@ test.describe('mocked mwan4 unstable WAN handling', () => {
 		const primary = page.locator('[data-interface="wan_primary"]');
 		const backup = page.locator('[data-interface="wan_backup"]');
 
-		await expect(page.locator('.mwan4-wan-table th')).toContainText([ 'State', 'Flaps', 'Availability', 'Score' ]);
+		await expect(page.locator('.mwan4-wan-table th')).toHaveText([ 'WAN link', 'State', 'Health', 'Flaps', 'Availability', 'Check targets', 'Active connections', 'Actions' ]);
 		await expect(primary.locator('.mwan4-held-chip')).toContainText('held: flapping');
 		await expect(primary.locator('.mwan4-held-chip')).toContainText(/1m \d+s/);
 		await expect(primary.locator('.mwan4-state-chips .mwan4-pill')).toHaveCount(1);
@@ -1522,7 +1606,7 @@ test.describe('mocked mwan4 unstable WAN handling', () => {
 	test('opens the link history with a 24 hour strip and refreshes while open', async ({ page }) => {
 		await page.clock.install();
 		await renderOverview(page, stable());
-		await page.locator('[data-interface="wan_primary"]').getByRole('button', { name: 'Show link history of WAN link wan_primary' }).click();
+		await page.locator('[data-interface="wan_primary"]').getByRole('button', { name: 'Show link history of WAN link Primary' }).click();
 
 		const modal = page.locator('.modal .mwan4-link-history');
 		const rows = modal.locator('.mwan4-history-row');
@@ -1563,12 +1647,12 @@ test.describe('mocked mwan4 unstable WAN handling', () => {
 
 	test('shows an empty history and keeps working when the history call fails', async ({ page }) => {
 		await renderOverview(page, stable());
-		await page.locator('[data-interface="wan_backup"]').getByRole('button', { name: 'Show link history of WAN link wan_backup' }).click();
+		await page.locator('[data-interface="wan_backup"]').getByRole('button', { name: 'Show link history of WAN link Backup' }).click();
 		await expect(page.locator('.modal .mwan4-conn-empty')).toHaveText('No state transitions recorded yet.');
 		await expect(page.locator('.modal svg.mwan4-strip rect')).toHaveCount(1);
 		await page.evaluate(() => window.__mwan4Mock.setHistory(null));
 		await page.getByRole('button', { name: 'Close' }).click();
-		await page.locator('[data-interface="wan_backup"]').getByRole('button', { name: 'Show link history of WAN link wan_backup' }).click();
+		await page.locator('[data-interface="wan_backup"]').getByRole('button', { name: 'Show link history of WAN link Backup' }).click();
 		await expect(page.locator('.modal .mwan4-conn-notice')).toContainText('Link history is unavailable');
 	});
 
