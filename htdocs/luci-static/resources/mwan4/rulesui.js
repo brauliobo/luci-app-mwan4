@@ -30,6 +30,10 @@ function matchesAnything(rule) {
 		!!(rule.src_iface || rule.src_port || rule.dest_port || rule.dscp || rule.ipset) || rule.proto != 'all';
 }
 
+function matchesNothing(rule) {
+	return !matchesAnything(rule);
+}
+
 function ruleShape(raw, what, who) {
 	let devices = raw.mode == 'devices';
 
@@ -243,11 +247,17 @@ function testQuery(values) {
 	};
 }
 
-/* Prefill for "Test this rule": the first site or address of the rule without its prefix, and its first device. */
+/* Prefill for "Test this rule": the first site or address without its prefix, the first device, and the protocol and port it names. */
 function testPrefill(draft) {
 	let destination = draft.domain.concat(draft.dest_ip).filter(entry => !/\/0$/.test(entry))[0] || '';
+	let tcpOrUdp = [ 'tcp', 'udp' ].indexOf(draft.proto) >= 0;
 
-	return { destination: destination.split('/')[0], source: draft.src_mac.concat(draft.src_ip)[0] || '' };
+	return {
+		destination: destination.split('/')[0],
+		source:      draft.src_mac.concat(draft.src_ip)[0] || '',
+		proto:       draft.proto,
+		port:        tcpOrUdp ? String(draft.dest_port).split(/[\s,;]+/)[0].split(/[-:]/)[0] : ''
+	};
 }
 
 function stepText(step) {
@@ -267,10 +277,12 @@ function examined(result) {
 	}));
 }
 
+/* The assumption sentence, unless the evaluator's own text already names the assumed rules. */
 function assumptionNote(result) {
 	let names = (result.assumptions || []).map(item => mwan4Routetest.ruleName(item.rule));
+	let stated = names.every(name => result.text.indexOf(name) >= 0);
 
-	return names.length ? _('Assumed not to apply, because they only match IP addresses: %s.').format(names.join(', ')) : '';
+	return names.length && !stated ? _('Assumed not to apply, because they only match IP addresses: %s.').format(names.join(', ')) : '';
 }
 
 /* The rule worth opening from a result: the one that matched, or the one that makes the answer uncertain. */
@@ -288,6 +300,7 @@ return baseclass.extend({
 	isFiltered:        isFiltered,
 	issues:            issues,
 	linkChoices:       linkChoices,
+	matchesNothing:    matchesNothing,
 	placement:         placement,
 	problems:          problems,
 	resolveVia:        resolveVia,

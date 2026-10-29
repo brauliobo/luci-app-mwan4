@@ -7,18 +7,26 @@
 'require view';
 'require mwan4.common as mwan4Common';
 'require mwan4.connections as mwan4Connections';
+'require mwan4.explain as mwan4Explain';
 'require mwan4.linkhistory as mwan4LinkHistory';
 'require mwan4.overview as mwan4Overview';
+'require mwan4.routetest as mwan4Routetest';
 'require mwan4.rules as mwan4Rules';
+'require mwan4.rulesui as mwan4Rulesui';
 'require mwan4.stability as mwan4Stability';
+'require mwan4.templates as mwan4Templates';
 
 var E = mwan4Common.element;
 /* global mwan4Common */
 /* global mwan4Connections */
+/* global mwan4Explain */
 /* global mwan4LinkHistory */
 /* global mwan4Overview */
+/* global mwan4Routetest */
 /* global mwan4Rules */
+/* global mwan4Rulesui */
 /* global mwan4Stability */
+/* global mwan4Templates */
 
 const callStatus = rpc.declare({
 	object: 'mwan4',
@@ -65,6 +73,13 @@ let live = { status: {}, counters: {}, total: null, history: false };
 let hasOperatorAccess = false;
 let hasConfigWrite = false;
 let dragRule = null;
+let ruleView = { query: '', filter: 'all' };
+let ruleCount = { shown: 0, total: 0 };
+let ruleEditor = null;
+let modalOpen = false;
+let modalRefresh = null;
+let testerBack = null;
+let testerTouched = false;
 let knownDevices = [];
 let pbrPreview = {};
 let hasAdvancedAccess = false;
@@ -90,13 +105,18 @@ const withBusy       = mwan4Overview.withBusy;
 const withButtonBusy = mwan4Overview.withButtonBusy;
 
 function focusModal(modal) {
-	let target = modal.querySelector('input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), a[href]');
+	let target = modal.querySelector('[data-autofocus]') ||
+		modal.querySelector('input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), a[href]');
 
 	(target || modal).focus();
 }
 
 function showMwan4Modal(title, nodes) {
-	modalReturnFocus = document.activeElement;
+	if (!modalOpen)
+		modalReturnFocus = document.activeElement;
+
+	modalOpen = true;
+	modalRefresh = null;
 	ui.showModal(title, nodes, 'mwan4-modal');
 
 	let modal = document.querySelector('.modal.mwan4-modal');
@@ -184,6 +204,9 @@ function closeModal() {
 	let target = modalReturnFocus;
 
 	modalReturnFocus = null;
+	modalOpen = false;
+	modalRefresh = null;
+	ruleEditor = null;
 	ui.hideModal();
 
 	if (target && document.documentElement.contains(target))
@@ -364,11 +387,13 @@ function modalSelect(label, name, values, selected, emptyLabel, help) {
 	return E('label', { class: 'mwan4-modal-field' }, nodes);
 }
 
-function modalCheck(label, name, checked) {
-	return E('label', { class: 'mwan4-modal-check' }, [
+function modalCheck(label, name, checked, help) {
+	let check = E('label', { class: 'mwan4-modal-check' }, [
 		E('input', { type: 'checkbox', name: name, checked: checked ? 'checked' : null }),
 		E('span', [ label ])
 	]);
+
+	return help ? E('div', { class: 'mwan4-modal-check-field' }, [ check, E('small', { class: 'mwan4-modal-help' }, [ help ]) ]) : check;
 }
 
 function stabilityField(name, values, globals, inherit) {
@@ -442,7 +467,7 @@ function renderPendingChangePreview(change) {
 }
 
 function setModalFieldsDisabled(modal, disabled) {
-	modal.querySelectorAll('.mwan4-modal-grid input, .mwan4-modal-grid select, .mwan4-modal-grid textarea').forEach(function(node) {
+	modal.querySelectorAll('.mwan4-modal-grid input, .mwan4-modal-grid select, .mwan4-modal-grid textarea, .mwan4-editor-tools button, .mwan4-title-enabled input').forEach(function(node) {
 		node.disabled = disabled;
 	});
 }
@@ -902,10 +927,6 @@ function showRoutingModal(mode) {
 	]);
 }
 
-function isValidNftSetName(value) {
-	return /^[A-Za-z_][A-Za-z0-9_.-]*$/.test(value || '');
-}
-
 function familyLabel(family) {
 	return family == 'ipv6' ? _('IPv6') : _('IPv4');
 }
@@ -967,24 +988,8 @@ function formatPolicyPath(path) {
 	return _('%s (%s)').format(describePathKind(path), path);
 }
 
-function ruleWans(strategyName) {
-	return mwan4Rules.strategyWans(uci.get('mwan4', strategyName), uci.sections('mwan4', 'route'));
-}
-
 function wanChoices() {
 	return mwan4Rules.wanGroups(configuredEnabledInterfaceNames(), uci.sections('mwan4', 'route'));
-}
-
-function formatVia(via) {
-	let preset = String(via || '').split(':');
-	let wans = ruleWans(via).map(function(wan) { return wan.name; });
-
-	if (preset[0] == 'prefer')
-		return _('Prefer %s, fall back to others').format(preset[1]);
-	if (preset[0] == 'only')
-		return _('Only %s, never leak').format(preset[1]);
-
-	return wans.length ? _('%s: %s').format(via, wans.join(' > ')) : formatPolicyPath(via);
 }
 
 function deviceName(mac) {
@@ -999,7 +1004,7 @@ function describeWhat(draft) {
 
 function describeWho(draft) {
 	if (draft.src_iface)
-		return _('Interface %s').format(draft.src_iface);
+		return _('Network %s').format(draft.src_iface);
 
 	return draft.src_mac.map(deviceName).concat(draft.src_ip).join(', ') || _('All devices');
 }
@@ -1016,7 +1021,7 @@ function ruleOptionList(draft) {
 	return [
 		draft.dscp ? _('DSCP %s').format(draft.dscp) : null,
 		draft.local == '1' ? _('Includes router traffic') : null,
-		draft.sticky == '1' ? _('Sticky source sessions for %ss').format(draft.timeout || '600') : null,
+		draft.sticky == '1' ? _('Keeps each device on one link for %ss').format(draft.timeout || '600') : null,
 		draft.logging == '1' ? _('Log matches') : null,
 		draft.ipset ? _('DNS/IP set %s').format(draft.ipset) : null
 	].filter(Boolean);
@@ -1026,23 +1031,23 @@ function formatRuleOptions(draft) {
 	return ruleOptionList(draft).join(', ') || _('No advanced options');
 }
 
-function emptyRuleDraft() {
-	let strategyNames = strategies().map(function(section) { return section['.name']; });
-
+function blankRuleDraft() {
 	return {
 		name: null, label: '', enabled: '1', domain: [], dest_ip: [], src_ip: [], src_mac: [], src_iface: '', proto: 'all',
-		src_port: '', dest_port: '', dscp: '', local: '0', ipset: '', via: strategyNames[0] || 'default',
-		sticky: '0', timeout: '600', logging: '0'
+		src_port: '', dest_port: '', dscp: '', local: '0', ipset: '', via: 'default', sticky: '0', timeout: '600', logging: '0'
 	};
 }
 
-function ruleDraftFromSection(name) {
-	let rule = uci.get('mwan4', name) || {};
-	let draft = emptyRuleDraft();
+function emptyRuleDraft() {
+	let current = rules().find(isGeneratedDefaultRule);
 
-	return Object.assign(draft, {
-		name:      name,
-		label:     rule.label || name,
+	return Object.assign(blankRuleDraft(), { via: (current || {}).use_strategy || (strategies()[0] || {})['.name'] || 'default' });
+}
+
+function ruleDraft(rule) {
+	return Object.assign(blankRuleDraft(), {
+		name:      rule['.name'],
+		label:     rule.label || rule['.name'],
 		enabled:   rule.enabled == '0' ? '0' : '1',
 		domain:    asArray(rule.domain),
 		dest_ip:   asArray(rule.dest_ip),
@@ -1062,89 +1067,88 @@ function ruleDraftFromSection(name) {
 	});
 }
 
-function ruleDraftFromModal(name) {
-	let modal = document.querySelector('.modal');
-	let mode = modalValue(modal, 'who_mode');
-	let what = mwan4Rules.classifyEntries(modalValue(modal, 'what'));
-	let who = mwan4Rules.classifyEntries(modalValue(modal, 'who'));
-	let devices = mode == 'devices';
+function ruleDraftFromSection(name) {
+	return ruleDraft(uci.get('mwan4', name) || { '.name': name });
+}
 
+function defaultRuleFamily(rule) {
+	return asArray(rule.family)[0] || (rule.dest_ip == '::/0' ? 'ipv6' : 'ipv4');
+}
+
+function ruleDrafts() {
+	return rules().map(function(rule) {
+		let draft = ruleDraft(rule);
+
+		return isGeneratedDefaultRule(rule)
+			? Object.assign(draft, { generated: true, label: _('Everything else (%s)').format(familyLabel(defaultRuleFamily(rule))) })
+			: draft;
+	});
+}
+
+function isDefaultDraft(draft) {
+	return draft.generated === true;
+}
+
+function linkGroups() {
+	return mwan4Explain.groupLinks(wanChoices().flat());
+}
+
+function ruleContext(status) {
 	return {
-		name:      name,
-		label:     modalValue(modal, 'label'),
-		enabled:   modalValue(modal, 'enabled'),
-		domain:    what.domain,
-		dest_ip:   what.ip,
-		src_ip:    devices ? who.ip : [],
-		src_mac:   devices ? who.mac : [],
-		src_iface: mode == 'iface' ? modalValue(modal, 'src_iface') : '',
-		proto:     modalValue(modal, 'proto') || 'all',
-		src_port:  modalValue(modal, 'src_port'),
-		dest_port: modalValue(modal, 'dest_port'),
-		dscp:      modalValue(modal, 'dscp'),
-		local:     modalValue(modal, 'local'),
-		ipset:     modalValue(modal, 'ipset'),
-		via:       modalValue(modal, 'use_strategy') || 'default',
-		sticky:    modalValue(modal, 'sticky'),
-		timeout:   modalValue(modal, 'timeout') || '600',
-		logging:   modalValue(modal, 'logging')
+		devices:    knownDevices,
+		strategies: strategies(),
+		routes:     uci.sections('mwan4', 'route'),
+		interfaces: mwanInterfaces(),
+		status:     status || live.status,
+		links:      linkGroups()
 	};
 }
 
-function ruleMatchesAnything(draft) {
-	return draft.domain.length || draft.dest_ip.length || draft.src_ip.length || draft.src_mac.length || draft.src_iface ||
-		draft.proto != 'all' || draft.src_port || draft.dest_port || draft.dscp || draft.ipset;
+function ruleCheckContext(name, ctx, drafts) {
+	return Object.assign({}, ctx, mwan4Rulesui.placement(drafts || ruleDrafts(), name, isDefaultDraft));
 }
 
-function ruleProblem(modal) {
-	let mode = modalValue(modal, 'who_mode');
-	let what = mwan4Rules.classifyEntries(modalValue(modal, 'what'));
-	let who = mwan4Rules.classifyEntries(modalValue(modal, 'who'));
-	let draft = ruleDraftFromModal(null);
-	let badWho = who.invalid.concat(who.domain);
-
-	if (!draft.label)
-		return _('Give the rule a name.');
-	if (what.invalid.length)
-		return _('Not a domain name or IP address: %s').format(what.invalid.join(', '));
-	if (what.mac.length)
-		return _('MAC addresses belong in Who, not in What.');
-	if (mode == 'devices' && badWho.length)
-		return _('Devices must be IP addresses, CIDR ranges, or MAC addresses: %s').format(badWho.join(', '));
-	if (mode == 'devices' && !draft.src_ip.length && !draft.src_mac.length)
-		return _('Pick or enter at least one device.');
-	if (mode == 'iface' && !draft.src_iface)
-		return _('Choose a network interface.');
-	if ((draft.src_port || draft.dest_port) && [ 'tcp', 'udp' ].indexOf(draft.proto) == -1)
-		return _('Choose TCP or UDP before adding source or destination ports.');
-	if (draft.src_port && !mwan4Rules.isValidPortList(draft.src_port))
-		return _('Use source ports from 1-65535, ranges such as 1000-2000, or comma-separated lists.');
-	if (draft.dest_port && !mwan4Rules.isValidPortList(draft.dest_port))
-		return _('Use ports from 1-65535, ranges such as 1000-2000, or comma-separated lists.');
-	if (draft.dscp && !mwan4Rules.isValidDscp(draft.dscp))
-		return _('Use a DSCP value from 1 to 63.');
-	if (draft.ipset && !isValidNftSetName(draft.ipset))
-		return _('Use a simple nft set name with letters, numbers, dots, dashes, or underscores.');
-	if (draft.sticky == '1' && (!/^\d+$/.test(draft.timeout) || Number(draft.timeout) < 1))
-		return _('Use a positive sticky timeout in seconds.');
-	if (!mwan4Rules.ruleFamilies(draft).length)
-		return _('The protocol and addresses do not share an IP family (IPv4 or IPv6).');
-	if (!ruleMatchesAnything(draft))
-		return _('Add at least one thing to match, otherwise the rule would catch all traffic.');
-
-	return null;
+function templateById(id) {
+	return mwan4Templates.ruleTemplates().find(function(template) { return template.id == id; });
 }
 
-function validateRuleModal(modal, show) {
-	let message = ruleProblem(modal);
-	let node = byId('mwan4-rule-validation');
+function ruleLabel(draft, ctx) {
+	return draft.label || mwan4Templates.autoLabel(draft, ctx);
+}
 
-	if (show && node) {
-		node.textContent = message || '';
-		node.style.display = message ? '' : 'none';
-	}
+function setIfChanged(node, key, build) {
+	if (node.getAttribute('data-sig') === key)
+		return;
 
-	return message == null;
+	node.setAttribute('data-sig', key);
+	node.replaceChildren.apply(node, build().filter(function(child) { return child != null; }));
+}
+
+function withError(field, name) {
+	let id = 'mwan4-error-%s'.format(name);
+	let control = field.querySelector('input, select, textarea');
+
+	control.setAttribute('aria-describedby', [ control.getAttribute('aria-describedby'), id ].filter(Boolean).join(' '));
+	field.appendChild(E('small', { id: id, class: 'mwan4-field-error', 'data-error-for': name, hidden: 'hidden' }));
+
+	return field;
+}
+
+function showFieldErrors(root, errors) {
+	root.querySelectorAll('[data-error-for]').forEach(function(slot) {
+		let found = errors.find(function(error) { return error.field == slot.getAttribute('data-error-for'); });
+		let control = slot.parentNode.querySelector('input, select, textarea');
+
+		slot.textContent = found ? found.message : '';
+		slot.hidden = !(found && found.message);
+		control.setAttribute('aria-invalid', found ? 'true' : 'false');
+	});
+
+	root.querySelectorAll('[data-flag-for]').forEach(function(control) {
+		let flagged = errors.some(function(error) { return error.field == control.getAttribute('data-flag-for') && !error.message; });
+
+		control.setAttribute('aria-invalid', flagged ? 'true' : 'false');
+	});
 }
 
 function chip(text, cls) {
@@ -1161,8 +1165,9 @@ function showClassified(modal) {
 	let node = byId('mwan4-rule-classified');
 	let what = mwan4Rules.classifyEntries(modalValue(modal, 'what'));
 
-	node.replaceChildren.apply(node, chipList(what.domain, 'mwan4-chip-domain', 50)
-		.concat(chipList(what.ip, 'mwan4-chip-ip', 50), chipList(what.mac.concat(what.invalid), 'mwan4-offline', 50)));
+	if (node)
+		node.replaceChildren.apply(node, chipList(what.domain, 'mwan4-chip-domain', 50)
+			.concat(chipList(what.ip, 'mwan4-chip-ip', 50), chipList(what.mac.concat(what.invalid), 'mwan4-offline', 50)));
 }
 
 function syncWhoMode(modal) {
@@ -1178,37 +1183,152 @@ function addKnownDevice(modal, select) {
 	let entries = mwan4Rules.classifyEntries(who.value);
 
 	if (select.value && entries.mac.concat(entries.ip).indexOf(select.value) < 0)
-		who.value = (who.value.trim() + '\n' + select.value).trim();
+		who.value = (who.value.trim() + (who.tagName == 'TEXTAREA' ? '\n' : ', ') + select.value).replace(/^[\n,\s]+/, '');
 
 	select.value = '';
-	who.dispatchEvent(new Event('input'));
+	who.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
-function bindRuleModal() {
+function simpleFormValues(modal) {
+	return {
+		what:  modalValue(modal, 'what') || '',
+		who:   modalValue(modal, 'who') || '',
+		ports: modalValue(modal, 'dest_port') || '',
+		link:  modalValue(modal, 'link') || ''
+	};
+}
+
+function fullFormValues(modal) {
+	let values = Object.fromEntries([ 'what', 'who', 'src_iface', 'proto', 'src_port', 'dest_port', 'dscp', 'ipset', 'sticky', 'timeout' ]
+		.map(function(name) { return [ name, modalValue(modal, name) || '' ]; }));
+
+	return Object.assign(values, { mode: modalValue(modal, 'who_mode') });
+}
+
+function simpleDraft(modal) {
+	let base = Object.assign({}, ruleEditor.base, { label: '' });
+
+	return mwan4Templates.applyTemplate(base, ruleEditor.template, simpleFormValues(modal), ruleContext());
+}
+
+function fullDraft(modal) {
+	let values = fullFormValues(modal);
+	let mode = values.mode;
+	let what = mwan4Rules.classifyEntries(values.what);
+	let who = mwan4Rules.classifyEntries(values.who);
+	let devices = mode == 'devices';
+
+	return {
+		domain:    what.domain,
+		dest_ip:   what.ip,
+		src_ip:    devices ? who.ip : [],
+		src_mac:   devices ? who.mac : [],
+		src_iface: mode == 'iface' ? values.src_iface : '',
+		proto:     values.proto || 'all',
+		src_port:  values.src_port,
+		dest_port: values.dest_port,
+		dscp:      values.dscp,
+		local:     modalValue(modal, 'local'),
+		ipset:     values.ipset,
+		via:       modalValue(modal, 'use_strategy') || 'default',
+		sticky:    values.sticky,
+		timeout:   values.timeout || '600',
+		logging:   modalValue(modal, 'logging')
+	};
+}
+
+function ruleDraftFromModal(name) {
 	let modal = document.querySelector('.modal');
-	let refresh = function(show) {
+	let draft = ruleEditor.mode == 'simple' ? simpleDraft(modal) : fullDraft(modal);
+
+	return Object.assign(draft, { name: name, label: modalValue(modal, 'label'), enabled: modalValue(modal, 'enabled') });
+}
+
+function ruleFieldProblems(modal) {
+	return ruleEditor.mode == 'simple'
+		? mwan4Rulesui.simpleProblems(templateById(ruleEditor.template), simpleFormValues(modal))
+		: mwan4Rulesui.problems(fullFormValues(modal));
+}
+
+function issueField(issue) {
+	return issue.field == 'via' ? (ruleEditor.mode == 'simple' ? 'link' : 'use_strategy') : issue.field;
+}
+
+function issueKind(severity) {
+	return { error: _('Error'), warning: _('Warning'), info: _('Note') }[severity];
+}
+
+function renderIssue(issue) {
+	return E('li', { class: 'is-%s'.format(issue.severity) }, [ E('strong', { class: 'mwan4-issue-kind' }, [ issueKind(issue.severity) ]), ' ', issue.message ]);
+}
+
+function shownFieldProblems(problems) {
+	return problems.filter(function(problem) { return ruleEditor.submitted || !problem.incomplete || ruleEditor.touched.has(problem.field); });
+}
+
+function refreshRuleSummary(modal, draft, ctx, issues) {
+	let path = mwan4Explain.pathSummary(draft.via, ctx.strategies, ctx.routes);
+	let now = mwan4Explain.nowVia(path, ctx.status).text;
+	let sentence = mwan4Rulesui.matchesNothing(draft) ? _('Fill in the fields below to see what this rule does.') : mwan4Explain.ruleSentence(draft, ctx);
+	let set = function(key, text) { modal.querySelector('[data-summary="%s"]'.format(key)).textContent = text; };
+
+	set('sentence', sentence);
+	set('now', mwan4Rulesui.matchesNothing(draft) ? '' : now);
+	setIfChanged(modal.querySelector('[data-summary="issues"]'), JSON.stringify(issues), function() { return issues.map(renderIssue); });
+
+	let live = modal.querySelector('[data-via-live]');
+
+	if (live)
+		live.textContent = '%s. %s'.format(path.text, now);
+}
+
+/* Recomputes everything the editor shows from the form: summary, inline messages, name suggestion. Returns whether saving is blocked. */
+function refreshRuleEditor() {
+	let modal = document.querySelector('.modal');
+
+	if (!modal || !ruleEditor || !modal.querySelector('.mwan4-rule-editor'))
+		return { blocked: false };
+
+	let ctx = ruleContext();
+	let draft = ruleDraftFromModal(ruleEditor.name);
+	let fields = ruleFieldProblems(modal);
+	let issues = mwan4Rulesui.issues(Object.assign({}, draft, { label: ruleLabel(draft, ctx) }), ruleCheckContext(ruleEditor.name, ctx));
+	let blocking = issues.filter(function(issue) { return issue.severity == 'error'; });
+
+	if (ruleEditor.mode == 'full') {
 		syncWhoMode(modal);
 		showClassified(modal);
-		validateRuleModal(modal, show);
-	};
+	}
 
-	[ 'label', 'what', 'who_mode', 'who', 'src_iface', 'proto', 'src_port', 'dest_port', 'dscp', 'ipset', 'sticky', 'timeout' ].forEach(function(name) {
-		let node = modal.querySelector('[name="%s"]'.format(name));
+	showFieldErrors(modal, shownFieldProblems(fields).concat(blocking.map(function(issue) { return { field: issueField(issue), message: '' }; })));
+	refreshRuleSummary(modal, draft, ctx, issues);
+	modal.querySelector('[name="label"]').placeholder = mwan4Templates.autoLabel(draft, ctx) || _('Named automatically');
 
-		[ 'input', 'change' ].forEach(function(type) { node.addEventListener(type, function() { refresh(true); }); });
-	});
+	return { blocked: fields.length > 0 || blocking.length > 0 };
+}
 
-	modal.querySelector('[name="device_pick"]')?.addEventListener('change', function(ev) { addKnownDevice(modal, ev.currentTarget); });
-	refresh(false);
+function validateRuleModal(modal, submit) {
+	if (submit)
+		ruleEditor.submitted = true;
+
+	let blocked = refreshRuleEditor().blocked;
+
+	if (blocked && submit)
+		modal.querySelector('[aria-invalid="true"]')?.focus();
+
+	return !blocked;
 }
 
 function ruleChangeItems(draft) {
+	let ctx = ruleContext();
+
 	return [
 		[ _('Rule'), draft.label ],
+		[ _('Summary'), mwan4Explain.ruleSentence(draft, ctx) ],
 		[ _('What'), describeWhat(draft) ],
 		[ _('Protocol and ports'), describeTransport(draft) ],
 		[ _('Who'), describeWho(draft) ],
-		[ _('Via'), formatVia(draft.via) ],
+		[ _('Goes through'), mwan4Explain.pathSummary(draft.via, ctx.strategies, ctx.routes).text ],
 		[ _('Advanced options'), formatRuleOptions(draft) ],
 		[ _('State'), draft.enabled == '1' ? _('Enabled') : _('Disabled') ]
 	];
@@ -1293,6 +1413,8 @@ function buildRuleChange(name) {
 
 	let draft = ruleDraftFromModal(name);
 
+	draft.label = ruleLabel(draft, ruleContext());
+
 	return {
 		summary: name
 			? _('This will update the routing rule before it is saved and applied.')
@@ -1335,15 +1457,21 @@ function renderRuleStep(title, description, children) {
 	]);
 }
 
+function protocolChoices() {
+	return [ 'all', 'tcp', 'udp', 'icmp', 'icmpv6', 'esp' ].map(function(proto) { return [ proto, protocolLabel(proto) ]; });
+}
+
 function renderWhatStep(draft) {
 	return renderRuleStep(_('1. What traffic?'), _('Domains and IP addresses are detected automatically, so list them together.'), [
-		modalTextarea(_('Domains and addresses'), 'what', draft.domain.concat(draft.dest_ip).join('\n'),
-			{ placeholder: 'youtube.com\n203.0.113.0/24\n2001:db8::/32' },
-			_('One entry per line. A domain also matches its subdomains. Leave empty to match every destination.')),
+		withError(modalTextarea(_('Domains and addresses'), 'what', draft.domain.concat(draft.dest_ip).join('\n'),
+			{ placeholder: 'youtube.com\n203.0.113.0/24\n2001:db8::/32', 'data-autofocus': '1' },
+			_('One entry per line. A site name such as youtube.com also covers its subdomains. Leave empty to match every destination.')), 'what'),
 		E('div', { id: 'mwan4-rule-classified', class: 'mwan4-chips', 'aria-live': 'polite' }),
 		E('div', { class: 'mwan4-modal-columns' }, [
-			modalSelect(_('Protocol'), 'proto', [ 'all', 'tcp', 'udp', 'icmp', 'icmpv6', 'esp' ].map(function(proto) { return [ proto, protocolLabel(proto) ]; }), draft.proto, null),
-			modalInput(_('Destination ports'), 'dest_port', draft.dest_port, { placeholder: _('443 or 1000-2000') }, _('Requires TCP or UDP. Supports single values, ranges, and comma-separated lists.'))
+			withError(modalSelect(_('Protocol'), 'proto', protocolChoices(), draft.proto, null,
+				_('Leave on Any protocol unless the rule is only for one kind of traffic, such as web (TCP) or calls (UDP).')), 'proto'),
+			withError(modalInput(_('Destination ports'), 'dest_port', draft.dest_port, { placeholder: _('443 or 1000-2000') },
+				_('Needs TCP or UDP. Use one port, a range such as 1000-2000, or a list separated by commas.')), 'dest_port')
 		])
 	]);
 }
@@ -1363,42 +1491,37 @@ function renderDevicePicker() {
 function renderWhoStep(draft) {
 	let mode = draft.src_iface ? 'iface' : draft.src_ip.length || draft.src_mac.length ? 'devices' : 'all';
 
-	return renderRuleStep(_('2. Who?'), _('Apply the rule to everyone, to specific LAN devices, or to a whole network interface.'), [
-		modalSelect(_('Applies to'), 'who_mode', [ [ 'all', _('All devices') ], [ 'devices', _('Selected devices') ], [ 'iface', _('A network interface') ] ], mode, null),
+	return renderRuleStep(_('2. Who?'), _('Apply the rule to everyone, to specific LAN devices, or to a whole network.'), [
+		modalSelect(_('Applies to'), 'who_mode', [ [ 'all', _('All devices') ], [ 'devices', _('Selected devices') ], [ 'iface', _('A network') ] ], mode, null),
 		E('div', { class: 'mwan4-modal-grid', 'data-who-mode': 'devices' }, [
 			renderDevicePicker(),
-			modalTextarea(_('Devices'), 'who', draft.src_mac.concat(draft.src_ip).join('\n'),
-				{ rows: '3', placeholder: 'aa:bb:cc:dd:ee:ff\n192.168.1.20' }, _('One MAC address, IP address, or CIDR range per line.'))
+			withError(modalTextarea(_('Devices'), 'who', draft.src_mac.concat(draft.src_ip).join('\n'),
+				{ rows: '3', placeholder: 'aa:bb:cc:dd:ee:ff\n192.168.1.20' }, _('One MAC address, IP address, or CIDR range per line.')), 'who')
 		]),
 		E('div', { 'data-who-mode': 'iface' }, [
-			modalSelect(_('Traffic coming from'), 'src_iface', networkNames(), draft.src_iface, null, _('Limit matches to traffic entering from this network interface.'))
+			withError(modalSelect(_('Traffic coming from'), 'src_iface', networkNames(), draft.src_iface, null,
+				_('Only traffic that enters the router from this network.')), 'src_iface')
 		])
 	]);
 }
 
 function viaOptionGroups(selected) {
-	let choices = wanChoices();
-	let presets = [].concat.apply([], choices.map(function(group) {
-		return [ [ 'prefer:' + group[0], formatVia('prefer:' + group[0]) ], [ 'only:' + group[0], formatVia('only:' + group[0]) ] ];
-	}));
-	let existing = strategies().map(function(section) { return [ section['.name'], formatVia(section['.name']) ]; });
-	let other = [ 'default', 'unreachable', 'blackhole' ].map(function(path) { return [ path, formatPolicyPath(path) ]; });
-
-	return [ [ _('Existing strategies'), existing ], [ _('Quick presets'), presets ], [ _('Other'), other ] ].filter(function(group) {
-		return group[1].length;
-	}).map(function(group) {
-		return E('optgroup', { label: group[0] }, optionList(group[1], selected));
+	return mwan4Rulesui.viaGroups(ruleContext()).map(function(group) {
+		return E('optgroup', { label: group[0] }, group[1].map(function(item) {
+			return E('option', { value: item[0], title: item[2] || null, selected: item[0] == selected ? 'selected' : null }, [ item[1] ]);
+		}));
 	});
 }
 
 function renderViaStep(draft) {
-	return renderRuleStep(_('3. Via which WAN links?'), _('Pick a saved strategy or a one-click preset; presets create the strategy for you.'), [
+	return renderRuleStep(_('3. Which WAN links?'), _('Pick the path this traffic takes. Quick presets create the path for you.'), [
 		E('label', { class: 'mwan4-modal-field' }, [
-			E('span', [ _('Send matching traffic via') ]),
-			E('select', { name: 'use_strategy', 'aria-describedby': 'mwan4-via-help' }, viaOptionGroups(draft.via)),
+			E('span', [ _('Send matching traffic through') ]),
+			E('select', { name: 'use_strategy', 'data-flag-for': 'use_strategy', 'aria-describedby': 'mwan4-via-help mwan4-via-live' }, viaOptionGroups(draft.via)),
 			E('small', { id: 'mwan4-via-help', class: 'mwan4-modal-help' }, [
-				_('Prefer keeps the other WAN links as backups. Only fails closed instead of leaking traffic to another WAN link.')
-			])
+				_('"First" keeps the other WAN links as backups. "Only" never moves traffic to another link: it stops instead of leaking.')
+			]),
+			E('small', { id: 'mwan4-via-live', class: 'mwan4-via-live', 'data-via-live': '1' })
 		])
 	]);
 }
@@ -1406,18 +1529,29 @@ function renderViaStep(draft) {
 function renderRuleOptions(draft) {
 	return E('section', { class: 'mwan4-builder-section mwan4-advanced-fields' }, [
 		E('div', { class: 'mwan4-builder-title' }, [
-			E('strong', [ _('Extra match and logging') ]),
-			E('span', [ _('Optional DSCP, source port, router traffic, sticky-session, and logging fields stay visible so the rule is reviewable at a glance.') ])
+			E('strong', [ _('Advanced options') ]),
+			E('span', [ _('Most rules do not need these. They narrow what the rule matches or change how it behaves.') ])
 		]),
-		E('div', { class: 'mwan4-modal-columns' }, [
-			modalInput(_('DSCP value'), 'dscp', draft.dscp, { type: 'number', min: '1', max: '63' }, _('Match packets marked with this DSCP class (1-63).')),
-			modalInput(_('Source port'), 'src_port', draft.src_port, { placeholder: _('Any') }, _('Requires TCP or UDP. Supports single values, ranges, and lists.')),
-			modalInput(_('DNS or nft set'), 'ipset', draft.ipset, { placeholder: _('optional set name') }, _('Expert field for dnsmasq or nftables sets that already exist.')),
-			modalInput(_('Sticky timeout seconds'), 'timeout', draft.timeout, { type: 'number', min: '1' }, _('Used only when sticky source sessions are enabled.')),
-			modalCheck(_('Enabled'), 'enabled', draft.enabled == '1'),
-			modalCheck(_('Also route traffic from this router'), 'local', draft.local == '1'),
-			modalCheck(_('Sticky source sessions'), 'sticky', draft.sticky == '1'),
-			modalCheck(_('Log matches'), 'logging', draft.logging == '1')
+		E('div', { class: 'mwan4-option-group' }, [
+			E('strong', [ _('Extra matching') ]),
+			E('div', { class: 'mwan4-modal-columns' }, [
+				withError(modalInput(_('DSCP value'), 'dscp', draft.dscp, { type: 'number', min: '1', max: '63' },
+					_('A priority tag that some apps put on their traffic, such as calls or games (1-63).')), 'dscp'),
+				withError(modalInput(_('Source port'), 'src_port', draft.src_port, { placeholder: _('Any') },
+					_('Needs TCP or UDP. The port the device sends from; usually left empty.')), 'src_port'),
+				withError(modalInput(_('DNS or nft set'), 'ipset', draft.ipset, { placeholder: _('optional set name') },
+					_('For experts: the name of a set that already exists in dnsmasq or nftables; its addresses are matched too.')), 'ipset')
+			])
+		]),
+		E('div', { class: 'mwan4-option-group' }, [
+			E('strong', [ _('Behaviour') ]),
+			E('div', { class: 'mwan4-modal-columns' }, [
+				modalCheck(_('Also route traffic from this router'), 'local', draft.local == '1', _('Includes traffic the router sends itself, such as updates and DNS.')),
+				modalCheck(_('Keep each device on the same link (sticky)'), 'sticky', draft.sticky == '1',
+					_('New connections from a device follow its earlier ones instead of being spread out.')),
+				withError(modalInput(_('Keep for (seconds)'), 'timeout', draft.timeout, { type: 'number', min: '1' }, _('Only used while "sticky" is on.')), 'timeout'),
+				modalCheck(_('Log matches'), 'logging', draft.logging == '1', _('Writes a line to the system log for every new connection this rule matches.'))
+			])
 		])
 	]);
 }
@@ -1447,29 +1581,299 @@ function refreshRuleLiveConnections() {
 		node.replaceChildren.apply(node, ruleConnectionNodes(node.getAttribute('data-rule-connections')));
 }
 
-function showRuleModal(name) {
-	let draft = name ? ruleDraftFromSection(name) : emptyRuleDraft();
+function renderTemplateField(field, values, ctx) {
+	let input = mwan4Rulesui.INPUT_OF[field.name];
 
-	showMwan4Modal(name ? _('Routing rule: %s').format(draft.label) : _('Add routing rule'), [
+	if (field.name == 'link')
+		return withError(modalSelect(field.label, 'link', mwan4Rulesui.linkChoices(ctx), values.link, null, field.help), 'link');
+
+	let text = withError(modalInput(field.label, input, values[field.name], { placeholder: field.placeholder, autocomplete: 'off' }, field.help), input);
+
+	return field.name == 'who' ? E('div', { class: 'mwan4-modal-grid' }, [ renderDevicePicker(), text ]) : text;
+}
+
+function renderSimpleFields(template, draft, ctx) {
+	let values = mwan4Rulesui.simpleValues(draft, ctx);
+	let nodes = template.fields.map(function(field) { return renderTemplateField(field, values, ctx); });
+
+	nodes[0].querySelector('input, select, textarea').setAttribute('data-autofocus', '1');
+
+	return [ E('div', { class: 'mwan4-simple-fields mwan4-modal-grid' }, nodes) ];
+}
+
+function renderFullFields(draft) {
+	return [ renderWhatStep(draft), renderWhoStep(draft), renderViaStep(draft), renderRuleOptions(draft) ];
+}
+
+function editorButton(label, aria, click) {
+	return E('button', { class: 'btn cbi-button cbi-button-neutral mwan4-compact-button mwan4-link-button', type: 'button', 'aria-label': aria || null, click: click }, [ label ]);
+}
+
+function editorTools(state) {
+	return E('div', { class: 'mwan4-editor-tools' }, [
+		state.mode == 'simple' ? editorButton(_('Show all options'), null, function() { return switchRuleEditor('full'); }) : null,
+		state.mode == 'full' && state.isNew ? editorButton(_('Use a template'), null, showTemplateChooser) : null,
+		editorButton(_('Test this rule'), null, testCurrentRule)
+	]);
+}
+
+function editorIntro(state) {
+	let template = templateById(state.template);
+
+	return E('div', { class: 'mwan4-modal-title' }, [
+		E('strong', [ state.mode == 'simple' ? template.title : state.isNew ? _('Custom rule') : _('Routing rule') ]),
+		E('span', [ state.mode == 'simple' ? template.summary : _('Rules run from top to bottom: the first match decides which WAN link carries the traffic.') ]),
+		editorTools(state)
+	]);
+}
+
+function renderEditorSummary() {
+	return E('div', { class: 'mwan4-rule-summary', 'aria-live': 'polite' }, [
+		E('strong', { class: 'mwan4-summary-sentence', 'data-summary': 'sentence' }),
+		E('span', { class: 'mwan4-summary-now', 'data-summary': 'now' }),
+		E('ul', { class: 'mwan4-summary-issues', 'data-summary': 'issues' })
+	]);
+}
+
+function initialRuleName(draft, ctx) {
+	return draft.label == mwan4Templates.autoLabel(draft, ctx) ? '' : draft.label;
+}
+
+function renderRuleEditor(state) {
+	let ctx = ruleContext();
+	let draft = state.base;
+	let title = state.isNew ? _('Add routing rule') : _('Routing rule: %s').format(draft.label);
+
+	ruleEditor = Object.assign({ submitted: false, touched: new Set() }, state);
+
+	let grid = E('div', { class: 'mwan4-modal-grid mwan4-rule-editor', 'data-mode': state.mode }, [
+		editorIntro(state),
+		renderEditorSummary(),
+		state.name ? renderRuleLiveConnections(state.name) : null,
+		modalInput(_('Rule name (optional)'), 'label', initialRuleName(draft, ctx), { placeholder: _('Named automatically') },
+			_('Leave empty and the rule is named for you, for example "youtube.com via Tim".'))
+	].concat(state.mode == 'simple' ? renderSimpleFields(templateById(state.template), draft, ctx) : renderFullFields(draft), [ pendingPreviewSlot() ]));
+	let modal = showMwan4Modal(title, [ grid, previewModalActions(function() { return buildRuleChange(state.name); }, state.name ? function() { return showRuleRemovalPreview(state.name); } : null) ]);
+	let toggle = modalCheck(_('Enabled'), 'enabled', draft.enabled == '1');
+
+	toggle.classList.add('mwan4-title-enabled');
+	modal.firstElementChild.classList.add('mwan4-modal-heading');
+	modal.firstElementChild.appendChild(toggle);
+	bindRuleEditor(grid, toggle);
+}
+
+function bindRuleEditor(grid, toggle) {
+	let touch = function(ev) {
+		if (ev.target.name)
+			ruleEditor.touched.add(ev.target.name);
+
+		refreshRuleEditor();
+	};
+
+	[ 'input', 'change' ].forEach(function(type) { grid.addEventListener(type, touch); toggle.addEventListener(type, touch); });
+	grid.querySelector('[name="device_pick"]')?.addEventListener('change', function(ev) { addKnownDevice(grid, ev.currentTarget); });
+	modalRefresh = refreshRuleEditor;
+	refreshRuleEditor();
+}
+
+function switchRuleEditor(mode) {
+	let state = ruleEditor;
+
+	renderRuleEditor({ name: state.name, isNew: state.isNew, template: state.template, mode: mode, base: ruleDraftFromModal(state.name) });
+}
+
+function showTemplateChooser() {
+	let choices = mwan4Templates.ruleTemplates().map(function(template) {
+		return E('button', { class: 'mwan4-template-choice', type: 'button', 'data-template': template.id,
+			click: function() { return showRuleModal(null, { template: template.id }); } }, [
+			E('strong', [ template.title ]),
+			E('span', [ template.summary ])
+		]);
+	});
+
+	choices[0].setAttribute('data-autofocus', '1');
+	showMwan4Modal(_('Add routing rule'), [
 		E('div', { class: 'mwan4-modal-grid' }, [
 			E('div', { class: 'mwan4-modal-title' }, [
-				E('span', { class: 'mwan4-eyebrow' }, [ _('Routing rule builder') ]),
-				E('strong', [ name ? draft.label : _('New routing rule') ]),
-				E('span', [ _('Rules run from top to bottom: the first match decides which WAN links carry the traffic.') ])
+				E('strong', [ _('What do you want to do?') ]),
+				E('span', [ _('Pick the closest match. You can change every detail afterwards.') ])
 			]),
-			name ? renderRuleLiveConnections(name) : null,
-			modalInput(_('Rule name'), 'label', draft.label, { placeholder: _('Work VPN') }, _('A readable name; mwan4 derives its short internal name automatically.')),
-			renderWhatStep(draft),
-			renderWhoStep(draft),
-			renderViaStep(draft),
-			renderRuleOptions(draft),
-			E('div', { id: 'mwan4-rule-validation', class: 'mwan4-rule-validation', role: 'alert', 'aria-live': 'polite', 'aria-atomic': 'true', style: 'display:none' }),
-			pendingPreviewSlot()
+			E('div', { class: 'mwan4-template-list' }, choices)
 		]),
-		previewModalActions(function() { return buildRuleChange(name); }, name ? function() { return showRuleRemovalPreview(name); } : null)
+		E('div', { class: 'right mwan4-modal-actions' }, [ E('button', { class: 'btn cbi-button cbi-button-neutral', click: closeModal }, [ _('Cancel') ]) ])
+	]);
+}
+
+/* name: the rule to edit; opts.draft starts a new rule from a copy; opts.template starts a new rule from a template. */
+function showRuleModal(name, opts) {
+	opts = opts || {};
+
+	if (!name && !opts.draft && !opts.template)
+		return showTemplateChooser();
+
+	let ctx = ruleContext();
+	let draft = opts.draft || (name ? ruleDraftFromSection(name) : emptyRuleDraft());
+	let template = opts.template || mwan4Templates.templateFor(draft, ctx);
+
+	renderRuleEditor({ name: name || null, isNew: !name, template: template, mode: template == 'custom' ? 'full' : 'simple', base: draft });
+}
+
+function duplicateRule(name) {
+	return showRuleModal(null, { draft: mwan4Rulesui.copyOf(ruleDraftFromSection(name)) });
+}
+
+function testCurrentRule() {
+	let state = ruleEditor;
+	let draft = ruleDraftFromModal(state.name);
+
+	draft.label = ruleLabel(draft, ruleContext()) || _('New rule');
+	showTesterModal(mwan4Rulesui.testPrefill(draft), { draft: draft, state: state });
+}
+
+function testerRules(override) {
+	return override ? mwan4Rulesui.withDraft(ruleDrafts(), override.draft, isDefaultDraft) : ruleDrafts();
+}
+
+function testerValues(modal) {
+	return Object.fromEntries([ 'destination', 'source', 'proto', 'port' ].map(function(name) { return [ name, modalValue(modal, name) || '' ]; }));
+}
+
+function ruleOpenButton(rule, override) {
+	let own = override && rule === override.draft;
+	let open = own
+		? function() { return renderRuleEditor(Object.assign({}, override.state, { base: override.draft })); }
+		: function() { return showRuleModal(rule.name); };
+
+	return rule.generated ? E('strong', [ rule.label ]) : editorButton(_('Open rule "%s"').format(rule.label), null, open);
+}
+
+function renderTestStep(step) {
+	return E('li', { class: 'mwan4-test-step is-%s%s'.format(step.state, step.enabled ? '' : ' is-disabled') }, [
+		E('span', { class: 'mwan4-test-num' }, [ '#%d'.format(step.index + 1) ]),
+		E('strong', [ step.name ]),
+		step.enabled ? null : E('small', { class: 'mwan4-muted-line' }, [ _('(disabled)') ]),
+		E('span', { class: 'mwan4-test-state' }, [ step.text ])
+	]);
+}
+
+function renderTestAnswer(result, override) {
+	let deciding = mwan4Rulesui.decidingRule(result);
+	let note = mwan4Rulesui.assumptionNote(result);
+
+	return [
+		E('p', { class: 'mwan4-test-sentence is-%s'.format(result.outcome) }, [ result.text ]),
+		deciding ? E('p', { class: 'mwan4-test-rule' }, [ ruleOpenButton(deciding, override) ]) : null,
+		E('strong', { class: 'mwan4-test-heading' }, [ _('Rules checked, in order') ]),
+		E('ol', { class: 'mwan4-test-steps' }, mwan4Rulesui.examined(result).map(renderTestStep)),
+		note ? E('p', { class: 'mwan4-muted-line' }, [ note ]) : null
+	];
+}
+
+function testerHint() {
+	let example = function(text) { return editorButton(text, null, function() { return fillTester(text); }); };
+
+	return [ E('p', { class: 'mwan4-muted-line' }, [ _('Type a site or an address to see which rule decides and which WAN link carries it. Try') ]),
+		E('p', [ example('youtube.com'), ' ', example('203.0.113.7') ]) ];
+}
+
+function fillTester(destination) {
+	let input = document.querySelector('.modal [name="destination"]');
+
+	input.value = destination;
+	input.dispatchEvent(new Event('input', { bubbles: true }));
+	input.focus();
+}
+
+function refreshTester() {
+	let modal = document.querySelector('.modal');
+	let result = modal && modal.querySelector('#mwan4-test-result');
+
+	if (!result)
+		return;
+
+	let values = testerValues(modal);
+	let problems = mwan4Rulesui.testProblems(values);
+	let shown = problems.filter(function(problem) { return !problem.incomplete || testerTouched; });
+
+	showFieldErrors(modal, shown);
+
+	if (problems.length)
+		return setIfChanged(result, 'hint:' + problems[0].message, testerHint);
+
+	let override = testerBack;
+	let found = mwan4Routetest.evaluate(mwan4Rulesui.testQuery(values), testerRules(override), strategies(), uci.sections('mwan4', 'route'), live.status);
+
+	setIfChanged(result, JSON.stringify([ found.text, mwan4Rulesui.examined(found).map(function(step) { return step.text; }) ]), function() { return renderTestAnswer(found, override); });
+}
+
+function showTesterModal(prefill, back) {
+	prefill = prefill || {};
+	testerBack = back || null;
+	testerTouched = !!prefill.destination;
+
+	let grid = E('div', { class: 'mwan4-modal-grid mwan4-tester' }, [
+		E('div', { class: 'mwan4-modal-title' }, [
+			E('strong', [ _('Where does this traffic go?') ]),
+			E('span', [ back ? _('Uses your saved rules and your unsaved changes to this rule, with the current link status.')
+				: _('Uses your saved rules and the current link status. Nothing is changed.') ])
+		]),
+		withError(modalInput(_('Site or address'), 'destination', prefill.destination, { placeholder: 'youtube.com', autocomplete: 'off', 'data-autofocus': '1' },
+			_('A site name such as youtube.com, or an IP address.')), 'destination'),
+		E('div', { class: 'mwan4-modal-columns' }, [
+			knownDevices.length ? modalSelect(_('Known device'), 'device_pick',
+				knownDevices.map(function(device) { return [ device.mac || device.ip, deviceLabel(device) ]; }), '', _('Any device'), _('Pick one, or type an address.')) : null,
+			withError(modalInput(_('Device address'), 'source', prefill.source, { placeholder: _('Any device') }, _('Optional. An IP address or a MAC address.')), 'source')
+		]),
+		E('div', { class: 'mwan4-modal-columns' }, [
+			modalSelect(_('Protocol'), 'proto', protocolChoices(), prefill.proto || 'all', null),
+			withError(modalInput(_('Port'), 'port', prefill.port, { placeholder: _('443') }, _('Optional. Matters only for rules that name a port.')), 'port')
+		]),
+		E('div', { id: 'mwan4-test-result', class: 'mwan4-test-result', 'aria-live': 'polite' })
 	]);
 
-	bindRuleModal();
+	showMwan4Modal(_('Test traffic'), [
+		grid,
+		E('div', { class: 'right mwan4-modal-actions' }, [
+			back ? E('button', { class: 'btn cbi-button cbi-button-action', click: function() { return renderRuleEditor(Object.assign({}, back.state, { base: back.draft })); } }, [ _('Back to the rule') ]) : null,
+			E('button', { class: 'btn cbi-button cbi-button-neutral', click: closeModal }, [ _('Close') ])
+		])
+	]);
+
+	grid.addEventListener('input', function() { testerTouched = true; refreshTester(); });
+	grid.addEventListener('change', function(ev) {
+		if (ev.target.name == 'device_pick' && ev.target.value) {
+			grid.querySelector('[name="source"]').value = ev.target.value;
+			ev.target.value = '';
+		}
+
+		testerTouched = true;
+		refreshTester();
+	});
+	modalRefresh = refreshTester;
+	refreshTester();
+}
+
+function showDefaultRoutingChoice() {
+	let choice = function(title, summary, mode) {
+		return E('button', { class: 'mwan4-template-choice', type: 'button', 'data-routing': mode, click: function() { return showRoutingModal(mode); } }, [
+			E('strong', [ title ]),
+			E('span', [ summary ])
+		]);
+	};
+
+	showMwan4Modal(_('Change default routing'), [
+		E('div', { class: 'mwan4-modal-grid' }, [
+			E('div', { class: 'mwan4-modal-title' }, [
+				E('strong', [ _('How should traffic that no rule matches leave?') ]),
+				E('span', [ _('This replaces the generated default path. Your own rules are kept.') ])
+			]),
+			E('div', { class: 'mwan4-template-list' }, [
+				choice(_('Use one link first'), _('Traffic uses your main link and moves to the next one only when it is unavailable.'), 'failover'),
+				choice(_('Balance across all links'), _('New connections are shared across all healthy links.'), 'balanced')
+			])
+		]),
+		E('div', { class: 'right mwan4-modal-actions' }, [ E('button', { class: 'btn cbi-button cbi-button-neutral', click: closeModal }, [ _('Cancel') ]) ])
+	]);
 }
 
 function strategyLimits(section) {
@@ -2186,40 +2590,49 @@ function renderRouting() {
 	return E('div', { class: 'mwan4-routing' }, nodes);
 }
 
-function wanChip(name, status) {
-	let runtime = ((status || {}).interfaces || {})[name] || {};
-	let state = runtime.health_state != null ? runtime.health_state : runtime.status || 'unknown';
+const LINK_CHIP = { online: 'mwan4-online', held: 'mwan4-warning', offline: 'mwan4-offline', disabled: 'mwan4-muted', unknown: 'mwan4-muted' };
 
-	return E('span', { class: 'mwan4-chip mwan4-chip-wan %s'.format(statusClass(state, runtime.up)), 'data-wan': name, title: '%s: %s'.format(name, state) }, [ name ]);
+function linkChip(group, status) {
+	let state = mwan4Explain.linkState(group, status);
+
+	return E('span', { class: 'mwan4-chip mwan4-chip-wan %s'.format(LINK_CHIP[state.state]), 'data-wan': group.key, title: '%s: %s'.format(group.label, state.text) }, [
+		group.label,
+		E('span', { class: 'mwan4-sr-only' }, [ ': ' + state.text ])
+	]);
 }
 
-function renderVia(via, status) {
-	let wans = ruleWans(via);
-	let ordered = wans.some(function(wan) { return wan.metric != wans[0].metric; });
-	let strategy = uci.get('mwan4', via) || {};
+function pathChips(path, status) {
 	let nodes = [];
 
-	if (!wans.length)
-		return [ E('strong', [ formatPolicyPath(via) ]) ];
-
-	wans.forEach(function(wan, index) {
+	path.tiers.forEach(function(tier, index) {
 		if (index)
-			nodes.push(E('span', { class: 'mwan4-via-sep', 'aria-hidden': 'true' }, [ ordered ? '>' : '+' ]));
-		nodes.push(wanChip(wan.name, status));
+			nodes.push(E('span', { class: 'mwan4-via-sep', 'aria-hidden': 'true' }, [ '→' ]));
+
+		tier.forEach(function(group, position) {
+			if (position)
+				nodes.push(E('span', { class: 'mwan4-via-sep', 'aria-hidden': 'true' }, [ '+' ]));
+
+			nodes.push(linkChip(group, status));
+		});
 	});
 
+	return nodes;
+}
+
+function renderGoesThrough(path, status) {
 	return [
-		E('div', { class: 'mwan4-chips mwan4-via' }, nodes),
-		E('small', [ _('%s (%s)').format(via, ordered ? _('ordered failover') : _('balanced')), strategy.last_resort == 'unreachable' || strategy.last_resort == 'blackhole' ? _(', fails closed') : '' ])
+		path.links.length ? E('div', { class: 'mwan4-chips mwan4-via' }, pathChips(path, status)) : E('strong', [ path.text ]),
+		E('small', { class: 'mwan4-now-via' }, [ mwan4Explain.nowVia(path, status).text ]),
+		path.links.length && path.failure == 'stops' ? E('small', { class: 'mwan4-stops-note' }, [ _('Stops if unavailable') ]) : null
 	];
 }
 
 function renderRuleConnections(name, label) {
-	return tableCell(_('Connections'), [ mwan4Connections.renderRuleButton(name, label, mwan4Connections.ruleStats(name, live.status, live.counters), showConnectionsModal) ]);
+	return mwan4Connections.renderRuleButton(name, label, mwan4Connections.ruleStats(name, live.status, live.counters), showConnectionsModal);
 }
 
 function renderDefaultRuleConnections(name) {
-	return tableCell(_('Connections'), [ mwan4Connections.renderRuleSummary(mwan4Connections.ruleStats(name, live.status, live.counters)) ]);
+	return mwan4Connections.renderRuleSummary(mwan4Connections.ruleStats(name, live.status, live.counters));
 }
 
 function renderHits(counters, name) {
@@ -2231,21 +2644,40 @@ function renderHits(counters, name) {
 	return [ E('strong', { title: _('%d bytes').format(hits.bytes) }, [ String(hits.packets) ]), E('small', [ formatBytes(hits.bytes) ]) ];
 }
 
+function activityLine(label, key, nodes) {
+	return E('div', { class: 'mwan4-activity-line' }, [
+		E('span', { class: 'mwan4-activity-label' }, [ label ]),
+		E('div', { class: 'mwan4-activity-value', 'data-activity': key }, nodes)
+	]);
+}
+
+function renderActivity(name, counters, connections) {
+	return tableCell(_('Activity'), [
+		activityLine(_('Hits'), 'hits', renderHits(counters, name)),
+		connectionsEnabled() ? activityLine(_('Connections'), 'connections', [ connections ]) : null
+	]);
+}
+
 function ruleWarnings(status, name) {
 	return runtimeWarnings(status).filter(function(warning) { return warning && warning.rule == name; }).map(function(warning) {
 		return E('small', { class: 'mwan4-rule-warning' }, [ formatDisplayValue(warning.message || warning.code, _('Runtime warning')) ]);
 	});
 }
 
-function renderRuleMatch(draft, status) {
-	let what = chipList(draft.domain, 'mwan4-chip-domain', 4).concat(chipList(draft.dest_ip, 'mwan4-chip-ip', 4));
-	let transport = draft.proto != 'all' || draft.dest_port || draft.src_port ? describeTransport(draft) : null;
-	let scope = [ describeWho(draft), transport, ruleOptionList(draft).join(', ') ].filter(Boolean);
+function ruleBadge(entry) {
+	let found = mwan4Rulesui.attention(entry.issues);
+	let text = found.map(function(issue) { return issue.message; }).join(' ');
 
-	return [
-		E('div', { class: 'mwan4-chips', title: describeWhat(draft) }, what.length ? what : [ E('span', { class: 'mwan4-muted-line' }, [ _('Any destination') ]) ]),
-		E('small', [ scope.join(' / ') ])
-	].concat(ruleWarnings(status, draft.name));
+	if (!found.length)
+		return null;
+
+	return E('button', {
+		class:        'mwan4-rule-badge is-%s'.format(found.some(function(issue) { return issue.severity == 'error'; }) ? 'error' : 'warning'),
+		type:         'button',
+		title:        text,
+		'aria-label': _('Needs attention: %s').format(text),
+		click:        function() { return showRuleModal(entry.draft.name); }
+	}, [ _('Needs attention') ]);
 }
 
 function dropAfter(ev) {
@@ -2312,59 +2744,56 @@ function moveButton(name, label, step, disabled) {
 	return E('button', {
 		class:        'btn cbi-button cbi-button-neutral mwan4-compact-button mwan4-move',
 		'aria-label': step < 0 ? _('Move routing rule %s up').format(label) : _('Move routing rule %s down').format(label),
-		disabled:     disabled ? 'disabled' : null,
+		title:        mwan4Rulesui.isFiltered(ruleView) ? _('Clear the search and filter to reorder rules') : null,
+		disabled:     disabled || mwan4Rulesui.isFiltered(ruleView) ? 'disabled' : null,
 		click:        function() { return moveRuleStep(name, step); }
 	}, [ step < 0 ? '^' : 'v' ]);
 }
 
-function renderRuleRow(rule, index, total, status, counters) {
-	let name = rule['.name'];
-	let draft = ruleDraftFromSection(name);
+function renderRuleRow(entry, total, status, counters) {
+	let draft = entry.draft;
+	let name = draft.name;
+	let reorder = !mwan4Rulesui.isFiltered(ruleView);
 	let attrs = Object.assign({
 		class:        'mwan4-row mwan4-rule-row%s'.format(draft.enabled == '0' ? ' is-disabled' : ''),
 		role:         'row',
-		draggable:    'true',
+		draggable:    reorder ? 'true' : null,
 		'data-rule':  name
-	}, ruleDragHandlers(name));
+	}, reorder ? ruleDragHandlers(name) : {});
 
 	return E('div', attrs, [
 		tableCell(_('Order'), [
-			E('span', { class: 'mwan4-drag-handle', 'aria-hidden': 'true', title: _('Drag to reorder') }, [ '::' ]),
-			E('span', { class: 'mwan4-rule-index' }, [ String(index + 1) ]),
-			moveButton(name, draft.label, -1, index == 0),
-			moveButton(name, draft.label, 1, index == total - 1)
+			E('span', { class: 'mwan4-drag-handle', 'aria-hidden': 'true', title: reorder ? _('Drag to reorder') : _('Clear the search and filter to reorder rules') }, [ '::' ]),
+			E('span', { class: 'mwan4-rule-index' }, [ String(entry.index + 1) ]),
+			moveButton(name, draft.label, -1, entry.index == 0),
+			moveButton(name, draft.label, 1, entry.index == total - 1)
 		], { class: 'mwan4-rule-order' }),
-		tableCell(_('Enabled'), [
+		tableCell(_('On'), [
 			E('input', { type: 'checkbox', class: 'mwan4-rule-toggle', checked: draft.enabled == '1' ? 'checked' : null, 'aria-label': _('Enable routing rule %s').format(draft.label),
 				change: function(ev) { return toggleRule(name, ev.currentTarget.checked); } })
 		]),
-		tableCell(_('Rule'), [ E('strong', [ draft.label ]), E('small', [ draft.label != name ? name : formatRuleSummaryFamily(rule) ]) ]),
-		tableCell(_('Match'), renderRuleMatch(draft, status)),
-		tableCell(_('Via'), renderVia(draft.via, status)),
-		tableCell(_('Hits'), renderHits(counters, name)),
-		connectionsEnabled() ? renderRuleConnections(name, draft.label) : null,
+		tableCell(_('Rule'), [ E('div', { class: 'mwan4-rule-title' }, [ E('strong', [ draft.label ]), ruleBadge(entry) ]),
+			E('small', { class: 'mwan4-rule-sentence' }, [ entry.sentence ]) ].concat(ruleWarnings(status, name))),
+		tableCell(_('Goes through'), renderGoesThrough(entry.path, status)),
+		renderActivity(name, counters, renderRuleConnections(name, draft.label)),
 		tableCell(_('Actions'), [
-			E('button', { class: 'btn cbi-button cbi-button-edit', 'aria-label': _('Edit routing rule %s').format(draft.label), click: function() { return showRuleModal(name); } }, [ _('Edit') ])
+			E('button', { class: 'btn cbi-button cbi-button-edit', 'aria-label': _('Edit routing rule %s').format(draft.label), click: function() { return showRuleModal(name); } }, [ _('Edit') ]),
+			E('button', { class: 'btn cbi-button cbi-button-neutral', 'aria-label': _('Duplicate routing rule %s').format(draft.label), click: function() { return duplicateRule(name); } }, [ _('Duplicate') ])
 		], { class: 'mwan4-actions' })
 	]);
 }
 
-function formatRuleSummaryFamily(rule) {
-	return asArray(rule.family).map(familyLabel).join(' + ');
-}
-
 function renderDefaultRuleRow(rule, status, counters) {
 	let name = rule['.name'];
-	let family = asArray(rule.family)[0] || (rule.dest_ip == '::/0' ? 'ipv6' : 'ipv4');
+	let ctx = ruleContext(status);
 
 	return E('div', { class: 'mwan4-row mwan4-rule-row is-default', role: 'row', 'data-rule': name }, [
 		tableCell(_('Order'), [ E('span', { class: 'mwan4-rule-index', title: _('Default routing always stays last') }, [ '=' ]) ], { class: 'mwan4-rule-order' }),
-		tableCell(_('Enabled'), []),
-		tableCell(_('Rule'), [ E('strong', [ _('Everything else') ]), E('small', [ familyLabel(family) ]) ]),
-		tableCell(_('Match'), [ E('span', { class: 'mwan4-muted-line' }, [ _('All traffic no rule above matched') ]) ]),
-		tableCell(_('Via'), renderVia(rule.use_strategy || 'default', status)),
-		tableCell(_('Hits'), renderHits(counters, name)),
-		connectionsEnabled() ? renderDefaultRuleConnections(name) : null,
+		tableCell(_('On'), []),
+		tableCell(_('Rule'), [ E('strong', [ _('Everything else') ]), E('small', { class: 'mwan4-rule-sentence' }, [
+			_('Traffic that no rule above matches (%s)').format(familyLabel(defaultRuleFamily(rule))) ]) ]),
+		tableCell(_('Goes through'), renderGoesThrough(mwan4Explain.pathSummary(rule.use_strategy || 'default', ctx.strategies, ctx.routes), status)),
+		renderActivity(name, counters, renderDefaultRuleConnections(name)),
 		tableCell(_('Actions'), [])
 	]);
 }
@@ -2373,35 +2802,117 @@ function trafficRules() {
 	return rules().filter(function(rule) { return !isGeneratedDefaultRule(rule); });
 }
 
-function renderRules(status, counters) {
-	let movable = trafficRules();
-	let labels = [ _('Order'), _('Enabled'), _('Rule'), _('Match'), _('Via'), _('Hits') ].concat(connectionsEnabled() ? [ _('Connections') ] : [], [ _('Actions') ]);
-	let nodes = [ tableHeader(labels, 'mwan4-rule-head') ];
+function ruleEntries(status) {
+	let ctx = ruleContext(status);
+	let drafts = ruleDrafts();
 
-	if (!movable.length)
+	return drafts.filter(function(draft) { return !isDefaultDraft(draft); }).map(function(draft, index) {
+		let sentence = mwan4Explain.ruleSentence(draft, ctx);
+
+		return {
+			draft:    draft,
+			index:    index,
+			sentence: sentence,
+			issues:   mwan4Rulesui.issues(draft, ruleCheckContext(draft.name, ctx, drafts)),
+			path:     mwan4Explain.pathSummary(draft.via, ctx.strategies, ctx.routes),
+			text:     mwan4Rulesui.searchText(draft, sentence, knownDevices)
+		};
+	});
+}
+
+function ruleCountText(shown, total) {
+	return _('%d of %d rules').format(shown, total);
+}
+
+function syncRulesCount() {
+	let node = byId('mwan4-rules-count');
+	let text = ruleCountText(ruleCount.shown, ruleCount.total);
+
+	if (node && node.textContent != text)
+		node.textContent = text;
+}
+
+function clearRuleView() {
+	ruleView = { query: '', filter: 'all' };
+	document.querySelectorAll('.mwan4-rules-toolbar [name="rule_search"], .mwan4-rules-toolbar [name="rule_filter"]').forEach(function(node) {
+		node.value = node.name == 'rule_search' ? '' : 'all';
+	});
+	refreshRules();
+}
+
+function renderRules(status, counters) {
+	let entries = ruleEntries(status);
+	let shown = entries.filter(function(entry) { return mwan4Rulesui.visible(entry, ruleView); });
+	let nodes = [ tableHeader([ _('Order'), _('On'), _('Rule'), _('Goes through'), _('Activity'), _('Actions') ], 'mwan4-rule-head') ];
+
+	ruleCount = { shown: shown.length, total: entries.length };
+
+	if (!entries.length)
 		nodes.unshift(renderEmptyState(
 			_('No routing rules yet.'),
 			_('All traffic follows the default routing below. Add a rule to send a site, a device, or a whole network through specific WAN links.'),
 			[ E('button', { class: 'btn cbi-button cbi-button-add', 'aria-label': _('Add routing rule'), click: function() { return showRuleModal(null); } }, [ _('Add rule') ]) ]
 		));
+	else if (!shown.length)
+		nodes.unshift(renderEmptyState(
+			_('No routing rule matches.'),
+			_('Change the search or the filter to see more rules.'),
+			[ E('button', { class: 'btn cbi-button cbi-button-neutral', click: clearRuleView }, [ _('Clear search and filter') ]) ]
+		));
 
-	movable.forEach(function(rule, index) { nodes.push(renderRuleRow(rule, index, movable.length, status, counters)); });
+	shown.forEach(function(entry) { nodes.push(renderRuleRow(entry, entries.length, status, counters)); });
 	rules().filter(isGeneratedDefaultRule).forEach(function(rule) { nodes.push(renderDefaultRuleRow(rule, status, counters)); });
 
 	return E('div', { class: 'mwan4-table mwan4-rules%s'.format(connectionsEnabled() ? ' has-connections' : ''), role: 'table', 'aria-label': _('Routing rules') }, nodes);
 }
 
-function renderRulesPanel(status, counters) {
-	return E('section', { class: 'mwan4-panel', 'aria-labelledby': 'mwan4-rules-title' }, [
-		E('div', { class: 'mwan4-panel-heading' }, [
-			E('div', [ E('span', { class: 'mwan4-eyebrow' }, [ _('Evaluated top to bottom') ]), E('h3', { id: 'mwan4-rules-title' }, [ _('Routing rules') ]) ]),
-			E('div', { class: 'mwan4-actions mwan4-rules-actions' }, [
-				canImportPbr() ? E('button', { class: 'btn cbi-button cbi-button-neutral', 'aria-label': _('Import routing rules from PBR'), 'aria-busy': 'false', click: function(ev) { return openPbrImport(eventButton(ev)); } }, [ _('Import from PBR') ]) : '',
-				E('button', { class: 'btn cbi-button cbi-button-add', 'aria-label': _('Add routing rule'), click: function() { return showRuleModal(null); } }, [ _('Add rule') ])
-			])
+function refreshRules() {
+	let body = byId('mwan4-rules-body');
+
+	if (body)
+		body.replaceChildren(renderRules(live.status, live.counters));
+
+	syncRulesCount();
+}
+
+function ruleFilterChoices() {
+	return [ [ 'all', _('All') ], [ 'active', _('Active') ], [ 'disabled', _('Disabled') ], [ 'attention', _('Needs attention') ] ];
+}
+
+function renderRulesToolbar() {
+	let onChange = function(key) { return function(ev) { ruleView[key] = ev.currentTarget.value; refreshRules(); }; };
+
+	return E('div', { class: 'mwan4-rules-toolbar', role: 'search' }, [
+		E('label', { class: 'mwan4-rules-search' }, [
+			E('span', { class: 'mwan4-sr-only' }, [ _('Search routing rules') ]),
+			E('input', { type: 'search', name: 'rule_search', value: ruleView.query, placeholder: _('Search rules, sites or devices'), input: onChange('query') })
 		]),
+		E('label', { class: 'mwan4-rules-filter' }, [
+			E('span', [ _('Show') ]),
+			E('select', { name: 'rule_filter', change: onChange('filter') }, optionList(ruleFilterChoices(), ruleView.filter))
+		]),
+		E('span', { id: 'mwan4-rules-count', class: 'mwan4-muted-line', 'aria-live': 'polite' }),
+		E('div', { class: 'mwan4-actions mwan4-rules-actions' }, [
+			E('button', { class: 'btn cbi-button cbi-button-neutral', click: function() { return showTesterModal(); } }, [ _('Test traffic') ]),
+			E('button', { class: 'btn cbi-button cbi-button-neutral', click: showDefaultRoutingChoice }, [ _('Change default routing') ]),
+			canImportPbr() ? E('button', { class: 'btn cbi-button cbi-button-neutral', 'aria-label': _('Import routing rules from PBR'), 'aria-busy': 'false', click: function(ev) { return openPbrImport(eventButton(ev)); } }, [ _('Import from PBR') ]) : null,
+			E('button', { class: 'btn cbi-button cbi-button-add', 'aria-label': _('Add routing rule'), click: function() { return showRuleModal(null); } }, [ _('Add rule') ])
+		])
+	]);
+}
+
+function renderRulesPanel(status, counters) {
+	let panel = E('section', { class: 'mwan4-panel', 'aria-labelledby': 'mwan4-rules-title' }, [
+		E('div', { class: 'mwan4-panel-heading' }, [
+			E('div', [ E('span', { class: 'mwan4-eyebrow' }, [ _('Evaluated top to bottom') ]), E('h3', { id: 'mwan4-rules-title' }, [ _('Routing rules') ]) ])
+		]),
+		renderRulesToolbar(),
 		E('div', { id: 'mwan4-rules-body' }, [ renderRules(status, counters) ])
 	]);
+
+	panel.querySelector('#mwan4-rules-count').textContent = ruleCountText(ruleCount.shown, ruleCount.total);
+
+	return panel;
 }
 
 function pbrPolicies(preview) {
@@ -2456,10 +2967,10 @@ function showPbrImportModal(preview) {
 				E('span', [ _('Nothing is written until you confirm. PBR itself is not changed or stopped; rules keep the PBR order and go before the default routing.') ])
 			]),
 			E('table', { class: 'table mwan4-import-table' }, [
-				E('tr', [ E('th', [ _('PBR policy') ]), E('th', [ _('Result') ]), E('th', [ _('Rule') ]), E('th', [ _('Via') ]) ])
+				E('tr', [ E('th', [ _('PBR policy') ]), E('th', [ _('Result') ]), E('th', [ _('Rule') ]), E('th', [ _('Path') ]) ])
 			].concat(policies.map(renderImportRow))),
 			renderImportList(_('WAN links to create:'), preview.interfaces),
-			renderImportList(_('Strategies to create:'), preview.strategies),
+			renderImportList(_('Paths to create:'), preview.strategies),
 			renderImportWarnings(preview.warnings)
 		]),
 		E('div', { class: 'right mwan4-modal-actions' }, [
@@ -2596,7 +3107,6 @@ return view.extend({
 		poll.add(function() {
 			let commandCenter = byId('mwan4-command-center');
 			let wanWorkspace = byId('mwan4-wan-workspace');
-			let rulesBody = byId('mwan4-rules-body');
 
 			setBusy(commandCenter, true);
 			setBusy(wanWorkspace, true);
@@ -2624,11 +3134,13 @@ return view.extend({
 						]),
 						renderWanWorkspace(result || {}, counterResult)
 					);
-				if (rulesBody && !dragRule)
-					rulesBody.replaceChildren(renderRules(result, counterResult));
+				if (!dragRule)
+					refreshRules();
 				if (byId('mwan4-strategy-connections'))
 					byId('mwan4-strategy-connections').replaceChildren.apply(byId('mwan4-strategy-connections'), renderStrategyConnections());
 				refreshRuleLiveConnections();
+				if (modalRefresh)
+					modalRefresh();
 				setBusy(byId('mwan4-wan-workspace'), false);
 			});
 		});

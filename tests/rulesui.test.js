@@ -64,6 +64,10 @@ assert.deepEqual(ui.problems(raw({ what: '', anchor: 'link' })).map(item => item
 assert.deepEqual(ui.problems(raw({ what: '', proto: 'tcp' })), [], 'a protocol alone is something to match');
 assert.equal(ui.problems(raw({ what: 'a.com', dest_port: '443' })).length, 1, 'one message per field');
 
+assert.equal(ui.matchesNothing(draft()), true);
+assert.equal(ui.matchesNothing(draft({ domain: [ 'a.com' ] })), false);
+assert.equal(ui.matchesNothing(draft({ proto: 'udp' })), false, 'a protocol alone is something to match');
+
 // simple mode shares the checks and names the missing fields
 assert.deepEqual(ui.simpleProblems(templates['site-link'], { what: 'youtube.com', link: 'wan_tim' }), []);
 assert.deepEqual(ui.simpleProblems(templates['site-link'], { what: '', link: 'wan_tim' }).map(item => [ item.field, item.message ]),
@@ -177,9 +181,12 @@ assert.deepEqual(ui.testQuery({ destination: ' youtube.com ', source: 'AA-BB-CC-
 	{ destination: 'youtube.com', proto: 'tcp', port: '443', source: { ip: '', mac: 'aa:bb:cc:dd:ee:01', iface: '' } });
 assert.deepEqual(ui.testQuery({ destination: 'a.com', source: '192.168.1.20' }).source, { ip: '192.168.1.20', mac: '', iface: '' });
 assert.equal(ui.testQuery({ destination: 'a.com' }).proto, 'all');
-assert.deepEqual(ui.testPrefill(draft({ domain: [ 'a.com', 'b.com' ], src_ip: [ '10.0.0.5' ] })), { destination: 'a.com', source: '10.0.0.5' });
-assert.deepEqual(ui.testPrefill(draft({ dest_ip: [ '203.0.113.0/24' ], src_mac: [ 'aa:bb:cc:dd:ee:01' ] })), { destination: '203.0.113.0', source: 'aa:bb:cc:dd:ee:01' });
-assert.deepEqual(ui.testPrefill(draft({ dest_ip: [ '0.0.0.0/0' ] })), { destination: '', source: '' }, 'a catch-all has nothing to test');
+assert.deepEqual(ui.testPrefill(draft({ domain: [ 'a.com', 'b.com' ], src_ip: [ '10.0.0.5' ] })), { destination: 'a.com', source: '10.0.0.5', proto: 'all', port: '' });
+assert.deepEqual(ui.testPrefill(draft({ dest_ip: [ '203.0.113.0/24' ], src_mac: [ 'aa:bb:cc:dd:ee:01' ] })),
+	{ destination: '203.0.113.0', source: 'aa:bb:cc:dd:ee:01', proto: 'all', port: '' });
+assert.deepEqual(ui.testPrefill(draft({ dest_ip: [ '0.0.0.0/0' ] })), { destination: '', source: '', proto: 'all', port: '' }, 'a catch-all has nothing to test');
+assert.deepEqual(ui.testPrefill(draft({ domain: [ 'a.com' ], proto: 'tcp', dest_port: '27015-27030,3074' })).port, '27015', 'a port range starts at its first port');
+assert.deepEqual(ui.testPrefill(draft({ domain: [ 'a.com' ], proto: 'udp', dest_port: '3074' })), { destination: 'a.com', source: '', proto: 'udp', port: '3074' });
 
 const rules = [
 	draft({ name: 'off', label: 'Old', enabled: '0', domain: [ 'youtube.com' ], via: 'tim_first' }),
@@ -202,7 +209,10 @@ result = mwan4Routetest.evaluate(ui.testQuery({ destination: 'youtube.com' }), [
 assert.equal(ui.decidingRule(result), null, 'no rule decides when none matches');
 
 result = mwan4Routetest.evaluate(ui.testQuery({ destination: 'youtube.com' }), [ draft({ name: 'net', label: 'Office', dest_ip: [ '10.0.0.0/8' ], via: 'tim_first' }), rules[2] ], strategies, routes, status);
-assert.equal(ui.assumptionNote(result), 'Assumed not to apply, because they only match IP addresses: Office.');
+assert.equal(ui.assumptionNote(result), '', 'an evaluator text that names the assumed rules is not repeated');
+assert.equal(ui.assumptionNote({ ...result, text: 'Matches rule "Video" (#2).' }), 'Assumed not to apply, because they only match IP addresses: Office.');
+assert.equal(ui.assumptionNote({ text: 'x', assumptions: [] }), '');
+assert.equal(ui.assumptionNote({ text: 'x' }), '');
 
 const unknown = mwan4Routetest.evaluate(ui.testQuery({ destination: '203.0.113.7' }), [ draft({ name: 'dom', label: 'Domain rule', domain: [ 'a.com' ], via: 'tim_first' }) ], strategies, routes, status);
 

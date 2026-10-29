@@ -7,6 +7,11 @@ const rulesModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/res
 const overviewModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/overview.js');
 const connectionsModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/connections.js');
 const linkHistoryModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/linkhistory.js');
+const explainModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/explain.js');
+const routetestModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/routetest.js');
+const rulecheckModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/rulecheck.js');
+const rulesuiModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/rulesui.js');
+const templatesModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/templates.js');
 const stabilityModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/stability.js');
 const diagnosticsModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/diagnostics.js');
 const diagnosticsPath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/view/mwan4/status/diagnostics.js');
@@ -643,9 +648,16 @@ async function renderOverview(page, options) {
 		const overviewModule = new Function('baseclass', 'mwan4Common', 'L', 'E', '_', args.overviewModuleSource)(baseclass, common, L, E, translate);
 		const rulesModule = new Function('baseclass', 'L', 'E', '_', args.rulesModuleSource)(baseclass, L, E, translate);
 		const connectionsModule = new Function('baseclass', 'rpc', 'mwan4Common', 'L', 'E', '_', args.connectionsModuleSource)(baseclass, rpc, common, L, E, translate);
+		const explainModule = new Function('baseclass', '_', args.explainModuleSource)(baseclass, translate);
+		const routetestModule = new Function('baseclass', 'mwan4Rules', '_', args.routetestModuleSource)(baseclass, rulesModule, translate);
+		const rulecheckModule = new Function('baseclass', 'mwan4Routetest', '_', args.rulecheckModuleSource)(baseclass, routetestModule, translate);
+		const templatesModule = new Function('baseclass', 'mwan4Rules', '_', args.templatesModuleSource)(baseclass, rulesModule, translate);
+		const rulesuiModule = new Function('baseclass', 'mwan4Explain', 'mwan4Routetest', 'mwan4Rulecheck', 'mwan4Rules', 'mwan4Templates', '_', args.rulesuiModuleSource)(
+			baseclass, explainModule, routetestModule, rulecheckModule, rulesModule, templatesModule, translate);
 		const stabilityModule = new Function('baseclass', 'rpc', 'mwan4Common', 'mwan4Connections', 'L', 'E', '_', args.stabilityModuleSource)(baseclass, rpc, common, connectionsModule, L, E, translate);
 		const linkHistoryModule = new Function('baseclass', 'mwan4Common', 'mwan4Stability', 'L', 'E', '_', args.linkHistoryModuleSource)(baseclass, common, stabilityModule, L, E, translate);
-		const module = new Function('fs', 'poll', 'rpc', 'uci', 'ui', 'view', 'mwan4Common', 'mwan4Connections', 'mwan4LinkHistory', 'mwan4Overview', 'mwan4Rules', 'mwan4Stability', 'L', 'E', '_', args.overviewSource)(fs, poll, rpc, uci, ui, view, common, connectionsModule, linkHistoryModule, overviewModule, rulesModule, stabilityModule, L, E, translate);
+		const module = new Function('fs', 'poll', 'rpc', 'uci', 'ui', 'view', 'mwan4Common', 'mwan4Connections', 'mwan4Explain', 'mwan4LinkHistory', 'mwan4Overview', 'mwan4Routetest', 'mwan4Rules', 'mwan4Rulesui', 'mwan4Stability', 'mwan4Templates', 'L', 'E', '_', args.overviewSource)(
+			fs, poll, rpc, uci, ui, view, common, connectionsModule, explainModule, linkHistoryModule, overviewModule, routetestModule, rulesModule, rulesuiModule, stabilityModule, templatesModule, L, E, translate);
 		const root = document.getElementById('test-root');
 
 		root.replaceChildren(module.render([
@@ -690,6 +702,11 @@ async function renderOverview(page, options) {
 		linkHistoryModuleSource: fs.readFileSync(linkHistoryModulePath, 'utf8'),
 		stabilityModuleSource: fs.readFileSync(stabilityModulePath, 'utf8'),
 		rulesModuleSource: fs.readFileSync(rulesModulePath, 'utf8'),
+		explainModuleSource: fs.readFileSync(explainModulePath, 'utf8'),
+		routetestModuleSource: fs.readFileSync(routetestModulePath, 'utf8'),
+		rulecheckModuleSource: fs.readFileSync(rulecheckModulePath, 'utf8'),
+		rulesuiModuleSource: fs.readFileSync(rulesuiModulePath, 'utf8'),
+		templatesModuleSource: fs.readFileSync(templatesModulePath, 'utf8'),
 		commonSource: fs.readFileSync(commonPath, 'utf8'),
 		hostHints: options.hostHints || defaultHostHints(),
 		pbrPreview: options.pbrPreview || { policies: [] },
