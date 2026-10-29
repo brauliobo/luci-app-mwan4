@@ -1078,7 +1078,7 @@ button.mwan4-command-metric:hover,
 }
 
 .mwan4-rules .mwan4-row {
-	grid-template-columns: 96px 40px minmax(240px, 2.4fr) minmax(200px, 1.6fr) 150px 170px;
+	grid-template-columns: 96px 40px minmax(200px, 2.4fr) minmax(170px, 1.6fr) 150px 170px;
 	align-items: start;
 }
 
@@ -1191,6 +1191,7 @@ button.mwan4-command-metric:hover,
 }
 
 @media (max-width: 900px) {
+	.mwan4-rules .mwan4-row,
 	.mwan4-compact-metrics.has-connections {
 		grid-template-columns: 1fr;
 	}
