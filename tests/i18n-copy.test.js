@@ -13,6 +13,7 @@ const jsFiles = [
 	'htdocs/luci-static/resources/mwan4/advanced.js',
 	'htdocs/luci-static/resources/mwan4/diagnostics.js',
 	'htdocs/luci-static/resources/mwan4/explain.js',
+	'htdocs/luci-static/resources/mwan4/fields.js',
 	'htdocs/luci-static/resources/mwan4/guide.js',
 	'htdocs/luci-static/resources/mwan4/linkhistory.js',
 	'htdocs/luci-static/resources/mwan4/overview.js',
@@ -406,5 +407,24 @@ assert.deepEqual(potIds.filter((id, index) => id && potIds.indexOf(id) != index)
 for (const file of jsFiles.map(file => file.replace('htdocs/luci-static/resources/', '')))
 	for (const match of read('htdocs/luci-static/resources/' + file).matchAll(/(?<![\w$.])_\('((?:[^'\\]|\\.)*)'\)/g))
 		assert.ok(potIds.map(unescape).includes(unescape(match[1])), `POT is missing "${match[1]}" used in ${file}`);
+
+// every resource file is covered by this test, so a new file cannot slip past the POT check
+const onDisk = (dir) => fs.readdirSync(path.join(root, dir), { withFileTypes: true })
+	.flatMap(entry => entry.isDirectory() ? onDisk(path.join(dir, entry.name)) : entry.name.endsWith('.js') ? [ path.join(dir, entry.name) ] : []);
+
+assert.deepEqual(onDisk('htdocs/luci-static/resources').sort(), [ ...jsFiles ].sort(), 'jsFiles lists every JavaScript resource');
+
+// no msgid stays in the POT once no resource uses it: only strings that come from resources or the menu are checked, ACL texts are not
+const used = new Set([ ...combined.matchAll(/(?<![\w$.])_\('((?:[^'\\]|\\.)*)'\)/g) ].map(match => unescape(match[1])).concat(Object.values(JSON.parse(menu)).map(entry => entry.title)));
+
+for (const block of pot.split(/\n\n+/)) {
+	const refs = block.split('\n').filter(line => line.startsWith('#:'));
+	const id = (block.match(/^msgid ((?:"(?:[^"\\]|\\.)*"\n)*"(?:[^"\\]|\\.)*")/m) || [])[1];
+
+	if (!id || !refs.length || !refs.every(ref => /htdocs\/luci-static|menu\.d\//.test(ref)))
+		continue;
+
+	assert.ok(used.has(unescape(id.split('\n').map(part => part.slice(1, -1)).join(''))), `the POT keeps a string no resource uses: ${id}`);
+}
 
 console.log('i18n and copy expectations passed');
