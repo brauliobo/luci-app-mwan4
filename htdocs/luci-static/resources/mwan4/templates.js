@@ -277,6 +277,7 @@ return baseclass.extend({
 	autoLabel:        autoLabel,
 	detectionSeconds: detectionSeconds,
 	healthProfiles:   healthProfiles,
+	presetOf:         presetOf,
 	profileFor:       profileFor,
 	profileValues:    profileValues,
 	recoverySeconds:  recoverySeconds,
