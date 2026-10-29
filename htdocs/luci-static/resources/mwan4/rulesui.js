@@ -155,6 +155,53 @@ function attention(list) {
 	return list.filter(item => item.severity != 'info');
 }
 
+/*
+ * The backend ANDs the domains of a rule with its addresses, so a rule listing both never matches. Saving writes one rule
+ * per kind instead (as the PBR import does): the first keeps the names, the second the addresses and every other option.
+ */
+function isMixed(draft) {
+	return asList(draft.domain).length > 0 && asList(draft.dest_ip).length > 0;
+}
+
+function splitNote() {
+	return _('This creates 2 rules: one for names, one for addresses');
+}
+
+function splitMixed(draft) {
+	if (!isMixed(draft))
+		return [ draft ];
+
+	return [
+		Object.assign({}, draft, { dest_ip: [] }),
+		Object.assign({}, draft, { name: null, domain: [], label: draft.label ? _('%s (addresses)').format(draft.label) : '' })
+	];
+}
+
+/* The section name of the second rule: <name>_ip, kept within the 15 characters section names are limited to. */
+function siblingName(name, taken) {
+	return mwan4Rules.sectionName('%s_ip'.format(name.slice(0, 12)), taken);
+}
+
+function sentence(draft, ctx) {
+	return splitMixed(draft).map(part => mwan4Explain.ruleSentence(part, ctx)).join(' ');
+}
+
+function listSentence(draft, ctx) {
+	if (!isMixed(draft))
+		return mwan4Explain.ruleSentence(draft, ctx);
+
+	let text = _('Never matches: it lists both site names and addresses. Edit and save it to split it into two rules.');
+
+	return draft.enabled == '0' ? _('Disabled: %s').format(text) : text;
+}
+
+/* Rule checks of what saving would write: each part of a split draft is checked on its own. */
+function draftIssues(draft, ctx) {
+	let all = splitMixed(draft).flatMap(part => issues(part, ctx));
+
+	return all.filter((item, index) => all.findIndex(other => other.code == item.code && other.message == item.message) == index);
+}
+
 /* Where a draft sits among the saved ones: everything except itself, and its index (a new rule goes before the defaults). */
 function placement(drafts, name, isDefault) {
 	let index = name == null ? -1 : drafts.findIndex(item => item.name == name);
@@ -170,6 +217,14 @@ function withDraft(drafts, draft, isDefault) {
 	let at = before < 0 ? drafts.length : before;
 
 	return index >= 0 ? drafts.map((item, position) => position == index ? draft : item) : drafts.slice(0, at).concat(draft, drafts.slice(at));
+}
+
+/* The parts of a split draft replace the draft in place; the extra ones follow it directly. */
+function withDrafts(drafts, parts, isDefault) {
+	let placed = withDraft(drafts, parts[0], isDefault);
+	let at = placed.indexOf(parts[0]);
+
+	return placed.slice(0, at + 1).concat(parts.slice(1), placed.slice(at + 1));
 }
 
 function copyOf(draft) {
@@ -296,21 +351,29 @@ return baseclass.extend({
 	attention:         attention,
 	copyOf:            copyOf,
 	decidingRule:      decidingRule,
+	draftIssues:       draftIssues,
 	examined:          examined,
 	isFiltered:        isFiltered,
+	isMixed:           isMixed,
 	issues:            issues,
 	linkChoices:       linkChoices,
+	listSentence:      listSentence,
 	matchesNothing:    matchesNothing,
 	placement:         placement,
 	problems:          problems,
 	resolveVia:        resolveVia,
 	searchText:        searchText,
+	sentence:          sentence,
+	siblingName:       siblingName,
 	simpleProblems:    simpleProblems,
 	simpleValues:      simpleValues,
+	splitMixed:        splitMixed,
+	splitNote:         splitNote,
 	testPrefill:       testPrefill,
 	testProblems:      testProblems,
 	testQuery:         testQuery,
 	viaGroups:         viaGroups,
 	visible:           visible,
-	withDraft:         withDraft
+	withDraft:         withDraft,
+	withDrafts:        withDrafts
 });

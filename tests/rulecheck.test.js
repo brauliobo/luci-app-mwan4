@@ -15,8 +15,9 @@ String.prototype.format = function(...values) {
 const baseclass = { extend: definition => definition };
 const identity = text => text;
 const mwan4Rules = new Function('baseclass', '_', read('htdocs/luci-static/resources/mwan4/rules.js'))(baseclass, identity);
-const mwan4Routetest = new Function('baseclass', 'mwan4Rules', '_', read('htdocs/luci-static/resources/mwan4/routetest.js'))(baseclass, mwan4Rules, identity);
-const rulecheck = new Function('baseclass', 'mwan4Routetest', '_', read('htdocs/luci-static/resources/mwan4/rulecheck.js'))(baseclass, mwan4Routetest, identity);
+const mwan4Explain = new Function('baseclass', '_', read('htdocs/luci-static/resources/mwan4/explain.js'))(baseclass, identity);
+const mwan4Routetest = new Function('baseclass', 'mwan4Explain', 'mwan4Rules', '_', read('htdocs/luci-static/resources/mwan4/routetest.js'))(baseclass, mwan4Explain, mwan4Rules, identity);
+const rulecheck = new Function('baseclass', 'mwan4Explain', 'mwan4Routetest', '_', read('htdocs/luci-static/resources/mwan4/rulecheck.js'))(baseclass, mwan4Explain, mwan4Routetest, identity);
 
 const emptyRule = { enabled: '1', domain: [], dest_ip: [], src_ip: [], src_mac: [], src_iface: '', proto: 'all', src_port: '', dest_port: '', dscp: '', ipset: '' };
 const rule = (name, fields) => Object.assign({}, emptyRule, { name, label: name, via: 'default' }, fields);
@@ -103,7 +104,7 @@ assert.deepEqual(codes(check({ domain: [ 'a.com' ], via: 'gone' }, { position: 0
 assert.deepEqual(codes(check({ domain: [ 'a.com' ], via: 'tim_first' }, { position: 0, routes: routes.map(r => Object.assign({}, r, { enabled: '0' })) })), [ 'pathEmpty' ]);
 issues = check({ domain: [ 'a.com' ], via: 'wg_wan_only' }, { position: 0, status });
 assert.equal(find(issues, 'pathDown').severity, 'warning');
-assert.ok(/Wg vpn/.test(find(issues, 'pathDown').message) && /rule stops/.test(find(issues, 'pathDown').message), find(issues, 'pathDown').message);
+assert.ok(/Vpn/.test(find(issues, 'pathDown').message) && /rule stops/.test(find(issues, 'pathDown').message), find(issues, 'pathDown').message);
 issues = check({ domain: [ 'a.com' ], via: 'tim_only' }, { position: 0 });
 assert.ok(/rule uses normal routing/.test(find(issues, 'pathDown').message), 'the effect follows the last resort');
 assert.ok(/Tim/.test(find(issues, 'pathDown').message) && !/Tim and Tim/.test(find(issues, 'pathDown').message), 'IPv4 and IPv6 siblings read as one link');
@@ -112,16 +113,26 @@ assert.equal(find(check({ domain: [ 'a.com' ], via: 'wg_wan_only' }, { position:
 assert.equal(find(check({ domain: [ 'a.com' ], via: 'wg_wan_only' }, { position: 0, status: null }), 'pathDown'), undefined, 'without live status nothing is reported down');
 assert.equal(find(check({ domain: [ 'a.com' ], via: 'default' }, { position: 0 }), 'pathDown'), undefined);
 
-// stopsWhenDown
+// stopsWhenDown: only for a single link that must not leak, or a blocked path
 issues = check({ domain: [ 'a.com' ], via: 'wg_wan_only' }, { position: 0 });
 assert.deepEqual(codes(issues), [ 'stopsWhenDown' ]);
 assert.equal(issues[0].severity, 'info');
-assert.equal(issues[0].message.indexOf('Traffic stops while Wg vpn is unavailable.'), 0);
-assert.ok(/Traffic stops while Tim and Str are all unavailable/.test(find(check({ domain: [ 'a.com' ], via: 'tim_first' }, { position: 0 }), 'stopsWhenDown').message));
-assert.equal(find(check({ domain: [ 'a.com' ], via: 'str_first' }, { position: 0 }), 'stopsWhenDown'), undefined, 'a path with normal routing as last resort does not stop');
+assert.equal(issues[0].message, 'Traffic stops while Vpn is unavailable. Pick "Use first" instead if it should keep flowing through another link.');
+assert.equal(find(check({ domain: [ 'a.com' ], via: 'tim_only' }, { position: 0 }), 'stopsWhenDown'), undefined, 'a single link with normal routing as last resort keeps flowing');
+assert.equal(find(check({ domain: [ 'a.com' ], via: 'tim_first' }, { position: 0 }), 'stopsWhenDown'), undefined, 'an ordinary failover path needs no note');
 assert.equal(find(check({ domain: [ 'a.com' ], via: 'default' }, { position: 0 }), 'stopsWhenDown'), undefined);
 for (const via of [ 'blackhole', 'unreachable' ])
 	assert.ok(/blocks matching traffic/.test(find(check({ domain: [ 'a.com' ], via }, { position: 0 }), 'stopsWhenDown').message), via);
+
+// mixedMatch: the backend ANDs names with addresses
+issues = check({ domain: [ 'a.com' ], dest_ip: [ '9.9.9.0/24' ] }, { position: 0 });
+assert.deepEqual(codes(issues), [ 'mixedMatch' ]);
+assert.equal(issues[0].severity, 'warning');
+assert.equal(issues[0].field, 'what');
+assert.ok(/never matches/.test(issues[0].message) && /splits it/.test(issues[0].message), issues[0].message);
+assert.deepEqual(codes(check({ domain: [ 'a.com' ], dest_ip: [ '0.0.0.0/0' ] }, { position: 0 })), [], 'a catch-all address does not narrow the names');
+assert.deepEqual(codes(check({ domain: [ 'a.com' ] }, { position: 0 })), []);
+assert.deepEqual(codes(check({ dest_ip: [ '9.9.9.0/24' ] }, { position: 0 })), []);
 
 // dnsNotEnforced
 issues = check({ domain: [ 'a.com' ], via: 'default' }, { position: 0, dnsEnforced: false });
@@ -165,7 +176,8 @@ const everything = [
 	check({ domain: [ 'www.youtube.com' ] }, { position: 3, dnsEnforced: false }),
 	check({ domain: [ 'youtube.com' ], via: 'str_first' }, { position: 0 }),
 	check({ via: 'empty' }, { position: 0 }), check({ via: 'gone' }, { position: 0 }), check({ via: 'wg_wan_only' }, { position: 0, status }),
-	check({ via: 'blackhole' }, { position: 0 }), check({ via: 'tim_only' }, { position: 0 }), check({ via: 'tim_first' }, { position: 0 })
+	check({ via: 'blackhole' }, { position: 0 }), check({ via: 'tim_only' }, { position: 0 }), check({ via: 'tim_first' }, { position: 0 }),
+	check({ domain: [ 'a.com' ], dest_ip: [ '9.9.9.0/24' ] }, { position: 0 })
 ].flat();
 assert.ok(everything.length >= 8);
 everything.forEach(item => {

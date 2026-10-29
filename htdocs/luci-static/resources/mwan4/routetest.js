@@ -1,8 +1,9 @@
 'use strict';
 'require baseclass';
+'require mwan4.explain as mwan4Explain';
 'require mwan4.rules as mwan4Rules';
 
-/* global mwan4Rules */
+/* global mwan4Explain, mwan4Rules */
 
 /*
  * "Where would this traffic go?" Evaluates routing-rule drafts top to bottom like the backend (first match wins)
@@ -124,12 +125,6 @@ function portsCover(outer, inner) {
 
 function stateWord(state) {
 	return { offline: _('offline'), disabled: _('disabled'), held: _('on hold') }[state] || state;
-}
-
-function linkLabel(name) {
-	let text = String(name).replace(/^wan_/, '').replace(/6$/, '').replace(/_/g, ' ');
-
-	return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 function linkState(name, status) {
@@ -326,7 +321,7 @@ function skippedText(strategyName, tier, ctx) {
 
 	wans.forEach(wan => {
 		let state = linkState(wan.name, ctx.status);
-		let label = linkLabel(wan.name);
+		let label = mwan4Explain.linkLabel(wan.name);
 		let labels = byWord[stateWord(state)] = byWord[stateWord(state)] || [];
 
 		if (labels.indexOf(label) < 0)
@@ -338,7 +333,7 @@ function skippedText(strategyName, tier, ctx) {
 }
 
 function linkText(strategyName, tier, ctx) {
-	let labels = tier.links.map(linkLabel).filter((label, index, all) => all.indexOf(label) == index);
+	let labels = tier.links.map(mwan4Explain.linkLabel).filter((label, index, all) => all.indexOf(label) == index);
 	let skipped = skippedText(strategyName, tier, ctx);
 	let verb = labels.length > 1 ? _('is shared between %s').format(joinList(labels)) : _('goes through %s').format(labels[0]);
 
@@ -347,7 +342,7 @@ function linkText(strategyName, tier, ctx) {
 
 function stopsText(strategyName, ctx) {
 	let wans = strategyLinks(strategyName, ctx.strategies, ctx.routes, ctx.status, ctx.family);
-	let labels = wans.map(wan => linkLabel(wan.name)).filter((label, index, all) => all.indexOf(label) == index);
+	let labels = wans.map(wan => mwan4Explain.linkLabel(wan.name)).filter((label, index, all) => all.indexOf(label) == index);
 
 	if (!labels.length)
 		return _('stops because the path has no WAN links');
@@ -459,7 +454,6 @@ return baseclass.extend({
 	evaluate:        evaluate,
 	isBuiltinPath:   isBuiltinPath,
 	isEnabled:       isEnabled,
-	linkLabel:       linkLabel,
 	linkState:       linkState,
 	matchDomain:     matchDomain,
 	normalizeRule:   normalizeRule,

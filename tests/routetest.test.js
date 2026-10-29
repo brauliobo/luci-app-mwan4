@@ -15,7 +15,8 @@ String.prototype.format = function(...values) {
 const baseclass = { extend: definition => definition };
 const identity = text => text;
 const mwan4Rules = new Function('baseclass', '_', read('htdocs/luci-static/resources/mwan4/rules.js'))(baseclass, identity);
-const routetest = new Function('baseclass', 'mwan4Rules', '_', read('htdocs/luci-static/resources/mwan4/routetest.js'))(baseclass, mwan4Rules, identity);
+const mwan4Explain = new Function('baseclass', '_', read('htdocs/luci-static/resources/mwan4/explain.js'))(baseclass, identity);
+const routetest = new Function('baseclass', 'mwan4Explain', 'mwan4Rules', '_', read('htdocs/luci-static/resources/mwan4/routetest.js'))(baseclass, mwan4Explain, mwan4Rules, identity);
 
 const emptyRule = { enabled: '1', domain: [], dest_ip: [], src_ip: [], src_mac: [], src_iface: '', proto: 'all', src_port: '', dest_port: '', dscp: '', ipset: '' };
 const rule = (name, fields) => Object.assign({}, emptyRule, { name, label: name }, fields);
@@ -155,10 +156,10 @@ assert.ok(result.steps[1].because.some(reason => /no port chosen/.test(reason)))
 // who: mac, ip, nothing chosen
 result = run({ destination: 'example.com', source: { mac: 'aa:bb:cc:dd:ee:01' } });
 assert.equal(result.matched.rule.name, 'phone');
-assert.equal(result.text, 'Matches rule "phone" (#3) and goes through Wg vpn.');
+assert.equal(result.text, 'Matches rule "phone" (#3) and goes through Vpn.');
 result = run({ destination: 'example.com', source: { mac: 'aa:bb:cc:dd:ee:01' } }, rules, wgDown);
 assert.equal(result.outcome, 'stops');
-assert.equal(result.text, 'Matches rule "phone" (#3) and stops because Wg vpn is unavailable.');
+assert.equal(result.text, 'Matches rule "phone" (#3) and stops because Vpn is unavailable.');
 assert.deepEqual(result.usable, []);
 result = run({ destination: 'example.com', source: { mac: 'aa:bb:cc:dd:ee:99', ip: '10.0.0.77' } });
 assert.equal(result.matched.rule.name, 'default_rule_v4');
@@ -215,7 +216,7 @@ assert.equal(result.text, 'Matches rule "lost" (#1) and uses the path "gone", wh
 // IPv4 and IPv6 destinations
 result = run({ destination: '203.0.113.7' }, ipRules, allOnline);
 assert.equal(result.matched.rule.name, 'office');
-assert.equal(result.text, 'Matches rule "office" (#1) and goes through Wg vpn.');
+assert.equal(result.text, 'Matches rule "office" (#1) and goes through Vpn.');
 assert.ok(result.steps[0].because[0].indexOf('address 203.0.113.7 is in 203.0.113.0/24') == 0);
 result = run({ destination: '2001:db8:1::5' }, ipRules, allOnline);
 assert.equal(result.matched.rule.name, 'office', 'an IPv6 CIDR inside a mixed rule matches');

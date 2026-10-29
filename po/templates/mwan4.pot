@@ -2460,10 +2460,6 @@ msgid "1. What traffic?"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Domains and IP addresses are detected automatically, so list them together."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "Domains and addresses"
 msgstr ""
 
@@ -3986,14 +3982,6 @@ msgid "This rule blocks matching traffic: nothing is sent through any WAN link. 
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/rulecheck.js
-msgid "Traffic stops while %s are all unavailable. Choose a path that uses normal routing if unavailable if it should keep flowing."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/rulecheck.js
-msgid "Traffic stops while %s is unavailable. That suits a VPN or tunnel; otherwise choose a path that uses normal routing if unavailable."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/rulecheck.js
 msgid "Devices that use their own DNS server or encrypted DNS are not matched by site names. Make the router the only DNS server for the LAN, or match by address instead."
 msgstr ""
 
@@ -4540,4 +4528,32 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "Paths to create:"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/rulecheck.js
+msgid "Traffic stops while %s is unavailable. Pick \"Use first\" instead if it should keep flowing through another link."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/rulecheck.js
+msgid "This rule lists both site names and addresses, but it only matches traffic that fits both, so it never matches. Saving splits it into one rule for names and one for addresses."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/rulesui.js
+msgid "This creates 2 rules: one for names, one for addresses"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/rulesui.js
+msgid "%s (addresses)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/rulesui.js
+msgid "Never matches: it lists both site names and addresses. Edit and save it to split it into two rules."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Rules"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Domains and IP addresses are detected automatically. Listing both creates one rule for each kind."
 msgstr ""

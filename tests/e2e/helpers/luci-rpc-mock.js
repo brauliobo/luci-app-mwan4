@@ -649,8 +649,8 @@ async function renderOverview(page, options) {
 		const rulesModule = new Function('baseclass', 'L', 'E', '_', args.rulesModuleSource)(baseclass, L, E, translate);
 		const connectionsModule = new Function('baseclass', 'rpc', 'mwan4Common', 'L', 'E', '_', args.connectionsModuleSource)(baseclass, rpc, common, L, E, translate);
 		const explainModule = new Function('baseclass', '_', args.explainModuleSource)(baseclass, translate);
-		const routetestModule = new Function('baseclass', 'mwan4Rules', '_', args.routetestModuleSource)(baseclass, rulesModule, translate);
-		const rulecheckModule = new Function('baseclass', 'mwan4Routetest', '_', args.rulecheckModuleSource)(baseclass, routetestModule, translate);
+		const routetestModule = new Function('baseclass', 'mwan4Explain', 'mwan4Rules', '_', args.routetestModuleSource)(baseclass, explainModule, rulesModule, translate);
+		const rulecheckModule = new Function('baseclass', 'mwan4Explain', 'mwan4Routetest', '_', args.rulecheckModuleSource)(baseclass, explainModule, routetestModule, translate);
 		const templatesModule = new Function('baseclass', 'mwan4Rules', '_', args.templatesModuleSource)(baseclass, rulesModule, translate);
 		const rulesuiModule = new Function('baseclass', 'mwan4Explain', 'mwan4Routetest', 'mwan4Rulecheck', 'mwan4Rules', 'mwan4Templates', '_', args.rulesuiModuleSource)(
 			baseclass, explainModule, routetestModule, rulecheckModule, rulesModule, templatesModule, translate);

@@ -17,8 +17,8 @@ const identity = text => text;
 const load = (file, names, deps) => new Function('baseclass', ...names, '_', read(file))(baseclass, ...names.map(name => deps[name]), identity);
 const mwan4Rules = load('rules.js', [], {});
 const mwan4Explain = load('explain.js', [], {});
-const mwan4Routetest = load('routetest.js', [ 'mwan4Rules' ], { mwan4Rules });
-const mwan4Rulecheck = load('rulecheck.js', [ 'mwan4Routetest' ], { mwan4Routetest });
+const mwan4Routetest = load('routetest.js', [ 'mwan4Explain', 'mwan4Rules' ], { mwan4Explain, mwan4Rules });
+const mwan4Rulecheck = load('rulecheck.js', [ 'mwan4Explain', 'mwan4Routetest' ], { mwan4Explain, mwan4Routetest });
 const mwan4Templates = load('templates.js', [ 'mwan4Rules' ], { mwan4Rules });
 const ui = load('rulesui.js', [ 'mwan4Explain', 'mwan4Routetest', 'mwan4Rulecheck', 'mwan4Rules', 'mwan4Templates' ],
 	{ mwan4Explain, mwan4Routetest, mwan4Rulecheck, mwan4Rules, mwan4Templates });
@@ -102,7 +102,8 @@ const check = (extra, over) => ui.issues(draft(Object.assign({ domain: [ 'a.com'
 
 assert.deepEqual(check({ via: 'prefer:wan_tim' }).filter(item => item.severity != 'info'), []);
 assert.ok(check({ via: 'only:wan_str' }).some(item => item.code == 'pathDown'), 'a down link is reported through the preset');
-assert.deepEqual(check({ via: 'tim_first' }).map(item => item.code), ['stopsWhenDown']);
+assert.deepEqual(check({ via: 'tim_first' }).map(item => item.code), [], 'an ordinary failover path needs no note');
+assert.deepEqual(check({ via: 'wg_vpn_only' }).map(item => item.code), ['stopsWhenDown']);
 assert.ok(ui.attention(check({ via: 'only:wan_str' })).every(item => item.severity != 'info'));
 
 // placement and drafts
@@ -115,6 +116,47 @@ assert.equal(ui.placement(saved.slice(0, 2), null, isDefault).position, 2);
 assert.deepEqual(ui.withDraft(saved, draft({ name: 'b', label: 'new' }), isDefault).map(item => item.label), [ '', 'new', '', '' ]);
 assert.deepEqual(ui.withDraft(saved, draft({ name: null, label: 'fresh' }), isDefault).map(item => item.label), [ '', '', 'fresh', '', '' ]);
 assert.equal(saved[1].label, '', 'saved drafts are not mutated');
+
+// a rule listing names and addresses is split, because the backend ANDs them
+const mixed = draft({ name: 'vid', label: 'Video', domain: [ 'a.com', 'b.com' ], dest_ip: [ '203.0.113.0/24' ], src_mac: [ 'aa:bb:cc:dd:ee:01' ], proto: 'tcp',
+	dest_port: '443', via: 'tim_first', sticky: '1', ipset: 'vids' });
+let parts = ui.splitMixed(mixed);
+
+assert.equal(ui.isMixed(mixed), true);
+assert.equal(ui.isMixed(draft({ domain: [ 'a.com' ] })), false);
+assert.equal(ui.isMixed(draft({ dest_ip: [ '10.0.0.0/8' ] })), false);
+assert.equal(parts.length, 2);
+assert.deepEqual([ parts[0].name, parts[0].label, parts[0].domain, parts[0].dest_ip ], [ 'vid', 'Video', [ 'a.com', 'b.com' ], [] ], 'the first rule keeps the names');
+assert.deepEqual([ parts[1].name, parts[1].label, parts[1].domain, parts[1].dest_ip ], [ null, 'Video (addresses)', [], [ '203.0.113.0/24' ] ], 'the second rule keeps the addresses');
+for (const key of [ 'src_mac', 'proto', 'dest_port', 'via', 'sticky', 'ipset', 'enabled' ])
+	assert.deepEqual(parts[1][key], parts[0][key], `${key} is the same in both rules`);
+assert.equal(mixed.dest_ip.length, 1, 'the draft is not mutated');
+assert.equal(ui.splitMixed(draft({ name: 'n', label: '', domain: [ 'a.com' ], dest_ip: [ '10.0.0.0/8' ] }))[1].label, '', 'an automatic name stays automatic');
+const plain = draft({ domain: [ 'a.com' ] });
+assert.deepEqual(ui.splitMixed(plain), [ plain ], 'other drafts are not split');
+assert.equal(ui.splitNote(), 'This creates 2 rules: one for names, one for addresses');
+assert.equal(ui.siblingName('video', [ 'video' ]), 'video_ip');
+assert.equal(ui.siblingName('youtube_com_via', [ 'youtube_com_via' ]), 'youtube_com_ip', 'the suffix survives the length limit');
+assert.equal(ui.siblingName('video', [ 'video', 'video_ip' ]), 'video_ip_2', 'a taken name gets a number');
+
+const sentences = ui.sentence(draft({ label: 'Video', domain: [ 'a.com' ], dest_ip: [ '203.0.113.0/24' ], via: 'tim_first' }), ctx);
+
+assert.ok(/Sends a\.com from all devices/.test(sentences) && /Sends 203\.0\.113\.0\/24 from all devices/.test(sentences), sentences);
+assert.ok(!/a\.com and 203/.test(sentences) && !/a\.com, 203/.test(sentences), 'no sentence claims a union');
+assert.equal(ui.sentence(plain, ctx), mwan4Explain.ruleSentence(plain, ctx), 'a plain draft keeps its sentence');
+assert.match(ui.listSentence(mixed, ctx), /^Never matches: it lists both site names and addresses/);
+assert.match(ui.listSentence(Object.assign({}, mixed, { enabled: '0' }), ctx), /^Disabled: Never matches/);
+assert.equal(ui.listSentence(plain, ctx), mwan4Explain.ruleSentence(plain, ctx));
+
+assert.deepEqual(ui.issues(mixed, ctx).map(item => item.code), [ 'mixedMatch' ], 'a saved rule with both kinds is flagged');
+assert.deepEqual(ui.draftIssues(mixed, ctx).map(item => item.code), [], 'what saving would write is not flagged');
+assert.deepEqual(ui.draftIssues(Object.assign({}, mixed, { via: 'wg_vpn_only' }), ctx).map(item => item.code), [ 'stopsWhenDown' ], 'identical notes of both rules are shown once');
+
+const around = [ draft({ name: 'a' }), draft({ name: 'vid' }), draft({ name: 'c' }), draft({ name: 'default_rule_v4' }) ];
+
+assert.deepEqual(ui.withDrafts(around, parts, isDefault).map(item => item.name), [ 'a', 'vid', null, 'c', 'default_rule_v4' ], 'the second rule follows the first');
+assert.deepEqual(ui.withDrafts(around, [ draft({ name: null, label: 'one' }), draft({ name: null, label: 'two' }) ], isDefault).map(item => item.label),
+	[ '', '', '', 'one', 'two', '' ], 'a new rule and its sibling go before the defaults');
 
 const original = draft({ name: 'x', label: 'Video', domain: [ 'a.com' ], via: 'tim_first' });
 const copy = ui.copyOf(original);

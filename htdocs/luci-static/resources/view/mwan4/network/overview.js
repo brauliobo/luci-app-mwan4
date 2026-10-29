@@ -1269,11 +1269,12 @@ function shownFieldProblems(problems) {
 function refreshRuleSummary(modal, draft, ctx, issues) {
 	let path = mwan4Explain.pathSummary(draft.via, ctx.strategies, ctx.routes);
 	let now = mwan4Explain.nowVia(path, ctx.status).text;
-	let sentence = mwan4Rulesui.matchesNothing(draft) ? _('Fill in the fields below to see what this rule does.') : mwan4Explain.ruleSentence(draft, ctx);
+	let empty = mwan4Rulesui.matchesNothing(draft);
 	let set = function(key, text) { modal.querySelector('[data-summary="%s"]'.format(key)).textContent = text; };
 
-	set('sentence', sentence);
-	set('now', mwan4Rulesui.matchesNothing(draft) ? '' : now);
+	set('sentence', empty ? _('Fill in the fields below to see what this rule does.') : mwan4Rulesui.sentence(draft, ctx));
+	set('now', empty ? '' : now);
+	set('split', mwan4Rulesui.isMixed(draft) ? mwan4Rulesui.splitNote() : '');
 	setIfChanged(modal.querySelector('[data-summary="issues"]'), JSON.stringify(issues), function() { return issues.map(renderIssue); });
 
 	let live = modal.querySelector('[data-via-live]');
@@ -1292,7 +1293,7 @@ function refreshRuleEditor() {
 	let ctx = ruleContext();
 	let draft = ruleDraftFromModal(ruleEditor.name);
 	let fields = ruleFieldProblems(modal);
-	let issues = mwan4Rulesui.issues(Object.assign({}, draft, { label: ruleLabel(draft, ctx) }), ruleCheckContext(ruleEditor.name, ctx));
+	let issues = mwan4Rulesui.draftIssues(Object.assign({}, draft, { label: ruleLabel(draft, ctx) }), ruleCheckContext(ruleEditor.name, ctx));
 	let blocking = issues.filter(function(issue) { return issue.severity == 'error'; });
 
 	if (ruleEditor.mode == 'full') {
@@ -1373,16 +1374,19 @@ function keepDefaultsLast() {
 		all.filter(isGeneratedDefaultRule).reverse().forEach(function(rule) { uci.move('mwan4', rule['.name'], last['.name'], true); });
 }
 
-function addRuleSection(label) {
-	let sid = mwan4Rules.sectionName(label, uci.sections('mwan4').map(function(section) { return section['.name']; }));
+function ruleSectionNames() {
+	return uci.sections('mwan4').map(function(section) { return section['.name']; });
+}
+
+function addRuleSection(base) {
+	let sid = mwan4Rules.sectionName(base, ruleSectionNames());
 
 	uci.add('mwan4', 'rule', sid);
 
 	return sid;
 }
 
-function writeRuleDraft(draft) {
-	let sid = draft.name || addRuleSection(draft.label);
+function writeRuleDraft(draft, sid) {
 	let strategy = ensureViaStrategy(draft.via);
 
 	setOptions(sid, {
@@ -1402,6 +1406,18 @@ function writeRuleDraft(draft) {
 		logging:      draft.logging
 	});
 	[ 'domain', 'dest_ip', 'src_ip', 'src_mac' ].forEach(function(option) { setList('mwan4', sid, option, draft[option]); });
+}
+
+function writeRuleDrafts(parts) {
+	let first = parts[0].name || addRuleSection(parts[0].label);
+
+	writeRuleDraft(parts[0], first);
+	parts.slice(1).forEach(function(part) {
+		let sid = addRuleSection(mwan4Rulesui.siblingName(first, ruleSectionNames()));
+
+		writeRuleDraft(part, sid);
+		uci.move('mwan4', sid, first, true);
+	});
 	keepDefaultsLast();
 }
 
@@ -1411,16 +1427,15 @@ function buildRuleChange(name) {
 	if (!validateRuleModal(modal, true))
 		return;
 
-	let draft = ruleDraftFromModal(name);
-
-	draft.label = ruleLabel(draft, ruleContext());
+	let ctx = ruleContext();
+	let parts = mwan4Rulesui.splitMixed(ruleDraftFromModal(name)).map(function(part) { return Object.assign(part, { label: ruleLabel(part, ctx) }); });
 
 	return {
 		summary: name
 			? _('This will update the routing rule before it is saved and applied.')
 			: _('This will add a routing rule before it is saved and applied.'),
-		items:   ruleChangeItems(draft),
-		apply:   function() { return writeRuleDraft(draft); }
+		items:   parts.length > 1 ? [ [ _('Rules'), mwan4Rulesui.splitNote() ] ].concat(parts.flatMap(ruleChangeItems)) : ruleChangeItems(parts[0]),
+		apply:   function() { return writeRuleDrafts(parts); }
 	};
 }
 
@@ -1462,7 +1477,7 @@ function protocolChoices() {
 }
 
 function renderWhatStep(draft) {
-	return renderRuleStep(_('1. What traffic?'), _('Domains and IP addresses are detected automatically, so list them together.'), [
+	return renderRuleStep(_('1. What traffic?'), _('Domains and IP addresses are detected automatically. Listing both creates one rule for each kind.'), [
 		withError(modalTextarea(_('Domains and addresses'), 'what', draft.domain.concat(draft.dest_ip).join('\n'),
 			{ placeholder: 'youtube.com\n203.0.113.0/24\n2001:db8::/32', 'data-autofocus': '1' },
 			_('One entry per line. A site name such as youtube.com also covers its subdomains. Leave empty to match every destination.')), 'what'),
@@ -1631,6 +1646,7 @@ function renderEditorSummary() {
 	return E('div', { class: 'mwan4-rule-summary', 'aria-live': 'polite' }, [
 		E('strong', { class: 'mwan4-summary-sentence', 'data-summary': 'sentence' }),
 		E('span', { class: 'mwan4-summary-now', 'data-summary': 'now' }),
+		E('span', { class: 'mwan4-summary-split', 'data-summary': 'split' }),
 		E('ul', { class: 'mwan4-summary-issues', 'data-summary': 'issues' })
 	]);
 }
@@ -1727,11 +1743,11 @@ function testCurrentRule() {
 	let draft = ruleDraftFromModal(state.name);
 
 	draft.label = ruleLabel(draft, ruleContext()) || _('New rule');
-	showTesterModal(mwan4Rulesui.testPrefill(draft), { draft: draft, state: state });
+	showTesterModal(mwan4Rulesui.testPrefill(draft), { draft: draft, parts: mwan4Rulesui.splitMixed(draft), state: state });
 }
 
 function testerRules(override) {
-	return override ? mwan4Rulesui.withDraft(ruleDrafts(), override.draft, isDefaultDraft) : ruleDrafts();
+	return override ? mwan4Rulesui.withDrafts(ruleDrafts(), override.parts, isDefaultDraft) : ruleDrafts();
 }
 
 function testerValues(modal) {
@@ -1739,7 +1755,7 @@ function testerValues(modal) {
 }
 
 function ruleOpenButton(rule, override) {
-	let own = override && rule === override.draft;
+	let own = override && override.parts.indexOf(rule) >= 0;
 	let open = own
 		? function() { return renderRuleEditor(Object.assign({}, override.state, { base: override.draft })); }
 		: function() { return showRuleModal(rule.name); };
@@ -2623,7 +2639,7 @@ function renderGoesThrough(path, status) {
 	return [
 		path.links.length ? E('div', { class: 'mwan4-chips mwan4-via' }, pathChips(path, status)) : E('strong', [ path.text ]),
 		E('small', { class: 'mwan4-now-via' }, [ mwan4Explain.nowVia(path, status).text ]),
-		path.links.length && path.failure == 'stops' ? E('small', { class: 'mwan4-stops-note' }, [ _('Stops if unavailable') ]) : null
+		path.kind == 'only' && path.failure == 'stops' ? E('small', { class: 'mwan4-stops-note' }, [ _('Stops if unavailable') ]) : null
 	];
 }
 
@@ -2807,7 +2823,7 @@ function ruleEntries(status) {
 	let drafts = ruleDrafts();
 
 	return drafts.filter(function(draft) { return !isDefaultDraft(draft); }).map(function(draft, index) {
-		let sentence = mwan4Explain.ruleSentence(draft, ctx);
+		let sentence = mwan4Rulesui.listSentence(draft, ctx);
 
 		return {
 			draft:    draft,

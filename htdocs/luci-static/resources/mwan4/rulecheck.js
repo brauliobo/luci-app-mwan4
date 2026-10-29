@@ -1,8 +1,9 @@
 'use strict';
 'require baseclass';
+'require mwan4.explain as mwan4Explain';
 'require mwan4.routetest as mwan4Routetest';
 
-/* global mwan4Routetest */
+/* global mwan4Explain, mwan4Routetest */
 
 /*
  * Pre-save checks of one routing rule against the others. Each checker takes (rule, ctx) and returns a list of
@@ -78,7 +79,7 @@ function enabledRoutes(ctx) {
 function pathLinks(via, ctx) {
 	let wans = mwan4Routetest.strategyLinks(via, ctx.strategies, enabledRoutes(ctx));
 
-	return wans.map(wan => mwan4Routetest.linkLabel(wan.name)).filter((label, index, all) => all.indexOf(label) == index);
+	return wans.map(wan => mwan4Explain.linkLabel(wan.name)).filter((label, index, all) => all.indexOf(label) == index);
 }
 
 function joinLabels(labels) {
@@ -129,19 +130,24 @@ function checkPathDown(rule, ctx) {
 			.format(strategyLabel(via, ctx), joinLabels(pathLinks(via, ctx)), effect)) ];
 }
 
+/* Only a path that must not leak (a single link, or a blocked path) is worth a note: "all links down" is true of every path. */
 function checkStopsWhenDown(rule, ctx) {
-	let via = rule.via;
-	let links = pathLinks(via, ctx);
+	let path = mwan4Explain.pathSummary(rule.via, ctx.strategies || [], enabledRoutes(ctx));
 
-	if (via == 'unreachable' || via == 'blackhole')
+	if (path.kind == 'stop' || path.kind == 'drop')
 		return [ issue('info', 'via', 'stopsWhenDown', _('This rule blocks matching traffic: nothing is sent through any WAN link. Choose a WAN link path if it should still get out.')) ];
-	if (!links.length || lastResort(via, ctx) == 'default')
+	if (path.kind != 'only' || path.failure == 'normal')
 		return [];
 
-	return [ issue('info', 'via', 'stopsWhenDown', (links.length > 1
-		? _('Traffic stops while %s are all unavailable. Choose a path that uses normal routing if unavailable if it should keep flowing.')
-		: _('Traffic stops while %s is unavailable. That suits a VPN or tunnel; otherwise choose a path that uses normal routing if unavailable.'))
-		.format(joinLabels(links))) ];
+	return [ issue('info', 'via', 'stopsWhenDown',
+		_('Traffic stops while %s is unavailable. Pick "Use first" instead if it should keep flowing through another link.').format(path.links[0].label)) ];
+}
+
+function checkMixedMatch(rule) {
+	let mixed = rule.domain.length > 0 && rule.dest_ip.some(cidr => !isCatchAllCidr(cidr));
+
+	return mixed ? [ issue('warning', 'what', 'mixedMatch',
+		_('This rule lists both site names and addresses, but it only matches traffic that fits both, so it never matches. Saving splits it into one rule for names and one for addresses.')) ] : [];
 }
 
 function checkDnsEnforced(rule, ctx) {
@@ -167,7 +173,7 @@ function checkBroad(rule, ctx) {
 		: _('This rule sends all traffic from all devices through "%s". Narrow it to a site or device unless that is intended.').format(path)) ];
 }
 
-const CHECKERS = [ checkShadowed, checkDuplicate, checkPathLinks, checkStopsWhenDown, checkDnsEnforced, checkBroad ];
+const CHECKERS = [ checkMixedMatch, checkShadowed, checkDuplicate, checkPathLinks, checkStopsWhenDown, checkDnsEnforced, checkBroad ];
 
 function check(draft, ctx) {
 	let rule = mwan4Routetest.normalizeRule(draft);

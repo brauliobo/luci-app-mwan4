@@ -7,7 +7,7 @@ function uciWithRules() {
 	const rest = uci.mwan4.filter(function(section) { return defaults.indexOf(section) < 0; });
 
 	uci.mwan4 = rest.concat([
-		{ '.type': 'rule', '.name': 'streaming', label: 'Streaming', enabled: '1', domain: [ 'netflix.com', 'youtube.com' ], dest_ip: [ '203.0.113.0/24' ], src_mac: [ 'aa:bb:cc:dd:ee:01' ], proto: 'tcp', dest_port: '443', use_strategy: 'failover', family: [ 'ipv4', 'ipv6' ] },
+		{ '.type': 'rule', '.name': 'streaming', label: 'Streaming', enabled: '1', domain: [ 'netflix.com', 'youtube.com' ], src_mac: [ 'aa:bb:cc:dd:ee:01' ], proto: 'tcp', dest_port: '443', use_strategy: 'failover', family: [ 'ipv4', 'ipv6' ] },
 		{ '.type': 'rule', '.name': 'console', label: 'Gaming console', enabled: '0', src_ip: [ '192.168.1.50' ], dscp: '46', local: '1', use_strategy: 'default', family: [ 'ipv4' ] },
 		{ '.type': 'rule', '.name': 'backups', enabled: '1', dest_ip: '198.51.100.7', use_strategy: 'unreachable', family: [ 'ipv4' ] }
 	]).concat(defaults);
@@ -415,14 +415,14 @@ test.describe('mocked mwan4 routing rules', () => {
 		await expect(page.locator('.mwan4-rule-head [role="columnheader"]')).toHaveText([ 'Order', 'On', 'Rule', 'Goes through', 'Activity', 'Actions' ]);
 		await expect(streaming).toContainText('Streaming');
 		await expect(streaming.locator('.mwan4-rule-sentence')).toHaveText(
-			'Sends netflix.com, youtube.com and 203.0.113.0/24 from living-room-tv (aa:bb:cc:dd:ee:01) on TCP port 443 through Primary first, then Backup; stops if none is available');
+			'Sends netflix.com and youtube.com from living-room-tv (aa:bb:cc:dd:ee:01) on TCP port 443 through Primary first, then Backup; stops if none is available');
 		await expect(streaming.locator('.mwan4-chip-domain, .mwan4-chip-ip')).toHaveCount(0);
 		await expect(streaming.locator('.mwan4-via [data-wan]')).toHaveCount(2);
 		await expect(streaming.locator('.mwan4-via [data-wan="wan_primary"]')).toHaveClass(/mwan4-online/);
 		await expect(streaming.locator('.mwan4-via [data-wan="wan_backup"]')).toHaveClass(/mwan4-offline/);
 		await expect(streaming.locator('.mwan4-via')).toContainText('\u2192');
 		await expect(streaming.locator('.mwan4-now-via')).toHaveText('Now: Primary');
-		await expect(streaming.locator('.mwan4-stops-note')).toHaveText('Stops if unavailable');
+		await expect(streaming.locator('.mwan4-stops-note')).toHaveCount(0);
 		await expect(streaming).not.toContainText('ordered failover');
 		await expect(streaming.locator('[data-activity="hits"]')).toContainText('50');
 		await expect(streaming.locator('.mwan4-rule-warning')).toContainText('dnsmasq-full with nftset support is missing');
@@ -441,6 +441,17 @@ test.describe('mocked mwan4 routing rules', () => {
 		await expect(page.locator('.mwan4-rule-badge')).toHaveCount(0);
 		await expect(page.locator('#mwan4-rules-count')).toHaveText('3 of 3 rules');
 		await expect(page.locator('details')).toHaveCount(0);
+	});
+
+	test('notes "Stops if unavailable" only on a path of a single link', async ({ page }) => {
+		const uci = uciWithRules();
+
+		uci.mwan4.push({ '.type': 'strategy', '.name': 'wan_primary_only', use_route: [ 'route_wan_primary' ], last_resort: 'unreachable' });
+		uci.mwan4.push({ '.type': 'rule', '.name': 'locked', label: 'Locked', enabled: '1', domain: [ 'bank.example' ], use_strategy: 'wan_primary_only', family: [ 'ipv4' ] });
+		await renderOverview(page, { uci });
+
+		await expect(page.locator('[data-rule="locked"] .mwan4-stops-note')).toHaveText('Stops if unavailable');
+		await expect(page.locator('[data-rule="streaming"] .mwan4-stops-note')).toHaveCount(0);
 	});
 
 	test('keeps the hit counters of the rules table fresh on poll', async ({ page }) => {
@@ -500,7 +511,7 @@ test.describe('mocked mwan4 routing rules', () => {
 		await expect(page.locator('.mwan4-rules .mwan4-rule-row').nth(4)).toHaveAttribute('data-rule', 'default_rule_v6');
 	});
 
-	test('classifies mixed domain and IP input in the What box and writes separate UCI options', async ({ page }) => {
+	test('classifies mixed domain and IP input in the What box and saves one rule per kind', async ({ page }) => {
 		await renderOverview(page);
 		await openCustomRule(page);
 
@@ -511,19 +522,58 @@ test.describe('mocked mwan4 routing rules', () => {
 		await expect(classified.locator('.mwan4-chip-domain')).toHaveText([ 'www.youtube.com', 'youtu.be' ]);
 		await expect(classified.locator('.mwan4-chip-ip')).toHaveText([ '203.0.113.0/24', '2001:db8::/32' ]);
 
+		const summary = page.locator('.modal .mwan4-rule-summary');
+		await expect(summary).toContainText('This creates 2 rules: one for names, one for addresses');
+		await expect(summary.locator('.mwan4-summary-sentence')).toContainText('Sends www.youtube.com and youtu.be');
+		await expect(summary.locator('.mwan4-summary-sentence')).toContainText('Sends 203.0.113.0/24 and 2001:db8::/32');
+		await expect(summary.locator('.mwan4-summary-sentence')).not.toContainText('youtu.be and 203.0.113.0/24');
+
 		await page.getByRole('button', { name: 'Preview changes' }).click();
-		await expect(page.locator('.modal')).toContainText('www.youtube.com, youtu.be, 203.0.113.0/24, 2001:db8::/32');
+		await expect(page.locator('.modal')).toContainText('This creates 2 rules: one for names, one for addresses');
+		await expect(page.locator('.modal')).toContainText('Video sites (addresses)');
 		await page.getByRole('button', { name: 'Apply pending changes' }).click();
 
-		const rule = await ruleSection(page, 'video_sites');
-		expect(rule.label).toBe('Video sites');
-		expect(rule.domain).toEqual([ 'www.youtube.com', 'youtu.be' ]);
-		expect(rule.dest_ip).toEqual([ '203.0.113.0/24', '2001:db8::/32' ]);
-		expect(rule.family).toEqual([ 'ipv4', 'ipv6' ]);
-		expect(rule.enabled).toBe('1');
-		expect(rule.use_strategy).toBe('failover');
-		expect(rule.src_ip).toBeNull();
-		expect(await ruleOrder(page)).toEqual([ 'video_sites', 'default_rule_v4', 'default_rule_v6' ]);
+		const names = await ruleSection(page, 'video_sites');
+		const addresses = await ruleSection(page, 'video_sites_ip');
+		expect(names.label).toBe('Video sites');
+		expect(names.domain).toEqual([ 'www.youtube.com', 'youtu.be' ]);
+		expect(names.dest_ip).toBeNull();
+		expect(names.family).toEqual([ 'ipv4', 'ipv6' ]);
+		expect(names.enabled).toBe('1');
+		expect(names.use_strategy).toBe('failover');
+		expect(addresses.label).toBe('Video sites (addresses)');
+		expect(addresses.domain).toBeNull();
+		expect(addresses.dest_ip).toEqual([ '203.0.113.0/24', '2001:db8::/32' ]);
+		expect(addresses.use_strategy).toBe('failover');
+		expect(addresses.enabled).toBe('1');
+		expect(await ruleOrder(page)).toEqual([ 'video_sites', 'video_sites_ip', 'default_rule_v4', 'default_rule_v6' ]);
+	});
+
+	test('splitting a saved rule that lists names and addresses keeps its place and flags it in the list', async ({ page }) => {
+		const uci = uciWithRules();
+
+		uci.mwan4.find(section => section['.name'] == 'streaming').dest_ip = [ '203.0.113.0/24' ];
+		await renderOverview(page, { uci });
+
+		const row = page.locator('[data-rule="streaming"]');
+		await expect(row.locator('.mwan4-rule-badge')).toContainText('Needs attention');
+		await expect(row.locator('.mwan4-rule-badge')).toHaveAttribute('title', /never matches/);
+		await expect(row.locator('.mwan4-rule-sentence')).toContainText('Never matches');
+
+		await row.getByRole('button', { name: 'Edit routing rule Streaming' }).click();
+		await expect(page.locator('.modal .mwan4-summary-split')).toContainText('This creates 2 rules');
+		await expect(page.locator('.modal .mwan4-summary-issues')).not.toContainText('never matches');
+		await page.getByRole('button', { name: 'Preview changes' }).click();
+		await page.getByRole('button', { name: 'Apply pending changes' }).click();
+
+		const order = await ruleOrder(page);
+		expect(order.slice(0, 4)).toEqual([ 'streaming', 'streaming_ip', 'console', 'backups' ]);
+		expect((await ruleSection(page, 'streaming')).domain).toEqual([ 'netflix.com', 'youtube.com' ]);
+		expect((await ruleSection(page, 'streaming')).dest_ip).toBeNull();
+		expect((await ruleSection(page, 'streaming_ip')).dest_ip).toEqual([ '203.0.113.0/24' ]);
+		expect((await ruleSection(page, 'streaming_ip')).proto).toBe('tcp');
+		expect((await ruleSection(page, 'streaming_ip')).src_mac).toEqual([ 'aa:bb:cc:dd:ee:01' ]);
+		await expect(page.locator('[data-rule="streaming"] .mwan4-rule-badge')).toHaveCount(0);
 	});
 
 	test('answers what, who, and via with a Prefer preset that creates the strategy', async ({ page }) => {
@@ -619,7 +669,7 @@ test.describe('mocked mwan4 routing rules', () => {
 		await renderOverview(page, { uci: uciWithRules() });
 		await page.getByRole('button', { name: 'Edit routing rule Streaming' }).click();
 
-		await expect(page.locator('.modal textarea[name="what"]')).toHaveValue('netflix.com\nyoutube.com\n203.0.113.0/24');
+		await expect(page.locator('.modal textarea[name="what"]')).toHaveValue('netflix.com\nyoutube.com');
 		await expect(page.locator('.modal select[name="who_mode"]')).toHaveValue('devices');
 		await expect(page.locator('.modal textarea[name="who"]')).toHaveValue('aa:bb:cc:dd:ee:01');
 
@@ -821,7 +871,7 @@ test.describe('mocked mwan4 routing rules', () => {
 
 		await expect(page.locator('.modal h2')).toContainText('Add routing rule');
 		await expect(page.locator('.modal input[name="label"]')).toHaveValue('Copy of Streaming');
-		await expect(page.locator('.modal textarea[name="what"]')).toHaveValue('netflix.com\nyoutube.com\n203.0.113.0/24');
+		await expect(page.locator('.modal textarea[name="what"]')).toHaveValue('netflix.com\nyoutube.com');
 		await expect(page.locator('.modal [data-rule-connections]')).toHaveCount(0);
 
 		await page.getByRole('button', { name: 'Preview changes' }).click();
