@@ -2297,7 +2297,7 @@ function renderWanWorkspace(status, counters) {
 
 	return E('div', { class: 'mwan4-wan-workspace-body' }, [
 		E('div', { class: 'mwan4-workspace-toolbar' }, [
-			E('span', { class: 'mwan4-muted-line' }, [ _('Compare saved WAN/SLA settings with live tracker state. Missing measurements stay explicit.') ]),
+			E('span', { class: 'mwan4-muted-line' }, [ _('Your internet connections and how they pass their health checks. IPv4 and IPv6 of one link are shown together.') ]),
 			E('button', { class: 'btn cbi-button cbi-button-add', 'aria-label': _('Add WAN link'), click: function() { return showInterfaceModal(null); } }, [ _('Add WAN link') ])
 		]),
 		E('div', { class: 'mwan4-wan-table-wrap' }, [
@@ -2781,12 +2781,7 @@ function applyPbrImport(button) {
 
 function renderWanPanel(status, counters) {
 	return [
-		E('div', { class: 'mwan4-panel-heading' }, [
-			E('div', [
-				E('span', { class: 'mwan4-eyebrow' }, [ _('WAN workspace') ]),
-				E('h3', { id: 'mwan4-wan-workspace-title' }, [ _('WAN health matrix') ])
-			])
-		]),
+		E('div', { class: 'mwan4-panel-heading' }, [ E('h3', { id: 'mwan4-wan-workspace-title' }, [ _('WAN links') ]) ]),
 		renderWanWorkspace(status, counters)
 	];
 }

@@ -2,14 +2,6 @@ msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "WAN workspace"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "WAN health matrix"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "Probe / SLA"
 msgstr ""
 
@@ -2189,10 +2181,6 @@ msgid "Add each internet uplink once, then mwan4 can track health, SLA state, an
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Compare saved WAN/SLA settings with live tracker state. Missing measurements stay explicit."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "WAN"
 msgstr ""
 
@@ -4146,4 +4134,8 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "Quality limits"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Your internet connections and how they pass their health checks. IPv4 and IPv6 of one link are shown together."
 msgstr ""

@@ -49,6 +49,15 @@ async function ruleSection(page, name) {
 }
 
 test.describe('mocked mwan4 overview workspace', () => {
+	test('puts the WAN links panel after the command center and the routing rules directly after it', async ({ page }) => {
+		await renderOverview(page);
+
+		const order = await page.evaluate(() => Array.from(document.querySelectorAll('.mwan4-app > *')).map(node => node.getAttribute('aria-labelledby')));
+
+		expect(order).toEqual([ 'mwan4-command-title', 'mwan4-wan-workspace-title', 'mwan4-rules-title' ]);
+		await expect(page.locator('.mwan4-app h3')).toHaveText([ 'WAN links', 'Routing rules' ]);
+	});
+
 	test('renders live WAN and SLA data without turning missing metrics into zeroes', async ({ page }) => {
 		const status = defaultStatus();
 		status.interfaces.wan_primary = {
@@ -77,9 +86,9 @@ test.describe('mocked mwan4 overview workspace', () => {
 		const row = workspace.locator('[data-interface="wan_primary"]');
 		const missingTarget = row.locator('.mwan4-target-summary li').filter({ hasText: '8.8.8.8' });
 
-		await expect(workspace).toContainText('WAN workspace');
-		await expect(workspace).toContainText('WAN health matrix');
-		await expect(workspace).toContainText('Compare saved WAN/SLA settings with live tracker state. Missing measurements stay explicit.');
+		await expect(workspace.locator('h3')).toHaveText('WAN links');
+		await expect(workspace).toContainText('Your internet connections and how they pass their health checks.');
+		await expect(workspace).not.toContainText('WAN health matrix');
 		await expect(row).toContainText('IPv4: online');
 		await expect(row).toContainText('IPv6: degraded');
 		await expect(row).toContainText('Not measured');
