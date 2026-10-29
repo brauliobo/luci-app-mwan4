@@ -204,6 +204,9 @@ assert.equal(line(member([ [ '1.1.1.1', 'up' ], [ '8.8.8.8', 'down' ] ])), '1 of
 assert.equal(line(member([ [ '1.1.1.1', 'up' ], [ '8.8.8.8', 'down' ] ]), member([ [ '::1', 'down' ], [ '::2', 'down' ], [ '::3', 'down' ], [ '::4', 'up' ] ])),
 	'4 of 6 checks failing', 'the checks of IPv4 and IPv6 are counted together');
 assert.equal(line(member([ [ '1.1.1.1', 'up' ], [ '8.8.8.8', 'unknown' ] ])), '1 of 2 checks passing');
+assert.equal(line(member([ [ '1.1.1.1', 'up' ], [ '8.8.8.8', 'skipped' ] ])), 'All checks passing', 'a skipped target is not needed while another answers');
+assert.equal(line(member([ [ '1.1.1.1', 'skipped' ], [ '8.8.8.8', 'skipped' ] ])), 'Waiting for the first check');
+assert.equal(line(member([ [ '1.1.1.1', 'up' ], [ '8.8.8.8', 'skipped' ] ]), member([ [ '::1', 'down' ], [ '::2', 'skipped' ] ])), '1 of 4 checks failing');
 assert.equal(line(member([ [ '1.1.1.1', 'unknown' ] ])), 'Waiting for the first check');
 assert.equal(line({ section: { enabled: '1', track_ip: [ '1.1.1.1' ] }, runtime: {} }), 'Waiting for the first check', 'no runtime data yet');
 assert.equal(line(member([ [ '1.1.1.1', 'timeout' ] ])), '1 of 1 checks failing');

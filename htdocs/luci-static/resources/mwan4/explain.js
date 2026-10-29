@@ -378,9 +378,10 @@ function targetState(status) {
 /* members: [ { section, runtime } ] of one link (its IPv4 and IPv6 siblings): the plain state of its health checks. */
 function healthLine(members) {
 	let total = members.reduce((sum, member) => sum + asList(member.section.track_ip).length, 0);
-	let results = members.flatMap(member => asList(member.runtime.track_ip)).map(target => targetState(target.status).ok);
-	let passing = results.filter(ok => ok === true).length;
-	let failing = results.filter(ok => ok === false).length;
+	let targets = members.flatMap(member => asList(member.runtime.track_ip));
+	let passing = targets.filter(target => targetState(target.status).ok === true).length;
+	let failing = targets.filter(target => targetState(target.status).ok === false).length;
+	let skipped = targets.filter(target => target.status == 'skipped').length;
 
 	if (members.every(member => member.section.enabled == '0'))
 		return _('Not tested while disabled');
@@ -389,7 +390,8 @@ function healthLine(members) {
 	if (failing)
 		return _('%d of %d checks failing').format(failing, total);
 
-	return !passing ? _('Waiting for the first check') : passing < total ? _('%d of %d checks passing').format(passing, total) : _('All checks passing');
+	// A target the tracker skipped is not needed: another one already answered.
+	return !passing ? _('Waiting for the first check') : passing + skipped < total ? _('%d of %d checks passing').format(passing, total) : _('All checks passing');
 }
 
 /* Only when latency and loss limits are on; the recovery figures are in the sentence of healthSentence(). */
