@@ -16,6 +16,7 @@ const rulesuiModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/r
 const templatesModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/templates.js');
 const stabilityModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/stability.js');
 const diagnosticsModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/diagnostics.js');
+const guideModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/guide.js');
 const diagnosticsPath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/view/mwan4/status/diagnostics.js');
 const statusPath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/view/mwan4/status/overview.js');
 
@@ -768,6 +769,7 @@ async function renderDiagnostics(page, options) {
 			diagnostics: args.diagnostics,
 			diagnosticsAccess: !!args.diagnosticsAccess,
 			operatorAccess: !!args.operatorAccess,
+			configAccess: !!args.configAccess,
 			connections: args.connections,
 			rpcCalls: []
 		};
@@ -914,7 +916,14 @@ async function renderDiagnostics(page, options) {
 		};
 
 		const ui = {
-			addNotification: function(_, node) { document.body.appendChild(node); }
+			addNotification: function(_, node) { document.body.appendChild(node); },
+			hideModal: function() {
+				document.querySelectorAll('.modal').forEach(function(node) { node.remove(); });
+			},
+			showModal: function(title, nodes, cls) {
+				this.hideModal();
+				document.body.appendChild(E('div', { class: 'modal ' + (cls || '') }, [ E('h2', [ title ]), nodes ]));
+			}
 		};
 
 		const view = {
@@ -926,16 +935,20 @@ async function renderDiagnostics(page, options) {
 		};
 
 		const common = new Function('baseclass', 'L', 'E', '_', args.commonSource)(baseclass, L, E, translate);
+		const explainModule = new Function('baseclass', '_', args.explainModuleSource)(baseclass, translate);
+		const guideModule = new Function('baseclass', 'ui', 'mwan4Common', 'mwan4Explain', 'L', 'E', '_', args.guideModuleSource)(baseclass, ui, common, explainModule, L, E, translate);
 		const diagnosticsModule = new Function('baseclass', 'mwan4Common', 'L', 'E', '_', args.diagnosticsModuleSource)(baseclass, common, L, E, translate);
 		const connectionsModule = new Function('baseclass', 'rpc', 'mwan4Common', 'L', 'E', '_', args.connectionsModuleSource)(baseclass, rpc, common, L, E, translate);
-		const module = new Function('rpc', 'ui', 'view', 'mwan4Common', 'mwan4Connections', 'mwan4Diagnostics', 'L', 'E', '_', args.diagnosticsSource)(rpc, ui, view, common, connectionsModule, diagnosticsModule, L, E, translate);
+		const module = new Function('rpc', 'ui', 'view', 'mwan4Common', 'mwan4Connections', 'mwan4Diagnostics', 'mwan4Guide', 'L', 'E', '_', args.diagnosticsSource)(
+			rpc, ui, view, common, connectionsModule, diagnosticsModule, guideModule, L, E, translate);
 		const root = document.getElementById('test-root');
 
 		root.replaceChildren(module.render([
 			state.diagnosticsAccess,
 			state.operatorAccess,
 			state.diagnostics.summary,
-			state.connections ? state.connections.items.length : null
+			state.connections ? state.connections.items.length : null,
+			state.configAccess
 		]));
 
 		window.__mwan4Mock = {
@@ -945,9 +958,12 @@ async function renderDiagnostics(page, options) {
 		diagnosticsSource: fs.readFileSync(diagnosticsPath, 'utf8'),
 		diagnosticsModuleSource: fs.readFileSync(diagnosticsModulePath, 'utf8'),
 		connectionsModuleSource: fs.readFileSync(connectionsModulePath, 'utf8'),
+		explainModuleSource: fs.readFileSync(explainModulePath, 'utf8'),
+		guideModuleSource: fs.readFileSync(guideModulePath, 'utf8'),
 		connections: options.connections === undefined ? defaultConnections() : options.connections,
 		commonSource: fs.readFileSync(commonPath, 'utf8'),
 		diagnostics: options.diagnostics || defaultDiagnostics(),
+		configAccess: options.configAccess == null ? true : options.configAccess,
 		diagnosticsAccess: options.diagnosticsAccess == null ? true : options.diagnosticsAccess,
 		operatorAccess: options.operatorAccess == null ? true : options.operatorAccess
 	});

@@ -7,10 +7,12 @@
 'require view';
 'require mwan4.common as mwan4Common';
 'require mwan4.advanced as mwan4Advanced';
+'require mwan4.guide as mwan4Guide';
 
 var E = mwan4Common.element;
 /* global mwan4Common */
 /* global mwan4Advanced */
+/* global mwan4Guide */
 
 const callDiagnostics = rpc.declare({
 	object: 'mwan4',
@@ -56,14 +58,6 @@ const resultErrors        = mwan4Advanced.resultErrors;
 const sanitizeSectionName = mwan4Advanced.sanitizeSectionName;
 const validationFailures  = mwan4Advanced.validationFailures;
 const validationSummary   = mwan4Advanced.validationSummary;
-
-function overviewDescription(text) {
-	return E('span', [
-		text,
-		' ',
-		E('a', { href: L.url('admin/network/mwan4/overview') }, [ _('Back to overview.') ])
-	]);
-}
 
 function diagnosticsPayload(result, section) {
 	let diagnostics = (result || {}).diagnostics || result || {};
@@ -1040,7 +1034,9 @@ return view.extend({
 			supportedAdvancedActions[action] = true;
 		});
 		let m = new form.Map('mwan4', _('MultiWAN 4 - Advanced'), E('div', [
-			overviewDescription(_('Configure advanced mwan4-owned integrations and use guided panels for externally owned systems such as PBR, MPTCP, VRF, and FRR/BFD.')),
+			mwan4Guide.intro(
+				_('Advanced settings cover tunnels, extra health-check tools and the hand-over to PBR, MPTCP, VRF and FRR/BFD setups.'),
+				_('Most changes are easier on the overview: add WAN links and routing rules there, and keep this page for tunnels and integrations.')),
 			renderAdvancedStatus(diagnostics, capabilities)
 		]));
 

@@ -2,14 +2,8 @@
 'require form';
 'require uci';
 'require view';
-
-function overviewDescription(text) {
-	return E('span', [
-		text,
-		' ',
-		E('a', { href: L.url('admin/network/mwan4/overview') }, [ _('Back to overview.') ])
-	]);
-}
+'require mwan4.guide as mwan4Guide';
+/* global mwan4Guide */
 
 function isValidPortToken(token) {
 	let parts = token.split(/[-:]/);
@@ -40,7 +34,9 @@ return view.extend({
 
 	render: function() {
 		let m = new form.Map('mwan4', _('MultiWAN 4 - Routing rules'),
-			overviewDescription(_('Traffic policies are evaluated from top to bottom and choose a policy path, the main routing table, or a fail-closed action for matching traffic.')));
+			mwan4Guide.intro(
+				_('Routing rules are checked from top to bottom; the first one that matches decides which path the traffic takes.'),
+				_('Most changes are easier on the overview: add or change routing rules there.')));
 		let s = m.section(form.GridSection, 'rule');
 		let o;
 

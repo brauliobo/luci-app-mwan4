@@ -13,6 +13,7 @@ const jsFiles = [
 	'htdocs/luci-static/resources/mwan4/advanced.js',
 	'htdocs/luci-static/resources/mwan4/diagnostics.js',
 	'htdocs/luci-static/resources/mwan4/explain.js',
+	'htdocs/luci-static/resources/mwan4/guide.js',
 	'htdocs/luci-static/resources/mwan4/linkhistory.js',
 	'htdocs/luci-static/resources/mwan4/overview.js',
 	'htdocs/luci-static/resources/mwan4/routetest.js',
@@ -393,7 +394,7 @@ const unescape = text => text.replace(/\\(.)/g, (all, char) => char == 'n' ? '\n
 
 assert.deepEqual(potIds.filter((id, index) => id && potIds.indexOf(id) != index), [], 'the POT has no duplicate msgids');
 
-for (const file of [ 'view/mwan4/network/overview.js', 'mwan4/explain.js', 'mwan4/routetest.js', 'mwan4/rulecheck.js', 'mwan4/rulesui.js', 'mwan4/summary.js', 'mwan4/templates.js', 'mwan4/wanform.js' ])
+for (const file of [ 'view/mwan4/network/overview.js', 'mwan4/explain.js', 'mwan4/guide.js', 'mwan4/routetest.js', 'mwan4/rulecheck.js', 'mwan4/rulesui.js', 'mwan4/summary.js', 'mwan4/templates.js', 'mwan4/wanform.js' ])
 	for (const match of read('htdocs/luci-static/resources/' + file).matchAll(/(?<![\w$.])_\('((?:[^'\\]|\\.)*)'\)/g))
 		assert.ok(potIds.map(unescape).includes(unescape(match[1])), `POT is missing "${match[1]}" used in ${file}`);
 

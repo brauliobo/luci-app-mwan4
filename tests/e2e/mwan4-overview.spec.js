@@ -525,7 +525,7 @@ routerTest('DIAG-090 DIAG-091 ACL-LUCI-110 ACL-LUCI-111 mwan4 overview loads and
 	for (const advancedPage of advancedPages) {
 		await page.goto(`${baseURL}/cgi-bin/luci/${advancedPage.route}`, { waitUntil: 'networkidle' });
 		await expect(page.getByText(advancedPage.title, { exact: true })).toBeVisible();
-		await expect(page.getByText('Back to overview.', { exact: true })).toBeVisible();
+		await expect(page.getByRole('link', { name: 'Go to the overview' })).toBeVisible();
 	}
 
 	await expectNoBrowserIssues(page, browserIssues);
@@ -630,7 +630,7 @@ limitedRouterTest('ACL-LUCI-110 limited user follows env-controlled allowed or d
 		for (const advancedPage of advancedPages) {
 			await page.goto(`${baseURL}/cgi-bin/luci/${advancedPage.route}`, { waitUntil: 'networkidle' });
 			await expect(page.getByText(advancedPage.title, { exact: true })).toBeVisible();
-			await expect(page.getByText('Back to overview.', { exact: true })).toBeVisible();
+			await expect(page.getByRole('link', { name: 'Go to the overview' })).toBeVisible();
 			await expect(page.locator('body')).not.toContainText(/RPC call.*failed|Access denied|Permission denied/i);
 		}
 

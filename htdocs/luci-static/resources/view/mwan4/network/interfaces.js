@@ -3,16 +3,10 @@
 'require fs';
 'require uci';
 'require view';
+'require mwan4.guide as mwan4Guide';
 'require mwan4.stability as mwan4Stability';
+/* global mwan4Guide */
 /* global mwan4Stability */
-
-function overviewDescription(text) {
-	return E('span', [
-		text,
-		' ',
-		E('a', { href: L.url('admin/network/mwan4/overview') }, [ _('Back to overview.') ])
-	]);
-}
 
 function validatePositiveInteger(section_id, value) {
 	if (value == null || value == '')
@@ -47,7 +41,9 @@ return view.extend({
 
 	render: function(stats) {
 		let m = new form.Map('mwan4', _('MultiWAN 4 - WAN Links'),
-			overviewDescription(_('WAN links map OpenWrt network interfaces to health checks and SLA thresholds.')));
+			mwan4Guide.intro(
+				_('WAN links are the internet connections MultiWAN 4 uses, each with the addresses it pings to test the connection.'),
+				_('Most changes are easier on the overview: add a WAN link or change how it is tested there.')));
 		let s = m.section(form.GridSection, 'interface');
 		let o;
 

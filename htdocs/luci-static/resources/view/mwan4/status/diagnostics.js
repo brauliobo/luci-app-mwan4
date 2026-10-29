@@ -5,11 +5,13 @@
 'require mwan4.common as mwan4Common';
 'require mwan4.connections as mwan4Connections';
 'require mwan4.diagnostics as mwan4Diagnostics';
+'require mwan4.guide as mwan4Guide';
 
 var E = mwan4Common.element;
 /* global mwan4Common */
 /* global mwan4Connections */
 /* global mwan4Diagnostics */
+/* global mwan4Guide */
 
 const callDiagnostics = rpc.declare({
 	object: 'mwan4',
@@ -1185,13 +1187,15 @@ return view.extend({
 	load: function() {
 		return Promise.all([
 			L.resolveDefault(callSessionAccess('access-group', 'luci-app-mwan4-diagnostics', 'read'), false),
-			L.resolveDefault(callSessionAccess('access-group', 'luci-app-mwan4-operator', 'write'), false)
+			L.resolveDefault(callSessionAccess('access-group', 'luci-app-mwan4-operator', 'write'), false),
+			L.resolveDefault(callSessionAccess('access-group', 'luci-app-mwan4', 'read'), false)
 		]).then(function(access) {
 			return Promise.all([
 				access[0],
 				access[1],
 				access[0] ? L.resolveDefault(callDiagnostics('summary'), {}) : {},
-				access[0] ? mwan4Connections.probe() : null
+				access[0] ? mwan4Connections.probe() : null,
+				access[2]
 			]);
 		});
 	},
@@ -1220,10 +1224,15 @@ return view.extend({
 		hasDiagnosticsAccess = !!data[0];
 		hasCounterResetAccess = !!data[1];
 		let initialResult = data[2] || null;
+		let hasConfigAccess = !!data[4];
 
 		return E('div', { class: 'cbi-map' }, [
 			E('h2', [ _('MultiWAN 4 - Diagnostics') ]),
 			E('div', { class: 'cbi-section' }, [
+				mwan4Guide.intro(
+					_('Diagnostics show what the router is really doing, for when the overview does not explain a problem.'),
+					_('Start on the overview: it shows link health and the path of each routing rule in plain words.'),
+					hasConfigAccess),
 				mwan4Common.renderAclNotice(hasDiagnosticsAccess,
 					_('Diagnostic commands are disabled because this session lacks the mwan4 diagnostics ACL.')),
 				E('div', { class: 'mwan4-next-steps' }, [

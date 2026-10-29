@@ -2,14 +2,8 @@
 'require form';
 'require uci';
 'require view';
-
-function overviewDescription(text) {
-	return E('span', [
-		text,
-		' ',
-		E('a', { href: L.url('admin/network/mwan4/overview') }, [ _('Back to overview.') ])
-	]);
-}
+'require mwan4.guide as mwan4Guide';
+/* global mwan4Guide */
 
 return view.extend({
 	load: function() {
@@ -18,7 +12,9 @@ return view.extend({
 
 	render: function() {
 		let m = new form.Map('mwan4', _('MultiWAN 4 - Link priorities'),
-			overviewDescription(_('Path members bind a WAN link to a priority metric and weight. Strategies choose one or more paths.')));
+			mwan4Guide.intro(
+				_('A link priority puts one WAN link into a path, with an order (priority) and a share of the traffic (weight).'),
+				_('Most changes are easier on the overview: choose the links of a routing rule and their order there.')));
 		let s = m.section(form.GridSection, 'route');
 		let o;
 

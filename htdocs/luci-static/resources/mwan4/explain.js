@@ -424,8 +424,18 @@ function glossary() {
 		[_('Flap')]:                             _('A link that keeps going up and down.'),
 		[_('Failback hold')]:                    _('How long a recovered link must stay healthy before traffic returns to it.'),
 		[_('Sticky session')]:                   _('Keeps a device on the same link for a while.'),
-		[_('DSCP')]:                             _('A priority tag that some apps put on their traffic, such as calls or games.')
+		[_('DSCP')]:                             _('A priority tag that some apps put on their traffic, such as calls or games.'),
+		[_('Link priority')]:                    _('A WAN link with its order and share inside a path.'),
+		[_('Weight')]:                           _('The share of new connections a link gets when links are balanced.'),
+		[_('Firewall mark')]:                    _('A number the router puts on traffic to tell which link it must use.'),
+		[_('Routing table')]:                    _('A list of routes the router looks up to pick a link; each link has its own.'),
+		[_('Address family')]:                   _('IPv4 and IPv6 are the two kinds of internet address.')
 	};
+}
+
+/* The one-sentence meaning of a glossary term, for title tooltips on the words that remain in the UI. */
+function termHint(term) {
+	return glossary()[term];
 }
 
 return baseclass.extend({
@@ -443,5 +453,6 @@ return baseclass.extend({
 	ruleParts:      ruleParts,
 	ruleSentence:   ruleSentence,
 	stateWord:      stateWord,
-	targetState:    targetState
+	targetState:    targetState,
+	termHint:       termHint
 });

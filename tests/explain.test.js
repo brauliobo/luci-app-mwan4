@@ -228,9 +228,12 @@ assert.equal(explain.familyName('wan_tim6'), 'IPv6');
 // glossary
 const terms = explain.glossary();
 for (const term of [ 'WAN link', 'Routing rule', 'Path', 'Use first', 'Use only', 'Balance', 'Stops if unavailable', 'Uses normal routing if unavailable',
-	'Health check', 'Check target', 'Hold', 'Flap', 'Failback hold', 'Sticky session', 'DSCP' ])
+	'Health check', 'Check target', 'Hold', 'Flap', 'Failback hold', 'Sticky session', 'DSCP', 'Link priority', 'Weight', 'Firewall mark',
+	'Routing table', 'Address family' ])
 	assert.ok(terms[term] && terms[term].length > 10 && terms[term].length < 120, `glossary has a short definition for ${term}`);
 outputs.push(...Object.entries(terms).flat());
+assert.equal(explain.termHint('Hold'), terms['Hold'], 'termHint gives the glossary sentence for tooltips');
+assert.equal(explain.termHint('Nonsense'), undefined);
 
 // vocabulary
 assert.ok(outputs.length > 30);

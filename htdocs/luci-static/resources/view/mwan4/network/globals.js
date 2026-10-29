@@ -2,16 +2,10 @@
 'require form';
 'require uci';
 'require view';
+'require mwan4.guide as mwan4Guide';
 'require mwan4.stability as mwan4Stability';
+/* global mwan4Guide */
 /* global mwan4Stability */
-
-function overviewDescription(text) {
-	return E('span', [
-		text,
-		' ',
-		E('a', { href: L.url('admin/network/mwan4/overview') }, [ _('Back to overview.') ])
-	]);
-}
 
 function validatePositiveMark(section_id, value) {
 	if (value == null || value == '')
@@ -29,7 +23,9 @@ return view.extend({
 
 	render: function(stabilitySupported) {
 		let m = new form.Map('mwan4', _('MultiWAN 4 - Global settings'),
-			overviewDescription(_('Global settings affect all WAN links, strategies, paths, and traffic policies.')));
+			mwan4Guide.intro(
+				_('Global settings apply to every WAN link, path and routing rule.'),
+				_('Most changes are easier on the overview: open Global settings in its top panel.')));
 		let s = m.section(form.NamedSection, 'globals', 'globals');
 		let o;
 

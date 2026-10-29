@@ -4,9 +4,11 @@
 'require uci';
 'require view';
 'require mwan4.common as mwan4Common';
+'require mwan4.guide as mwan4Guide';
 
 var E = mwan4Common.element;
 /* global mwan4Common */
+/* global mwan4Guide */
 
 const callDiagnostics = rpc.declare({
 	object: 'mwan4',
@@ -25,14 +27,6 @@ const callSessionAccess = rpc.declare({
 mwan4Common.addStylesheet();
 
 const formatDisplayValue = mwan4Common.formatDisplayValue;
-
-function overviewDescription(text) {
-	return E('span', [
-		text,
-		' ',
-		E('a', { href: L.url('admin/network/mwan4/overview') }, [ _('Back to overview.') ])
-	]);
-}
 
 function asArray(value) {
 	if (value == null || value === '')
@@ -364,7 +358,9 @@ return view.extend({
 		let hasConfigAccess = !!data[0];
 
 		let m = new form.Map('mwan4', _('MultiWAN 4 - MPTCP'), E('div', [
-			overviewDescription(_('Manage MPTCP kernel state, limits, and per-WAN endpoint roles from mwan4-owned configuration.')),
+			mwan4Guide.intro(
+				_('MPTCP lets one connection use several WAN links at once; this page sets its kernel limits and the role of each link.'),
+				_('Most changes are easier on the overview: add WAN links and routing rules there. MPTCP settings are only here.')),
 			mwan4Common.renderAclNotice(hasConfigAccess,
 				_('MPTCP management is disabled because this session lacks the mwan4 configuration ACL.')),
 			renderMptcpBootstrap(hasConfigAccess),

@@ -1810,3 +1810,44 @@ button.mwan4-command-metric:hover,
 }
 
 .mwan4-test-step.is-match .mwan4-test-state { color: #155724; }
+
+.mwan4-raw-intro {
+	border: 1px solid var(--border-color-medium);
+	border-radius: 6px;
+	background: var(--background-color-high);
+	margin: 8px 0 14px;
+	padding: 10px 14px;
+}
+
+.mwan4-raw-intro p {
+	margin: 0;
+}
+
+.mwan4-raw-purpose {
+	font-weight: 600;
+}
+
+.mwan4-raw-links {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 10px;
+	margin-top: 8px !important;
+}
+
+.mwan4-terms {
+	display: grid;
+	grid-template-columns: minmax(120px, max-content) minmax(0, 1fr);
+	gap: 6px 14px;
+	margin: 0;
+	max-height: 60vh;
+	overflow-y: auto;
+}
+
+.mwan4-terms dt {
+	font-weight: 700;
+}
+
+.mwan4-terms dd {
+	margin: 0;
+}
