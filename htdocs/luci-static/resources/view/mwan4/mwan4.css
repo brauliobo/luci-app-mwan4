@@ -1073,6 +1073,16 @@ button.mwan4-command-metric:hover,
 	gap: 10px;
 }
 
+.mwan4-advanced-fields .mwan4-modal-columns > .mwan4-modal-field {
+	align-content: end;
+}
+
+.mwan4-health-live {
+	margin: 0;
+	color: var(--text-color-medium);
+	line-height: 1.4;
+}
+
 .mwan4-modal-check {
 	display: flex;
 	align-items: center;

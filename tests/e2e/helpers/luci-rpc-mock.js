@@ -10,6 +10,7 @@ const linkHistoryModulePath = path.resolve(__dirname, '../../../htdocs/luci-stat
 const explainModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/explain.js');
 const routetestModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/routetest.js');
 const summaryModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/summary.js');
+const wanformModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/wanform.js');
 const rulecheckModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/rulecheck.js');
 const rulesuiModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/rulesui.js');
 const templatesModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/templates.js');
@@ -61,8 +62,12 @@ function defaultUci() {
 			{ '.type': 'globals', '.name': 'globals', mmx_mask: '0x3F00', source_routing: '0', loglevel: 'notice' }
 		],
 		network: [
+			{ '.type': 'interface', '.name': 'loopback', proto: 'static' },
+			{ '.type': 'interface', '.name': 'lan', proto: 'static' },
 			{ '.type': 'interface', '.name': 'wan_primary', proto: 'dhcp' },
-			{ '.type': 'interface', '.name': 'wan_backup', proto: 'dhcp' }
+			{ '.type': 'interface', '.name': 'wan_backup', proto: 'dhcp' },
+			{ '.type': 'interface', '.name': 'wan_lte', proto: 'dhcp' },
+			{ '.type': 'interface', '.name': 'wan_lte6', proto: 'dhcpv6' }
 		]
 	};
 }
@@ -682,10 +687,11 @@ async function renderOverview(page, options) {
 		const stabilityModule = new Function('baseclass', 'rpc', 'mwan4Common', 'mwan4Connections', 'L', 'E', '_', args.stabilityModuleSource)(baseclass, rpc, common, connectionsModule, L, E, translate);
 		const linkHistoryModule = new Function('baseclass', 'mwan4Common', 'mwan4Stability', 'L', 'E', '_', args.linkHistoryModuleSource)(baseclass, common, stabilityModule, L, E, translate);
 		const summaryModule = new Function('baseclass', '_', args.summaryModuleSource)(baseclass, translate);
+		const wanformModule = new Function('baseclass', 'mwan4Templates', '_', args.wanformModuleSource)(baseclass, templatesModule, translate);
 		const modules = {
 			mwan4Common: common, mwan4Connections: connectionsModule, mwan4Explain: explainModule, mwan4LinkHistory: linkHistoryModule, mwan4Overview: overviewModule,
 			mwan4Routetest: routetestModule, mwan4Rules: rulesModule, mwan4Rulesui: rulesuiModule, mwan4Stability: stabilityModule, mwan4Summary: summaryModule,
-			mwan4Templates: templatesModule
+			mwan4Templates: templatesModule, mwan4Wanform: wanformModule
 		};
 		const names = Object.keys(modules);
 		const module = new Function('fs', 'poll', 'rpc', 'uci', 'ui', 'view', ...names, 'L', 'E', '_', args.overviewSource)(
@@ -738,6 +744,7 @@ async function renderOverview(page, options) {
 		rulecheckModuleSource: fs.readFileSync(rulecheckModulePath, 'utf8'),
 		rulesuiModuleSource: fs.readFileSync(rulesuiModulePath, 'utf8'),
 		summaryModuleSource: fs.readFileSync(summaryModulePath, 'utf8'),
+		wanformModuleSource: fs.readFileSync(wanformModulePath, 'utf8'),
 		templatesModuleSource: fs.readFileSync(templatesModulePath, 'utf8'),
 		commonSource: fs.readFileSync(commonPath, 'utf8'),
 		hostHints: options.hostHints || defaultHostHints(),

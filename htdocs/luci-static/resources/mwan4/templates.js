@@ -252,22 +252,30 @@ function healthProfiles() {
 	});
 }
 
-function profileFor(values, globals) {
+/* keys: the options the form actually has, so a form without the stability fields can still tell a profile apart */
+function profileFor(values, globals, keys) {
 	let now = effective(values, globals);
-	let profile = healthProfiles().find(item => HEALTH_KEYS.every(name => item.values[name] == now[name]));
+	let profile = healthProfiles().find(item => (keys || HEALTH_KEYS).every(name => item.values[name] == now[name]));
 
 	return profile ? profile.id : 'custom';
+}
+
+/* [ [ id, "Balanced: notices an outage in about 50 s" ], ..., [ 'custom', 'Custom' ] ] for the profile select */
+function profileOptions() {
+	return healthProfiles().map(profile => [ profile.id, _('%s: notices an outage in about %s').format(profile.title, formatDuration(profile.detectSeconds)) ])
+		.concat([ [ 'custom', _('Custom') ] ]);
 }
 
 /*
  * An option equal to the package default is returned as null: callers delete it from the link instead of writing the default,
  * so an untouched link stays untouched and keeps following the global and package defaults.
  */
-function profileValues(id) {
+function profileValues(id, keys) {
 	let profile = healthProfiles().find(item => item.id == id);
 	let values = profile ? profile.values : { };
 
-	return Object.fromEntries(Object.keys(values).map(name => [ name, values[name] == HEALTH_DEFAULTS[name] ? null : values[name] ]));
+	return Object.fromEntries(Object.keys(values).filter(name => !keys || keys.indexOf(name) >= 0)
+		.map(name => [ name, values[name] == HEALTH_DEFAULTS[name] ? null : values[name] ]));
 }
 
 return baseclass.extend({
@@ -279,6 +287,7 @@ return baseclass.extend({
 	healthProfiles:   healthProfiles,
 	presetOf:         presetOf,
 	profileFor:       profileFor,
+	profileOptions:   profileOptions,
 	profileValues:    profileValues,
 	recoverySeconds:  recoverySeconds,
 	ruleTemplates:    ruleTemplates,

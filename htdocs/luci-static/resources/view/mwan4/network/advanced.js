@@ -917,7 +917,7 @@ function addInterfaceAdvancedSection(m, stats) {
 	o.depends('track_method', 'httping');
 	o.modalonly = true;
 
-	o = s.option(form.Flag, 'check_quality', _('Use latency/loss SLA thresholds'));
+	o = s.option(form.Flag, 'check_quality', _('Also check latency and packet loss'));
 	o.default = '0';
 	o.description = _('Let latency or packet loss mark a link degraded or offline, not just probe reachability.');
 

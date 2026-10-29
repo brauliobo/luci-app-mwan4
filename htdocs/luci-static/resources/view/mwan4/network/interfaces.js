@@ -138,7 +138,7 @@ return view.extend({
 		o.description = _('Maximum hop count for ping health check probes.');
 		o.modalonly = true;
 
-		o = s.option(form.Flag, 'check_quality', _('Use latency/loss SLA thresholds'));
+		o = s.option(form.Flag, 'check_quality', _('Also check latency and packet loss'));
 		o.default = '0';
 		o.depends('track_method', 'ping');
 		o.description = _('Enable SLA checks so high latency or packet loss can mark the link unhealthy.');

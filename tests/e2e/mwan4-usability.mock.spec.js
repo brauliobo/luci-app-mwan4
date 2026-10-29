@@ -1,5 +1,5 @@
 const { test, expect } = require('@playwright/test');
-const { renderOverview } = require('./helpers/luci-rpc-mock');
+const { defaultLinkHistory, renderOverview, stableStatus } = require('./helpers/luci-rpc-mock');
 
 /*
  * Interaction budgets from USABILITY.md. A click is one click; a field is one value typed or chosen
@@ -12,7 +12,9 @@ function counter() {
 		used,
 		click:  async locator => { used.clicks++; await locator.click(); },
 		fill:   async (locator, value) => { used.fields++; await locator.fill(value); },
-		choose: async (locator, value) => { used.fields++; await locator.selectOption(value); }
+		choose: async (locator, value) => { used.fields++; await locator.selectOption(value); },
+		// picking from a short list is one click-sized action, not typing
+		pick:   async (locator, value) => { used.clicks++; await locator.selectOption(value); }
 	};
 }
 
@@ -86,7 +88,92 @@ test.describe('interaction budgets (ISO 9241-11 efficiency)', () => {
 	});
 });
 
+test.describe('WAN link tasks (ISO 9241-11 efficiency)', () => {
+	test('T6: a new link saved up to the preview takes at most 4 clicks and 1 typed field', async ({ page }) => {
+		const step = counter();
+
+		await renderOverview(page);
+		await step.click(page.getByRole('button', { name: 'Add WAN link' }));
+		await step.pick(page.locator('.modal select[name="network"]'), 'wan_lte6');
+		await step.click(page.getByRole('button', { name: 'Preview changes' }));
+
+		expect(step.used.clicks).toBeLessThanOrEqual(4);
+		expect(step.used.fields).toBeLessThanOrEqual(1);
+		await expect(page.locator('.modal')).toContainText('1.1.1.1, 8.8.8.8');
+		await page.getByRole('button', { name: 'Apply pending changes' }).click();
+
+		const link = await ruleSection(page, 'wan_lte6');
+
+		expect(link['.type']).toBe('interface');
+		expect(link.family).toEqual([ 'ipv6' ]);
+		expect(link.track_ip).toEqual([ '1.1.1.1', '8.8.8.8' ]);
+		expect(link.enabled).toBe('1');
+	});
+
+	test('T7: calmer or more sensitive failover takes at most 3 clicks and no typing', async ({ page }) => {
+		const step = counter();
+
+		await renderOverview(page);
+		await step.click(page.getByRole('button', { name: 'Edit WAN link wan_primary' }));
+		await step.pick(page.locator('.modal select[name="health_profile"]'), 'sensitive');
+		await step.click(page.getByRole('button', { name: 'Preview changes' }));
+
+		expect(step.used.clicks).toBeLessThanOrEqual(3);
+		expect(step.used.fields).toBe(0);
+		await page.getByRole('button', { name: 'Apply pending changes' }).click();
+
+		expect(await ruleSection(page, 'wan_primary')).toMatchObject({ interval: '5', down: '3', up: '3', reliability: '1' });
+	});
+
+	test('T7 with stability settings: the profile also sets the hold times', async ({ page }) => {
+		const step = counter();
+
+		await renderOverview(page, { status: stableStatus(), history: defaultLinkHistory() });
+		await step.click(page.getByRole('button', { name: 'Edit WAN link wan_primary' }));
+		await step.pick(page.locator('.modal select[name="health_profile"]'), 'tolerant');
+		await step.click(page.getByRole('button', { name: 'Preview changes' }));
+
+		expect(step.used.clicks).toBeLessThanOrEqual(3);
+		expect(step.used.fields).toBe(0);
+		await page.getByRole('button', { name: 'Apply pending changes' }).click();
+
+		const link = await ruleSection(page, 'wan_primary');
+
+		expect(link).toMatchObject({ interval: '15', down: '6', up: '6', flap_threshold: '2', flap_window: '600', flap_holddown: '300', recovery_hold: '60' });
+		expect(link.flap_damping).toBeFalsy();
+	});
+});
+
 test.describe('no raw null or undefined reaches the screen', () => {
+	test('the WAN link dialogs and the stop confirmation render clean text', async ({ page }) => {
+		await renderOverview(page, { operatorAccess: true, status: stableStatus(), history: defaultLinkHistory() });
+		expect(await strayText(page)).toEqual([]);
+
+		await page.getByRole('button', { name: 'Edit WAN link wan_primary' }).click();
+		expect(await strayText(page)).toEqual([]);
+		await page.locator('.modal select[name="health_profile"]').selectOption('tolerant');
+		expect(await strayText(page)).toEqual([]);
+		await page.getByRole('button', { name: 'Preview changes' }).click();
+		expect(await strayText(page)).toEqual([]);
+		await page.getByRole('button', { name: 'Cancel' }).click();
+
+		await page.getByRole('button', { name: 'Add WAN link' }).click();
+		expect(await strayText(page)).toEqual([]);
+		await page.locator('.modal select[name="health_profile"]').selectOption('sensitive');
+		await page.locator('.modal input[name="track_ip"]').fill('');
+		expect(await strayText(page)).toEqual([]);
+		await expect(page.locator('details')).toHaveCount(0);
+		await page.getByRole('button', { name: 'Cancel' }).click();
+
+		await page.getByRole('button', { name: 'Stop MultiWAN 4 service' }).click();
+		expect(await strayText(page)).toEqual([]);
+		await page.getByRole('button', { name: 'Cancel' }).click();
+
+		await page.getByRole('button', { name: 'Change default routing' }).click();
+		expect(await strayText(page)).toEqual([]);
+	});
+
+
 	test('the overview, the template chooser, both editors and the tester render clean text', async ({ page }) => {
 		await renderOverview(page);
 		expect(await strayText(page)).toEqual([]);

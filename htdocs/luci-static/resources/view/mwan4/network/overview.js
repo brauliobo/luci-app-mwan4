@@ -16,6 +16,7 @@
 'require mwan4.stability as mwan4Stability';
 'require mwan4.summary as mwan4Summary';
 'require mwan4.templates as mwan4Templates';
+'require mwan4.wanform as mwan4Wanform';
 
 var E = mwan4Common.element;
 /* global mwan4Common */
@@ -29,6 +30,7 @@ var E = mwan4Common.element;
 /* global mwan4Stability */
 /* global mwan4Summary */
 /* global mwan4Templates */
+/* global mwan4Wanform */
 
 const callStatus = rpc.declare({
 	object: 'mwan4',
@@ -673,34 +675,102 @@ function showInterfaceRemovalPreview(name) {
 	return showPendingChangePreview(change, function() { return buildInterfaceChange(name); }, function() { return showInterfaceRemovalPreview(name); });
 }
 
+function healthKeys() {
+	return stabilityEnabled() ? mwan4Templates.HEALTH_KEYS : mwan4Templates.HEALTH_KEYS.slice(0, 4);
+}
+
+function healthFieldValues(root) {
+	return Object.fromEntries(healthKeys().map(function(key) { return [ key, modalValue(root, key) || '' ]; }));
+}
+
+/* The link as the form currently describes it, in the shape mwan4Explain.healthSentence reads. */
+function healthFormSection(root) {
+	let fields = [ 'track_method', 'check_quality', 'failure_latency', 'failure_loss', 'recovery_latency', 'recovery_loss' ];
+
+	return Object.assign({ track_ip: splitTokens(modalValue(root, 'track_ip')) }, healthFieldValues(root),
+		Object.fromEntries(fields.map(function(key) { return [ key, modalValue(root, key) || '' ]; })));
+}
+
+function healthProfileField(values) {
+	return modalSelect(_('Health profile'), 'health_profile', mwan4Templates.profileOptions(), mwan4Templates.profileFor(values, getGlobalSection(), healthKeys()), null,
+		_('How quickly a failing link is noticed and trusted again. The exact numbers are under Fine tuning.'));
+}
+
+function fillHealthProfile(root, id) {
+	let fill = mwan4Wanform.profileFill(id, getGlobalSection(), healthKeys());
+
+	Object.keys(fill).forEach(function(key) { root.querySelector('[name="%s"]'.format(key)).value = fill[key]; });
+}
+
+/* Choosing a profile fills the numbers; editing a number switches the profile (to Custom when none fits); the sentence follows either. */
+function bindHealthProfile(root) {
+	let select = root.querySelector('[name="health_profile"]');
+	let live = root.querySelector('[data-health-live]');
+	let update = function(ev) {
+		if (ev.target == select && select.value != 'custom')
+			fillHealthProfile(root, select.value);
+		else if (ev.target != select)
+			select.value = mwan4Templates.profileFor(healthFieldValues(root), getGlobalSection(), healthKeys());
+
+		live.textContent = mwan4Explain.healthSentence(healthFormSection(root));
+	};
+
+	[ 'input', 'change' ].forEach(function(type) { root.addEventListener(type, update); });
+	live.textContent = mwan4Explain.healthSentence(healthFormSection(root));
+}
+
+function bindInterfaceFamily(root, networks) {
+	root.addEventListener('change', function(ev) {
+		if (ev.target.name == 'network')
+			root.querySelector('[name="family"]').value = mwan4Wanform.familyFor(ev.target.value, networks);
+	});
+}
+
+function newLinkFields(networks) {
+	let choices = mwan4Wanform.interfaceChoices(networks, mwanInterfaces().map(function(item) { return item['.name']; }));
+
+	return [
+		modalSelect(_('Network interface'), 'network', choices, (choices[0] || [])[0], null, _('The network interface that carries this internet connection.')),
+		modalInput(_('Name (optional)'), 'name', '', { placeholder: _('Same as the network interface') }, _('Leave empty to use the interface name.'))
+	];
+}
+
+function healthNumberFields(section) {
+	return [
+		modalInput(_('Check every (seconds)'), 'interval', section?.interval || '10', { type: 'number', min: '1', placeholder: '10' }),
+		modalInput(_('Failed checks before the link is marked down'), 'down', section?.down || '5', { type: 'number', min: '1', placeholder: '5' }),
+		modalInput(_('Good checks before it is used again'), 'up', section?.up || '5', { type: 'number', min: '1', placeholder: '5' }),
+		modalInput(_('Targets that must answer'), 'reliability', section?.reliability || '1', { type: 'number', min: '1', placeholder: '1' })
+	];
+}
+
 function showInterfaceModal(name) {
 	let section = name ? uci.get('mwan4', name) : null;
+	let networks = uci.sections('network', 'interface');
 	let families = asArray(section?.family);
-	let familyChoice = families.includes('ipv4') && families.includes('ipv6') ? 'dual' : (families.includes('ipv6') ? 'ipv6' : 'ipv4');
+	let started = name ? null : mwan4Wanform.interfaceChoices(networks, mwanInterfaces().map(function(item) { return item['.name']; }))[0];
+	let familyChoice = name ? (families.includes('ipv4') && families.includes('ipv6') ? 'dual' : (families.includes('ipv6') ? 'ipv6' : 'ipv4')) : mwan4Wanform.familyFor((started || [])[0], networks);
 	let title = name ? _('WAN link: %s').format(name) : _('Add WAN link');
+	let values = Object.fromEntries(healthKeys().map(function(key) { return [ key, (section || {})[key] || '' ]; }));
 	let fields = [
 		name ? E('div', { class: 'mwan4-modal-title' }, [
 			E('strong', [ name ]),
 			E('span', [ _('Health checks decide when this WAN link can carry traffic.') ])
 		]) : E('div', { class: 'mwan4-modal-title' }, [
 			E('strong', [ _('New WAN link') ]),
-			E('span', [ _('Pick an existing network interface and mwan4 will run health checks against it.') ])
+			E('span', [ _('Pick a network interface and mwan4 will test it with the targets below.') ])
 		])
 	];
 
-	if (name)
-		fields.push(modalCheck(_('Enabled'), 'enabled', section.enabled != '0'));
-	else {
-		fields.push(modalInput(_('Name'), 'name', '', { placeholder: _('wan_backup') }));
-		fields.push(modalSelect(_('Network interface'), 'network', networkNames(), networkNames()[0], null));
-	}
-
+	fields.push.apply(fields, name ? [ modalCheck(_('Enabled'), 'enabled', section.enabled != '0') ] : newLinkFields(networks));
 	fields.push(
 		E('section', { class: 'mwan4-builder-section' }, [
 			E('div', { class: 'mwan4-builder-title' }, [
-				E('strong', [ _('Basic health check') ]),
-				E('span', [ _('Most links only need an address family and two reliable targets.') ])
+				E('strong', [ _('Health check') ]),
+				E('span', [ _('Most links only need a profile, an address family and two reliable targets.') ])
 			]),
+			healthProfileField(values),
+			E('p', { class: 'mwan4-health-live', 'data-health-live': '1', 'aria-live': 'polite' }),
 			E('div', { class: 'mwan4-modal-columns' }, [
 				modalSelect(_('Address family'), 'family', [
 					[ 'ipv4', _('IPv4') ],
@@ -714,21 +784,16 @@ function showInterfaceModal(name) {
 		]),
 		E('section', { class: 'mwan4-builder-section mwan4-advanced-fields' }, [
 			E('div', { class: 'mwan4-builder-title' }, [
-				E('strong', [ _('Health tuning') ]),
-				E('span', [ _('Set hysteresis and optional latency/loss thresholds for this WAN link.') ])
+				E('strong', [ _('Fine tuning (optional)') ]),
+				E('span', [ _('The numbers behind the profile. Changing one switches the profile to Custom.') ])
 			]),
+			E('div', { class: 'mwan4-modal-columns' }, healthNumberFields(section)),
+			modalCheck(_('Also check latency and packet loss'), 'check_quality', section?.check_quality == '1'),
 			E('div', { class: 'mwan4-modal-columns' }, [
-				modalInput(_('Required healthy targets'), 'reliability', section?.reliability || '1', { type: 'number', min: '1' }),
-				modalInput(_('Healthy interval (seconds)'), 'interval', section?.interval || '10', { type: 'number', min: '1' }),
-				modalInput(_('Failures before down'), 'down', section?.down || '5', { type: 'number', min: '1' }),
-				modalInput(_('Successes before up'), 'up', section?.up || '5', { type: 'number', min: '1' })
-			]),
-			modalCheck(_('Use latency/loss SLA thresholds'), 'check_quality', section?.check_quality == '1'),
-			E('div', { class: 'mwan4-modal-columns' }, [
-				modalInput(_('Failure latency (ms)'), 'failure_latency', section?.failure_latency || '1000', { type: 'number', min: '1' }),
-				modalInput(_('Failure packet loss (%)'), 'failure_loss', section?.failure_loss || '40', { type: 'number', min: '0', max: '100' }),
-				modalInput(_('Recovery latency (ms)'), 'recovery_latency', section?.recovery_latency || '500', { type: 'number', min: '1' }),
-				modalInput(_('Recovery packet loss (%)'), 'recovery_loss', section?.recovery_loss || '10', { type: 'number', min: '0', max: '100' })
+				modalInput(_('Degraded above (ms)'), 'failure_latency', section?.failure_latency || '1000', { type: 'number', min: '1' }),
+				modalInput(_('Degraded above (% packet loss)'), 'failure_loss', section?.failure_loss || '40', { type: 'number', min: '0', max: '100' }),
+				modalInput(_('Healthy again below (ms)'), 'recovery_latency', section?.recovery_latency || '500', { type: 'number', min: '1' }),
+				modalInput(_('Healthy again below (% packet loss)'), 'recovery_loss', section?.recovery_loss || '10', { type: 'number', min: '0', max: '100' })
 			])
 		])
 	);
@@ -738,10 +803,12 @@ function showInterfaceModal(name) {
 
 	fields.push(pendingPreviewSlot());
 
-	bindSingleTargetWarning(showMwan4Modal(title, [
-		E('div', { class: 'mwan4-modal-grid' }, fields),
-		previewModalActions(function() { return buildInterfaceChange(name); }, name ? function() { return showInterfaceRemovalPreview(name); } : null)
-	]));
+	let grid = E('div', { class: 'mwan4-modal-grid' }, fields);
+
+	bindHealthProfile(grid);
+	bindSingleTargetWarning(grid);
+	bindInterfaceFamily(grid, networks);
+	showMwan4Modal(title, [ grid, previewModalActions(function() { return buildInterfaceChange(name); }, name ? function() { return showInterfaceRemovalPreview(name); } : null) ]);
 }
 
 function setupProgress() {

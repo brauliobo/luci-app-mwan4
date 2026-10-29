@@ -1564,6 +1564,143 @@ async function applyPending(page) {
 	await page.getByRole('button', { name: 'Apply pending changes' }).click();
 }
 
+test.describe('mocked mwan4 WAN link dialog', () => {
+	const stable = () => ({ status: stableStatus(), history: defaultLinkHistory() });
+	const field = (page, name) => page.locator('.modal [name="%s"]'.replace('%s', name));
+
+	test('names the health fields in plain words and keeps them visible under Fine tuning', async ({ page }) => {
+		await renderOverview(page);
+		await page.getByRole('button', { name: 'Edit WAN link wan_backup' }).click();
+
+		const modal = page.locator('.modal');
+
+		await expect(modal.locator('.mwan4-builder-title strong')).toHaveText([ 'Health check', 'Fine tuning (optional)' ]);
+		await expect(modal.locator('.mwan4-advanced-fields label span')).toContainText([
+			'Check every (seconds)', 'Failed checks before the link is marked down', 'Good checks before it is used again', 'Targets that must answer' ]);
+		await expect(modal.locator('input[name="interval"]')).toBeVisible();
+		await expect(modal).not.toContainText('Health tuning');
+		await expect(modal).not.toContainText('SLA');
+		await expect(modal.locator('details, summary')).toHaveCount(0);
+		await expect(modal.locator('.mwan4-builder-section').first().locator('select').first()).toHaveAttribute('name', 'health_profile');
+	});
+
+	test('chooses a health profile that fills the numbers, and goes back to Custom when one is edited', async ({ page }) => {
+		await renderOverview(page);
+		await page.getByRole('button', { name: 'Edit WAN link wan_primary' }).click();
+
+		const profile = field(page, 'health_profile');
+		const live = page.locator('.modal [data-health-live]');
+
+		await expect(profile.locator('option')).toHaveText([
+			'Sensitive: notices an outage in about 15 s', 'Balanced: notices an outage in about 50 s', 'Tolerant: notices an outage in about 1.5 min', 'Custom' ]);
+		await expect(profile).toHaveValue('balanced');
+		await expect(live).toHaveText('Pings 1.1.1.1 and 8.8.8.8 every 10 s; marked down after 5 failed checks and up again after 5 good ones; any one target answering keeps it up'
+			+ '; treated as degraded above 1000 ms or 40% loss, and healthy again below 500 ms and 10%');
+
+		await profile.selectOption('tolerant');
+		await expect(field(page, 'interval')).toHaveValue('15');
+		await expect(field(page, 'down')).toHaveValue('6');
+		await expect(field(page, 'up')).toHaveValue('6');
+		await expect(field(page, 'reliability')).toHaveValue('');
+		await expect(live).toContainText('every 15 s; marked down after 6 failed checks and up again after 6 good ones');
+
+		await field(page, 'down').fill('4');
+		await expect(profile).toHaveValue('custom');
+		await expect(live).toContainText('marked down after 4 failed checks');
+
+		await field(page, 'down').fill('6');
+		await expect(profile).toHaveValue('tolerant');
+		await profile.selectOption('sensitive');
+		await expect(field(page, 'interval')).toHaveValue('5');
+		await field(page, 'track_ip').fill('9.9.9.9');
+		await expect(live).toContainText('Pings 9.9.9.9 every 5 s');
+		await expect(profile).toHaveValue('sensitive');
+		await profile.selectOption('custom');
+		await expect(field(page, 'interval')).toHaveValue('5');
+	});
+
+	test('a profile also sets the stability fields and leaves them empty when they match the defaults', async ({ page }) => {
+		await renderOverview(page, stable());
+		await page.getByRole('button', { name: 'Edit WAN link wan_primary' }).click();
+
+		const profile = field(page, 'health_profile');
+
+		await expect(profile).toHaveValue('balanced');
+		await profile.selectOption('tolerant');
+		await expect(field(page, 'flap_threshold')).toHaveValue('2');
+		await expect(field(page, 'flap_window')).toHaveValue('600');
+		await expect(field(page, 'flap_holddown')).toHaveValue('300');
+		await expect(field(page, 'recovery_hold')).toHaveValue('60');
+		await expect(field(page, 'flap_damping')).toHaveValue('');
+
+		await field(page, 'flap_window').fill('300');
+		await expect(profile).toHaveValue('custom');
+		await field(page, 'flap_window').fill('600');
+		await expect(profile).toHaveValue('tolerant');
+		await profile.selectOption('balanced');
+		await expect(field(page, 'flap_holddown')).toHaveValue('');
+		await expect(field(page, 'interval')).toHaveValue('');
+		await expect(field(page, 'interval')).toHaveAttribute('placeholder', '10');
+	});
+
+	test('recognises the saved options as a profile', async ({ page }) => {
+		await renderOverview(page, stable());
+		await setUciOption(page, 'wan_backup', 'interval', '5');
+		await setUciOption(page, 'wan_backup', 'down', '3');
+		await setUciOption(page, 'wan_backup', 'up', '3');
+		await setUciOption(page, 'wan_backup', 'flap_holddown', '60');
+		await setUciOption(page, 'wan_backup', 'recovery_hold', '10');
+		await page.getByRole('button', { name: 'Edit WAN link wan_backup' }).click();
+		await expect(field(page, 'health_profile')).toHaveValue('sensitive');
+		await page.getByRole('button', { name: 'Cancel' }).click();
+		await setUciOption(page, 'wan_backup', 'down', '4');
+		await page.getByRole('button', { name: 'Edit WAN link wan_backup' }).click();
+		await expect(field(page, 'health_profile')).toHaveValue('custom');
+	});
+
+	test('adds a link from an unused interface: unused ones first, the family follows, two targets are filled in', async ({ page }) => {
+		await renderOverview(page);
+		await page.getByRole('button', { name: 'Add WAN link' }).click();
+
+		const network = field(page, 'network');
+
+		await expect(network.locator('option')).toHaveText([ 'wan_lte', 'wan_lte6', 'lan', 'wan_backup (already a WAN link)', 'wan_primary (already a WAN link)' ]);
+		await expect(network).toHaveValue('wan_lte');
+		await expect(field(page, 'family')).toHaveValue('ipv4');
+		await expect(field(page, 'track_ip')).toHaveValue('1.1.1.1 8.8.8.8');
+		await expect(page.locator('.modal [data-mwan4-single-target]')).toBeHidden();
+		await expect(field(page, 'name')).toHaveAttribute('placeholder', 'Same as the network interface');
+		await expect(field(page, 'health_profile')).toHaveValue('balanced');
+
+		await network.selectOption('wan_lte6');
+		await expect(field(page, 'family')).toHaveValue('ipv6');
+		await network.selectOption('wan_lte');
+		await expect(field(page, 'family')).toHaveValue('ipv4');
+
+		await field(page, 'track_ip').fill('9.9.9.9');
+		await expect(page.locator('.modal [data-mwan4-single-target]')).toBeVisible();
+		await field(page, 'track_ip').fill('9.9.9.9 1.0.0.1');
+		await expect(page.locator('.modal [data-mwan4-single-target]')).toBeHidden();
+
+		await field(page, 'health_profile').selectOption('sensitive');
+		await page.getByRole('button', { name: 'Preview changes' }).click();
+		await expect(page.locator('.modal')).toContainText('wan_lte');
+		await expect(page.locator('.modal')).toContainText('9.9.9.9, 1.0.0.1');
+		await page.getByRole('button', { name: 'Apply pending changes' }).click();
+
+		expect(await uciSection(page, 'wan_lte')).toMatchObject({ '.type': 'interface', family: [ 'ipv4' ], track_ip: [ '9.9.9.9', '1.0.0.1' ], interval: '5', down: '3', up: '3', enabled: '1' });
+	});
+
+	test('an optional name overrides the interface name and a taken name is refused', async ({ page }) => {
+		await renderOverview(page);
+		await page.getByRole('button', { name: 'Add WAN link' }).click();
+		await field(page, 'name').fill('wan_primary');
+		await page.getByRole('button', { name: 'Preview changes' }).click();
+		await expect(page.locator('body')).toContainText('A WAN link with that name already exists.');
+		await expect(page.locator('.modal [data-mwan4-preview]')).toBeHidden();
+	});
+});
+
 test.describe('mocked mwan4 unstable WAN handling', () => {
 	const stable = () => ({ status: stableStatus(), history: defaultLinkHistory() });
 

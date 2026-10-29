@@ -22,6 +22,7 @@ const jsFiles = [
 	'htdocs/luci-static/resources/mwan4/stability.js',
 	'htdocs/luci-static/resources/mwan4/summary.js',
 	'htdocs/luci-static/resources/mwan4/templates.js',
+	'htdocs/luci-static/resources/mwan4/wanform.js',
 	'htdocs/luci-static/resources/view/mwan4/network/globals.js',
 	'htdocs/luci-static/resources/view/mwan4/network/advanced.js',
 	'htdocs/luci-static/resources/view/mwan4/network/interfaces.js',
@@ -57,7 +58,12 @@ for (const needle of [
 	'WAN links',
 	'DNS probe',
 	'Probe helper availability',
-	'Health tuning',
+	'Health profile',
+	'Fine tuning (optional)',
+	'Check every (seconds)',
+	'Failed checks before the link is marked down',
+	'Good checks before it is used again',
+	'Targets that must answer',
 	'Advanced options',
 	'Extra matching',
 	'Behaviour',
@@ -208,6 +214,8 @@ for (const needle of [
 	"_(' / netifd up')",
 	"_('Open Advanced')",
 	"_('Routing mode')",
+	"_('Health tuning')",
+	"_('Use latency/loss SLA thresholds')",
 	'Each card combines saved WAN/SLA settings'
 ])
 	assert.equal(combined.includes(needle), false, `stale or ambiguous copy remains: ${needle}`);
@@ -246,7 +254,12 @@ for (const needle of [
 	'msgid "WAN links"',
 	'msgid "DNS probe"',
 	'msgid "Probe helper availability"',
-	'msgid "Health tuning"',
+	'msgid "Health profile"',
+	'msgid "Fine tuning (optional)"',
+	'msgid "Check every (seconds)"',
+	'msgid "Failed checks before the link is marked down"',
+	'msgid "Good checks before it is used again"',
+	'msgid "Targets that must answer"',
 	'msgid "Advanced options"',
 	'msgid "Extra matching"',
 	'msgid "Behaviour"',
@@ -370,7 +383,7 @@ const unescape = text => text.replace(/\\(.)/g, (all, char) => char == 'n' ? '\n
 
 assert.deepEqual(potIds.filter((id, index) => id && potIds.indexOf(id) != index), [], 'the POT has no duplicate msgids');
 
-for (const file of [ 'view/mwan4/network/overview.js', 'mwan4/explain.js', 'mwan4/routetest.js', 'mwan4/rulecheck.js', 'mwan4/rulesui.js', 'mwan4/summary.js', 'mwan4/templates.js' ])
+for (const file of [ 'view/mwan4/network/overview.js', 'mwan4/explain.js', 'mwan4/routetest.js', 'mwan4/rulecheck.js', 'mwan4/rulesui.js', 'mwan4/summary.js', 'mwan4/templates.js', 'mwan4/wanform.js' ])
 	for (const match of read('htdocs/luci-static/resources/' + file).matchAll(/(?<![\w$.])_\('((?:[^'\\]|\\.)*)'\)/g))
 		assert.ok(potIds.map(unescape).includes(unescape(match[1])), `POT is missing "${match[1]}" used in ${file}`);
 

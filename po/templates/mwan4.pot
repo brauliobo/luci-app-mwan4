@@ -1,10 +1,6 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Health tuning"
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
 msgid "PBR"
 msgstr ""
@@ -798,10 +794,6 @@ msgid ""
 "MultiWAN 4 settings applied. Service restart is hidden by this session ACL."
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:507
-msgid "Name"
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:450
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:508
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:156
@@ -952,12 +944,6 @@ msgstr ""
 msgid "Pending change preview"
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:500
-msgid ""
-"Pick an existing network interface and mwan4 will run health checks against "
-"it."
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:122
 msgid "Ping size"
 msgstr ""
@@ -1052,10 +1038,6 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:342
 msgid "Remove"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:516
-msgid "Required healthy targets"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:111
@@ -1367,11 +1349,6 @@ msgid ""
 "underscores."
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:135
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:521
-msgid "Use latency/loss SLA thresholds"
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:795
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:112
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/strategies.js:41
@@ -1526,10 +1503,6 @@ msgstr ""
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:152
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/overview.js:157
 msgid "unknown"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:507
-msgid "wan_backup"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/advanced.js
@@ -1917,19 +1890,7 @@ msgid "Change was not applied: %s"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Basic health check"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Most links only need an address family and two reliable targets."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "IPv4 + IPv6"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Set hysteresis and optional latency/loss thresholds for this WAN link."
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
@@ -2502,10 +2463,6 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
 msgid "Wait this long before flushing the connections of a downed WAN, so healthy flows survive a short outage (0 flushes immediately)."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
-msgid "Latency and loss limits need \"Use latency/loss SLA thresholds\" (check_quality) enabled on the WAN links of this strategy."
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/stability.js
@@ -4158,4 +4115,92 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "Check targets"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/templates.js
+msgid "%s: notices an outage in about %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/templates.js
+msgid "Custom"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/mwan4/wanform.js
+msgid "%s (already a WAN link)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Health profile"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "How quickly a failing link is noticed and trusted again. The exact numbers are under Fine tuning."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "The network interface that carries this internet connection."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Name (optional)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Same as the network interface"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Leave empty to use the interface name."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Check every (seconds)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Failed checks before the link is marked down"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Good checks before it is used again"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Targets that must answer"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Pick a network interface and mwan4 will test it with the targets below."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Most links only need a profile, an address family and two reliable targets."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Fine tuning (optional)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "The numbers behind the profile. Changing one switches the profile to Custom."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Also check latency and packet loss"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Degraded above (ms)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Degraded above (% packet loss)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Healthy again below (ms)"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Healthy again below (% packet loss)"
 msgstr ""
