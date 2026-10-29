@@ -272,6 +272,21 @@ function viaGroups(ctx) {
 	return [ [ _('Existing paths'), existing ], [ _('Quick presets'), presets ], [ _('Other'), other ] ].filter(group => group[1].length);
 }
 
+/* The routes of the default path: one link first (its IPv4 and IPv6 siblings together) with the others behind it, or every link at one level. */
+function defaultRoutes(mode, primary, groups) {
+	if (!groups.length)
+		return [];
+
+	return mode == 'balanced' ? groups.flat().map(name => ({ interface: name, metric: 1 })) : mwan4Rules.presetPlan('prefer', primary, groups).routes;
+}
+
+function defaultPath(mode, primary, groups) {
+	let routes = defaultRoutes(mode, primary, groups).map((route, index) => ({ '.name': 'r%d'.format(index), interface: route.interface, metric: String(route.metric) }));
+	let plan = { '.name': 'plan', use_route: routes.map(route => route['.name']), last_resort: 'unreachable' };
+
+	return mwan4Explain.pathSummary('plan', [ plan ], routes);
+}
+
 function linkChoices(ctx) {
 	return (ctx.links || []).map(link => [ link.key, '%s (%s)'.format(link.label, mwan4Explain.linkState(link, ctx.status || {}).text) ]);
 }
@@ -351,6 +366,8 @@ return baseclass.extend({
 	attention:         attention,
 	copyOf:            copyOf,
 	decidingRule:      decidingRule,
+	defaultPath:       defaultPath,
+	defaultRoutes:     defaultRoutes,
 	draftIssues:       draftIssues,
 	examined:          examined,
 	isFiltered:        isFiltered,

@@ -737,10 +737,6 @@ function showInterfaceModal(name) {
 	]));
 }
 
-function enabledInterfaceNames() {
-	return configuredEnabledInterfaceNames();
-}
-
 function setupProgress() {
 	let links = mwanInterfaces();
 	let routeSections = uci.sections('mwan4', 'route');
@@ -862,88 +858,95 @@ function writePresetStrategy(strategy, routes) {
 	setDefaultRules(strategy);
 }
 
-function buildRoutingPresetChange(mode) {
+function routingModes() {
+	return [
+		[ 'failover', _('Use one link first, others as backup'), _('Traffic uses the main link and moves to the next one only when it is unavailable.') ],
+		[ 'balanced', _('Share load across all healthy links'), _('New connections are spread across every healthy link.') ]
+	];
+}
+
+function currentRoutingMode() {
+	return (rules().find(isGeneratedDefaultRule) || {}).use_strategy == 'balanced' ? 'balanced' : 'failover';
+}
+
+function routingDraftFromModal() {
 	let modal = document.querySelector('.modal');
-	let names = enabledInterfaceNames();
-	let strategy = mode == 'failover' ? 'failover' : 'balanced';
+	let checked = modal.querySelector('[name="routing_mode"]:checked');
+
+	return { mode: checked ? checked.value : 'failover', primary: modalValue(modal, 'primary') || (wanChoices()[0] || [])[0] };
+}
+
+function routingSentence(draft) {
+	return _('Traffic that no rule matches: %s.').format(mwan4Rulesui.defaultPath(draft.mode, draft.primary, wanChoices()).text);
+}
+
+function buildRoutingPresetChange() {
+	let draft = routingDraftFromModal();
+	let plan = mwan4Rulesui.defaultRoutes(draft.mode, draft.primary, wanChoices());
 	let generatedCount = overviewGeneratedRoutes().length;
-	let customCount = uci.sections('mwan4', 'route').length - generatedCount;
-	if (!names.length) {
+
+	if (!plan.length) {
 		ui.addNotification(null, E('p', [ _('Enable at least one WAN link first.') ]), 'warning');
 		return;
 	}
 
-	if (mode == 'failover') {
-		let primary = modalValue(modal, 'primary') || names[0];
-			names.sort(function(a, b) {
-				if (a == primary)
-					return -1;
-				if (b == primary)
-					return 1;
-				return String(a).localeCompare(String(b));
-			});
-	}
-
 	return {
-		summary: mode == 'failover'
-			? _('This will replace generated paths with a primary WAN link failover order.')
-			: _('This will replace generated paths with equal-priority load balancing.'),
+		summary: _('This will replace the generated default path. Your own rules are kept.'),
 		items:   [
-			[ _('Routing preset'), mode == 'failover' ? _('Reliability first') : _('Throughput first') ],
-			[ _('Strategy'), formatPolicyPath(strategy) ],
-			[ _('WAN order'), names.join(mode == 'failover' ? ' -> ' : ' + ') ],
+			[ _('Default routing'), routingModes().find(function(item) { return item[0] == draft.mode; })[1] ],
+			[ _('Path'), mwan4Rulesui.defaultPath(draft.mode, draft.primary, wanChoices()).text ],
 			[ _('Generated paths replaced'), String(generatedCount) ],
-			[ _('Custom paths preserved'), String(customCount) ],
-			[ _('Default routing'), _('IPv4 and IPv6 default traffic will use %s.').format(formatPolicyPath(strategy)) ]
+			[ _('Custom paths preserved'), String(uci.sections('mwan4', 'route').length - generatedCount) ],
+			[ _('Applies to'), _('IPv4 and IPv6 traffic that no rule matches') ]
 		],
 		apply:   function() {
-			return commitRoutingPreset(mode, names.slice());
+			return commitRoutingPreset(draft.mode, plan);
 		}
 	};
 }
 
-function commitRoutingPreset(mode, names) {
-	let routes = [];
+function commitRoutingPreset(mode, plan) {
 	let stamp = Date.now();
-	let strategy = mode == 'failover' ? 'failover' : 'balanced';
 
 	resetGeneratedRouting();
 
-	if (mode == 'failover') {
-		names.forEach(function(name, index) {
-			let route = sanitizeName('ui_%s_m%d_%d'.format(name, index + 1, stamp), 'route_%d_%d'.format(index + 1, stamp));
-			routes.push(addPresetRoute(route, name, index + 1));
-		});
-	}
-	else {
-		names.forEach(function(name) {
-			let route = sanitizeName('ui_%s_m1_%d'.format(name, stamp), 'route_' + name + '_' + stamp);
-			routes.push(addPresetRoute(route, name, 1));
-		});
-	}
+	let routes = plan.map(function(item, index) {
+		return addPresetRoute(sanitizeName('ui_%s_m%d_%d'.format(item.interface, item.metric, stamp), 'route_%d_%d'.format(index + 1, stamp)), item.interface, item.metric);
+	});
 
-	writePresetStrategy(strategy, routes);
+	writePresetStrategy(mode == 'failover' ? 'failover' : 'balanced', routes);
 }
 
-function showRoutingModal(mode) {
-	let names = enabledInterfaceNames();
-	let title = mode == 'failover' ? _('Use failover') : _('Use load balancing');
-
-	showMwan4Modal(title, [
-		E('div', { class: 'mwan4-modal-grid' }, [
-			E('div', { class: 'mwan4-modal-title' }, [
-				E('strong', [ mode == 'failover' ? _('Reliability-first routing') : _('Throughput-first routing') ]),
-				E('span', [ mode == 'failover'
-					? _('mwan4 will prefer the primary WAN link and move down the list when health checks fail.')
-					: _('mwan4 will use equal-priority paths across all enabled healthy WAN links.') ])
-			]),
-			mode == 'failover'
-				? modalSelect(_('Primary WAN link'), 'primary', names, names[0], null)
-				: E('div', { class: 'mwan4-route-preview' }, [ names.join(' + ') || _('No enabled WAN links') ]),
-			pendingPreviewSlot()
-		]),
-		previewModalActions(function() { return buildRoutingPresetChange(mode); })
+function routingChoice(mode, checked) {
+	return E('label', { class: 'mwan4-radio-choice' }, [
+		E('input', { type: 'radio', name: 'routing_mode', value: mode[0], checked: checked ? 'checked' : null }),
+		E('span', [ E('strong', [ mode[1] ]), E('small', [ mode[2] ]) ])
 	]);
+}
+
+/* mode: the radio that starts selected. The primary link only matters, and is only shown, while one link is used first. */
+function showRoutingModal(mode) {
+	let primary = modalSelect(_('Main link'), 'primary', mwan4Rulesui.linkChoices(ruleContext()), (wanChoices()[0] || [])[0], null);
+	let live = E('p', { class: 'mwan4-routing-live', 'data-routing-live': '1', 'aria-live': 'polite' });
+	let grid = E('div', { class: 'mwan4-modal-grid' }, [
+		E('div', { class: 'mwan4-modal-title' }, [
+			E('strong', [ _('How should traffic that no rule matches leave?') ]),
+			E('span', [ _('This replaces the generated default path. Your own rules are kept.') ])
+		]),
+		E('div', { class: 'mwan4-radio-list', role: 'radiogroup', 'aria-label': _('Default routing') }, routingModes().map(function(item) { return routingChoice(item, item[0] == mode); })),
+		primary,
+		live,
+		pendingPreviewSlot()
+	]);
+	let refresh = function() {
+		primary.hidden = routingDraftFromModal().mode != 'failover';
+		live.textContent = routingSentence(routingDraftFromModal());
+	};
+
+	showMwan4Modal(_('Change default routing'), [ grid, previewModalActions(buildRoutingPresetChange) ]);
+	grid.addEventListener('change', refresh);
+	modalRefresh = refresh;
+	refresh();
 }
 
 function familyLabel(family) {
@@ -961,50 +964,6 @@ function protocolLabel(proto) {
 	};
 
 	return labels[proto || 'all'] || proto;
-}
-
-function describePathKind(path) {
-	let strategy = uci.get('mwan4', path) || {};
-	let routes = asArray(strategy.use_route);
-	let metrics = [];
-
-	if (path == 'default')
-		return _('main routing table');
-	if (path == 'unreachable')
-		return _('fail closed (reject traffic)');
-	if (path == 'blackhole')
-		return _('fail closed (drop traffic)');
-	if (path == 'failover')
-		return _('failover strategy');
-	if (path == 'balanced')
-		return _('load-balancing strategy');
-
-	routes.forEach(function(routeName) {
-		let route = uci.get('mwan4', routeName) || {};
-		if (route.metric != null && route.metric !== '')
-			metrics.push(String(route.metric));
-	});
-
-	if (routes.length > 1 && metrics.length == routes.length) {
-		let first = metrics[0];
-		let equal = metrics.every(function(metric) { return metric == first; });
-		return equal ? _('load-balancing strategy') : _('failover strategy');
-	}
-
-	return _('custom strategy');
-}
-
-function formatPolicyPath(path) {
-	path = path || 'default';
-
-	if (path == 'default')
-		return _('Use main routing table');
-	if (path == 'unreachable')
-		return _('Fail closed (reject traffic)');
-	if (path == 'blackhole')
-		return _('Fail closed (drop traffic)');
-
-	return _('%s (%s)').format(describePathKind(path), path);
 }
 
 function wanChoices() {
@@ -1889,26 +1848,11 @@ function showTesterModal(prefill, back) {
 }
 
 function showDefaultRoutingChoice() {
-	let choice = function(title, summary, mode) {
-		return E('button', { class: 'mwan4-template-choice', type: 'button', 'data-routing': mode, click: function() { return showRoutingModal(mode); } }, [
-			E('strong', [ title ]),
-			E('span', [ summary ])
-		]);
-	};
+	showRoutingModal(currentRoutingMode());
+}
 
-	showMwan4Modal(_('Change default routing'), [
-		E('div', { class: 'mwan4-modal-grid' }, [
-			E('div', { class: 'mwan4-modal-title' }, [
-				E('strong', [ _('How should traffic that no rule matches leave?') ]),
-				E('span', [ _('This replaces the generated default path. Your own rules are kept.') ])
-			]),
-			E('div', { class: 'mwan4-template-list' }, [
-				choice(_('Use one link first'), _('Traffic uses your main link and moves to the next one only when it is unavailable.'), 'failover'),
-				choice(_('Balance across all links'), _('New connections are shared across all healthy links.'), 'balanced')
-			])
-		]),
-		E('div', { class: 'right mwan4-modal-actions' }, [ E('button', { class: 'btn cbi-button cbi-button-neutral', click: closeModal }, [ _('Cancel') ]) ])
-	]);
+function pathText(name) {
+	return mwan4Explain.pathSummary(name, strategies(), uci.sections('mwan4', 'route')).text;
 }
 
 function strategyLimits(section) {
@@ -1930,9 +1874,9 @@ function buildStrategyChange(name) {
 	let draft = { max_latency: modalValue(modal, 'max_latency'), max_loss: modalValue(modal, 'max_loss') };
 
 	return {
-		summary: _('This will update the quality limits of this strategy before they are written to mwan4.'),
+		summary: _('This will update the quality limits of this path before they are written to mwan4.'),
 		items:   [
-			[ _('Strategy'), name ],
+			[ _('Path'), pathText(name) ],
 			[ _('Limits'), strategyLimits(draft) ]
 		],
 		apply:   function() {
@@ -1945,11 +1889,11 @@ function showStrategyModal(name) {
 	let section = uci.get('mwan4', name) || {};
 	let gaps = strategyQualityGaps(name);
 
-	showMwan4Modal(_('Strategy quality: %s').format(name), [
+	showMwan4Modal(_('Quality limits: %s').format(pathText(name)), [
 		E('div', { class: 'mwan4-modal-grid' }, [
 			E('div', { class: 'mwan4-modal-title' }, [
 				E('strong', [ name ]),
-				E('span', [ _('A WAN link above a limit is skipped by this strategy only; it stays online elsewhere. If every link exceeds the limits, the least bad one is kept.') ])
+				E('span', [ _('A WAN link above a limit is skipped by this path only; it stays online elsewhere. If every link exceeds the limits, the least bad one is kept.') ])
 			]),
 			E('div', { class: 'mwan4-modal-columns' }, [
 				modalInput(_('Maximum latency (ms)'), 'max_latency', section.max_latency, { type: 'number', min: '1', placeholder: _('no limit') }),
@@ -2411,77 +2355,6 @@ function renderCounterStrip(counters) {
 	]);
 }
 
-function renderStrategyConnections() {
-	if (!connectionsEnabled())
-		return [];
-
-	return strategies().map(function(section) {
-		let name = section['.name'];
-		let active = mwan4Connections.strategyActive(name, live.status);
-
-		return active == null ? null : mwan4Connections.countButton(_('View active connections of strategy %s').format(name), _('%s: %d').format(name, active), null, { strategy: name }, showConnectionsModal);
-	}).filter(Boolean);
-}
-
-function renderStrategyQuality() {
-	return strategies().map(function(section) {
-		let name = section['.name'];
-
-		return E('button', {
-			class:        'btn cbi-button cbi-button-neutral mwan4-compact-button',
-			title:        strategyLimits(section),
-			'aria-label': _('Edit quality limits of strategy %s').format(name),
-			click:        function() { return showStrategyModal(name); }
-		}, [ _('Quality: %s').format(name) ]);
-	});
-}
-
-function renderRouting() {
-	let strategyNames = strategies().map(function(section) { return section['.name']; });
-	let routes = uci.sections('mwan4', 'route');
-	let nodes = [];
-
-	if (!strategyNames.length && !routes.length)
-		nodes.push(renderEmptyState(
-			_('No routing mode configured.'),
-			_('Choose a preset after at least one WAN link exists. Presets create paths, a strategy, and default routing for you.'),
-			[
-				E('button', { class: 'btn cbi-button cbi-button-apply', 'aria-label': _('Configure failover routing'), click: function() { return showRoutingModal('failover'); } }, [ _('Configure failover') ]),
-				E('button', { class: 'btn cbi-button cbi-button-neutral', 'aria-label': _('Configure load-balancing routing'), click: function() { return showRoutingModal('balanced'); } }, [ _('Configure load balancing') ])
-			]
-		));
-
-	nodes.push(E('div', { class: 'mwan4-mode-grid' }, [
-		E('div', { class: 'mwan4-mode' }, [
-			E('h3', [ _('Reliability first') ]),
-			E('div', { class: 'mwan4-route-preview' }, [ _('Use one primary WAN link and fail over when health checks fail.') ]),
-			E('button', { class: 'btn cbi-button cbi-button-apply', 'aria-label': _('Use reliability first'), click: function() { return showRoutingModal('failover'); } }, [ _('Use reliability first') ])
-		]),
-		E('div', { class: 'mwan4-mode' }, [
-			E('h3', [ _('Throughput first') ]),
-			E('div', { class: 'mwan4-route-preview' }, [ _('Balance traffic across healthy WAN links with equal priority.') ]),
-			E('button', { class: 'btn cbi-button cbi-button-apply', 'aria-label': _('Use throughput first'), click: function() { return showRoutingModal('balanced'); } }, [ _('Use throughput first') ])
-		]),
-		E('div', { class: 'mwan4-mode' }, [
-			E('h3', [ _('Custom strategy') ]),
-			E('div', { class: 'mwan4-route-preview' }, [ _('Tune path weights, priorities, SLA behavior, and reject/drop handling manually.') ]),
-			E('small', { class: 'mwan4-muted-line' }, [ _('Use the Strategies tab when manual path weighting is needed.') ])
-		]),
-		E('div', { class: 'mwan4-mode mwan4-mode-current' }, [
-			E('h3', [ _('Current routing') ]),
-			E('div', { class: 'mwan4-route-preview' }, [
-				_('%d strategies, %d paths').format(strategyNames.length, routes.length),
-				E('br'),
-				strategyNames.map(formatPolicyPath).join(', ') || _('No strategies')
-			]),
-			E('div', { id: 'mwan4-strategy-connections', class: 'mwan4-chips mwan4-strategy-connections' }, renderStrategyConnections()),
-			stabilityEnabled() ? E('div', { class: 'mwan4-chips mwan4-strategy-quality' }, renderStrategyQuality()) : null
-		])
-	]));
-
-	return E('div', { class: 'mwan4-routing' }, nodes);
-}
-
 const LINK_CHIP = { online: 'mwan4-online', held: 'mwan4-warning', offline: 'mwan4-offline', disabled: 'mwan4-muted', unknown: 'mwan4-muted' };
 
 function linkChip(group, status) {
@@ -2675,6 +2548,17 @@ function renderRuleRow(entry, total, status, counters) {
 	]);
 }
 
+function qualityButton(strategy) {
+	let section = uci.get('mwan4', strategy) || {};
+
+	return E('button', {
+		class:        'btn cbi-button cbi-button-neutral mwan4-compact-button',
+		title:        strategyLimits(section),
+		'aria-label': _('Edit quality limits of %s').format(pathText(strategy)),
+		click:        function() { return showStrategyModal(strategy); }
+	}, [ _('Quality limits') ]);
+}
+
 function renderDefaultRuleRow(rule, status, counters) {
 	let name = rule['.name'];
 	let ctx = ruleContext(status);
@@ -2686,7 +2570,7 @@ function renderDefaultRuleRow(rule, status, counters) {
 			_('Traffic that no rule above matches (%s)').format(familyLabel(defaultRuleFamily(rule))) ]) ]),
 		tableCell(_('Goes through'), renderGoesThrough(mwan4Explain.pathSummary(rule.use_strategy || 'default', ctx.strategies, ctx.routes), status)),
 		renderActivity(name, counters, renderDefaultRuleConnections(name)),
-		tableCell(_('Actions'), [])
+		tableCell(_('Actions'), stabilityEnabled() ? [ qualityButton(rule.use_strategy) ] : [], { class: 'mwan4-actions' })
 	]);
 }
 
@@ -2895,37 +2779,6 @@ function applyPbrImport(button) {
 	});
 }
 
-function renderGlobalSettings() {
-	let section = getGlobalSection();
-	let mask = globalValue(section, 'mwan4.mmx_mask', 'mmx_mask', '0x3F00');
-	let sourceRouting = globalValue(section, 'mwan4.source_routing', 'source_routing', '0') == '1';
-	let lookupTables = asArray(section.rt_table_lookup).join(', ') || _('Default tables');
-
-	return E('div', { class: 'mwan4-mode-grid' }, [
-		E('div', { class: 'mwan4-mode' }, [
-			E('h3', [ _('Firewall marks') ]),
-			E('div', { class: 'mwan4-route-preview' }, [ mask ])
-		]),
-		E('div', { class: 'mwan4-mode' }, [
-			E('h3', [ _('Routing lookup') ]),
-			E('div', { class: 'mwan4-route-preview' }, [
-				sourceRouting ? _('Source routing enabled') : _('Standard policy routing'),
-				E('br'),
-				lookupTables
-			])
-		]),
-		E('div', { class: 'mwan4-mode' }, [
-			E('h3', [ _('Logging') ]),
-			E('div', { class: 'mwan4-route-preview' }, [
-				section.logging == '1' ? _('Rule logging enabled') : _('Rule logging off'),
-				E('br'),
-				section.loglevel || 'notice'
-			]),
-			E('button', { class: 'btn cbi-button cbi-button-edit', 'aria-label': _('Configure global MultiWAN settings'), click: showGlobalsModal }, [ _('Configure') ])
-		])
-	]);
-}
-
 function renderWanPanel(status, counters) {
 	return [
 		E('div', { class: 'mwan4-panel-heading' }, [
@@ -2950,10 +2803,6 @@ function renderApp(status, counters) {
 	nodes.push(
 		E('section', { id: 'mwan4-wan-workspace', class: 'mwan4-panel mwan4-wan-workspace', 'aria-labelledby': 'mwan4-wan-workspace-title', 'aria-live': 'polite', 'aria-busy': 'false' },
 			renderWanPanel(status, counters)),
-		E('section', { class: 'mwan4-panel', 'aria-labelledby': 'mwan4-routing-title' }, [
-			E('h3', { id: 'mwan4-routing-title' }, [ _('Routing mode') ]),
-			renderRouting()
-		]),
 		renderRulesPanel(status, counters)
 	);
 
@@ -3021,8 +2870,6 @@ return view.extend({
 					wanWorkspace.replaceChildren.apply(wanWorkspace, renderWanPanel(result || {}, counterResult));
 				if (!dragRule)
 					refreshRules();
-				if (byId('mwan4-strategy-connections'))
-					byId('mwan4-strategy-connections').replaceChildren.apply(byId('mwan4-strategy-connections'), renderStrategyConnections());
 				refreshRuleLiveConnections();
 				if (modalRefresh)
 					modalRefresh();

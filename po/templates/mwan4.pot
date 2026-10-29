@@ -144,10 +144,6 @@ msgstr ""
 msgid "%d ms"
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1666
-msgid "%d strategies, %d paths"
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/mwan4/common.js:106
 msgid "%d warning(s)"
 msgstr ""
@@ -287,10 +283,6 @@ msgstr ""
 msgid "Back to overview."
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1564
-msgid "Balance traffic across healthy WAN links with equal priority."
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/globals.js:31
 msgid ""
 "Bit mask used to keep mwan4 policy marks separate from other firewall marks. "
@@ -347,37 +339,8 @@ msgstr ""
 msgid "Configuration"
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1656
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1661
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1768
-msgid "Configure"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1259
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1441
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1647
-msgid "Configure failover"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1441
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1647
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1656
-msgid "Configure failover routing"
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1768
 msgid "Configure global MultiWAN settings"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1446
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1648
-msgid "Configure load balancing"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1446
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1648
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1661
-msgid "Configure load-balancing routing"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:74
@@ -413,10 +376,6 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/globals.js:46
 msgid "Create source-based rules in addition to traffic policy marks."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1567
-msgid "Custom strategy"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1060
@@ -598,10 +557,6 @@ msgstr ""
 msgid "Firewall mark mask"
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1750
-msgid "Firewall marks"
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1451
 msgid "First-run setup"
 msgstr ""
@@ -706,10 +661,6 @@ msgstr ""
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1105
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:54
 msgid "IPv4"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:654
-msgid "IPv4 and IPv6 default traffic will use %s."
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js:53
@@ -902,10 +853,6 @@ msgstr ""
 msgid "No diagnostics output returned."
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:715
-msgid "No enabled WAN links"
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:151
 msgid ""
 "No mwan4 counters reported. Generate traffic that should match a traffic "
@@ -915,14 +862,6 @@ msgstr ""
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:158
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:183
 msgid "No output"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1644
-msgid "No routing mode configured."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1668
-msgid "No strategies"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:472
@@ -1069,10 +1008,6 @@ msgstr ""
 msgid "Preview changes"
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:714
-msgid "Primary WAN link"
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/routes.js:36
 msgid "Priority metric"
 msgstr ""
@@ -1131,15 +1066,6 @@ msgstr ""
 msgid "Relative share when multiple healthy paths have the same metric."
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:651
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1559
-msgid "Reliability first"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:708
-msgid "Reliability-first routing"
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:342
 msgid "Remove"
 msgstr ""
@@ -1168,20 +1094,8 @@ msgstr ""
 msgid "Review this change before it is saved and applied."
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1754
-msgid "Routing lookup"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1796
-msgid "Routing mode"
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1267
 msgid "Routing needed"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:651
-msgid "Routing preset"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:76
@@ -1268,16 +1182,8 @@ msgstr ""
 msgid "Source routing"
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1756
-msgid "Source routing enabled"
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:70
 msgid "Stable interface ID"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1756
-msgid "Standard policy routing"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:156
@@ -1380,15 +1286,6 @@ msgstr ""
 msgid "This will remove the WAN link and generated paths that reference it."
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:648
-msgid ""
-"This will replace generated paths with a primary WAN link failover order."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:649
-msgid "This will replace generated paths with equal-priority load balancing."
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:446
 msgid "This will update WAN link health checks before it is written to mwan4."
 msgstr ""
@@ -1397,15 +1294,6 @@ msgstr ""
 msgid ""
 "This will update global firewall and routing behavior before it is written "
 "to mwan4."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:651
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1563
-msgid "Throughput first"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:708
-msgid "Throughput-first routing"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:138
@@ -1439,12 +1327,6 @@ msgstr ""
 msgid ""
 "Traffic policies are evaluated from top to bottom and choose a policy path, "
 "the main routing table, or a fail-closed action for matching traffic."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1568
-msgid ""
-"Tune path weights, priorities, SLA behavior, and reject/drop handling "
-"manually."
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:162
@@ -1505,17 +1387,9 @@ msgid ""
 "underscores."
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:703
-msgid "Use failover"
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:135
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:521
 msgid "Use latency/loss SLA thresholds"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:703
-msgid "Use load balancing"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:795
@@ -1550,10 +1424,6 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js
 msgid "Reset nft counters"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1560
-msgid "Use one primary WAN link and fail over when health checks fail."
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:850
@@ -1603,10 +1473,6 @@ msgid ""
 "WAN links map OpenWrt network interfaces to health checks and SLA thresholds."
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:653
-msgid "WAN order"
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:1433
 msgid "Waiting"
 msgstr ""
@@ -1637,45 +1503,8 @@ msgstr ""
 msgid "automatic"
 msgstr ""
 
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:788
-msgid "custom strategy"
-msgstr ""
-
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js:83
 msgid "derived from mask"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:770
-msgid "fail closed (drop traffic)"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:768
-msgid "fail closed (reject traffic)"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:772
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:785
-msgid "failover strategy"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:774
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:785
-msgid "load-balancing strategy"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:766
-msgid "main routing table"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:710
-msgid ""
-"mwan4 will prefer the primary WAN link and move down the list when health "
-"checks fail."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js:711
-msgid ""
-"mwan4 will use equal-priority paths across all enabled healthy WAN links."
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/status/diagnostics.js:83
@@ -2396,26 +2225,6 @@ msgid "%d bytes matched"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Choose a preset after at least one WAN link exists. Presets create paths, a strategy, and default routing for you."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Use reliability first"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Use throughput first"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Use the Strategies tab when manual path weighting is needed."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Current routing"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "%d bytes"
 msgstr ""
 
@@ -2525,14 +2334,6 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "PBR import failed: %s"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Rule logging enabled"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Rule logging off"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js
@@ -2697,14 +2498,6 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "View active connections of WAN link %s"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "View active connections of strategy %s"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "%s: %d"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/rules.js
@@ -2908,19 +2701,7 @@ msgid "no limits"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "This will update the quality limits of this strategy before they are written to mwan4."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "Limits"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Strategy quality: %s"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "A WAN link above a limit is skipped by this strategy only; it stays online elsewhere. If every link exceeds the limits, the least bad one is kept."
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
@@ -2969,14 +2750,6 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "Availability"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Edit quality limits of strategy %s"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Quality: %s"
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/interfaces.js
@@ -4103,22 +3876,6 @@ msgid "This replaces the generated default path. Your own rules are kept."
 msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Use one link first"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Traffic uses your main link and moves to the next one only when it is unavailable."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "Balance across all links"
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
-msgid "New connections are shared across all healthy links."
-msgstr ""
-
-#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "Activity"
 msgstr ""
 
@@ -4337,4 +4094,56 @@ msgstr ""
 
 #: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
 msgid "Raw counters are in Diagnostics"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Use one link first, others as backup"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Traffic uses the main link and moves to the next one only when it is unavailable."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Share load across all healthy links"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "New connections are spread across every healthy link."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Traffic that no rule matches: %s."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "This will replace the generated default path. Your own rules are kept."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "IPv4 and IPv6 traffic that no rule matches"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Main link"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "This will update the quality limits of this path before they are written to mwan4."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Quality limits: %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "A WAN link above a limit is skipped by this path only; it stays online elsewhere. If every link exceeds the limits, the least bad one is kept."
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Edit quality limits of %s"
+msgstr ""
+
+#: luci-app-mwan4/htdocs/luci-static/resources/view/mwan4/network/overview.js
+msgid "Quality limits"
 msgstr ""

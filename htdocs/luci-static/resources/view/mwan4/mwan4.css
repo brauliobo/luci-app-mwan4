@@ -402,13 +402,9 @@
 
 .mwan4-state-grid {
 	display: grid;
-	grid-template-columns: minmax(0, 0.95fr) minmax(0, 0.95fr) minmax(280px, 1.1fr);
+	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: 10px;
 	margin-top: 12px;
-}
-
-.mwan4-compact-metrics {
-	grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .mwan4-compact-metrics .mwan4-command-metric {
@@ -416,10 +412,6 @@
 	border-radius: var(--mwan4-radius-sm);
 	background: rgba(255, 255, 255, 0.28);
 	padding: 10px;
-}
-
-.mwan4-compact-metrics.has-connections {
-	grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 button.mwan4-command-metric {
@@ -773,37 +765,6 @@ button.mwan4-command-metric:hover,
 
 .mwan4-cell::before {
 	display: none;
-}
-
-.mwan4-mode-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-	gap: 10px;
-}
-
-.mwan4-mode {
-	border: 1px solid var(--border-color-low);
-	border-radius: var(--mwan4-radius-sm);
-	padding: 12px;
-	background: var(--background-color);
-	display: grid;
-	gap: 10px;
-	align-content: start;
-}
-
-.mwan4-mode-current {
-	background: var(--background-color-low);
-}
-
-.mwan4-mode h3 {
-	margin: 0;
-	font-size: 16px;
-}
-
-.mwan4-route-preview {
-	min-height: 32px;
-	color: var(--text-color-medium);
-	overflow-wrap: anywhere;
 }
 
 .mwan4-toolbar {
@@ -1192,10 +1153,6 @@ button.mwan4-command-metric:hover,
 
 @media (max-width: 900px) {
 	.mwan4-rules .mwan4-row,
-	.mwan4-compact-metrics.has-connections {
-		grid-template-columns: 1fr;
-	}
-
 	.mwan4-row {
 		display: grid;
 		grid-template-columns: 1fr;
@@ -1357,10 +1314,6 @@ button.mwan4-command-metric:hover,
 
 .mwan4-conn-button {
 	font-variant-numeric: tabular-nums;
-}
-
-.mwan4-strategy-connections {
-	margin-top: 8px;
 }
 
 .mwan4-rule-connections {
@@ -1700,6 +1653,44 @@ button.mwan4-command-metric:hover,
 .mwan4-template-choice span {
 	color: var(--text-color-medium);
 	line-height: 1.35;
+}
+
+.mwan4-radio-list {
+	display: grid;
+	gap: 8px;
+}
+
+.mwan4-radio-choice {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	gap: 10px;
+	align-items: start;
+	border: 1px solid var(--border-color-medium);
+	border-radius: var(--mwan4-radius-sm, 6px);
+	background: var(--background-color);
+	padding: 10px 12px;
+	cursor: pointer;
+}
+
+.mwan4-radio-choice:has(input:checked) {
+	border-color: var(--primary-color, #2684ff);
+	box-shadow: 0 0 0 2px rgba(38, 132, 255, 0.2);
+}
+
+.mwan4-radio-choice input {
+	margin-top: 3px;
+}
+
+.mwan4-radio-choice small {
+	display: block;
+	color: var(--text-color-medium);
+	line-height: 1.35;
+}
+
+.mwan4-routing-live {
+	margin: 0;
+	font-weight: 600;
+	line-height: 1.4;
 }
 
 .mwan4-test-result {

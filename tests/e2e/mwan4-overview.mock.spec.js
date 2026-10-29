@@ -331,9 +331,11 @@ test.describe('mocked mwan4 overview workspace', () => {
 		);
 
 		await renderOverview(page, { uci });
-		await page.getByRole('button', { name: 'Use throughput first' }).click();
+		await page.getByRole('button', { name: 'Change default routing' }).click();
+		await page.getByLabel('Share load across all healthy links').check();
 		await page.getByRole('button', { name: 'Preview changes' }).click();
 
+		await expect(page.locator('.modal')).toContainText('Share load across all healthy links');
 		await expect(page.locator('.modal')).toContainText('Generated paths replaced');
 		await expect(page.locator('.modal')).toContainText('Custom paths preserved');
 
@@ -1137,12 +1139,37 @@ test.describe('mocked mwan4 routing rules', () => {
 		expect((await ruleSection(page, 'streaming')).domain).toEqual([ 'netflix.com', 'youtube.com' ]);
 	});
 
-	test('changes the default routing through a short chooser', async ({ page }) => {
+	test('changes the default routing with a radio choice, a main link and a live sentence', async ({ page }) => {
 		await renderOverview(page);
+		await expect(page.locator('#mwan4-routing-title, .mwan4-routing')).toHaveCount(0);
 		await page.getByRole('button', { name: 'Change default routing' }).click();
-		await expect(page.locator('.modal h2')).toHaveText('Change default routing');
-		await page.locator('.mwan4-template-choice[data-routing="failover"]').click();
-		await expect(page.locator('.modal h2')).toHaveText('Use failover');
+
+		const modal = page.locator('.modal');
+		const live = modal.locator('[data-routing-live]');
+
+		await expect(modal.locator('h2')).toHaveText('Change default routing');
+		await expect(modal.locator('input[name="routing_mode"]')).toHaveCount(2);
+		await expect(modal.getByLabel('Use one link first, others as backup')).toBeChecked();
+		await expect(modal.locator('select[name="primary"] option')).toHaveText([ 'Primary (online)', 'Backup (online)' ]);
+		await expect(live).toHaveText('Traffic that no rule matches: Primary first, then Backup; stops if none is available.');
+
+		await modal.locator('select[name="primary"]').selectOption('wan_backup');
+		await expect(live).toHaveText('Traffic that no rule matches: Backup first, then Primary; stops if none is available.');
+
+		await modal.getByLabel('Share load across all healthy links').check();
+		await expect(modal.locator('select[name="primary"]')).toBeHidden();
+		await expect(live).toHaveText('Traffic that no rule matches: Balanced across Primary and Backup; stops if none is available.');
+
+		await modal.getByLabel('Use one link first, others as backup').check();
+		await page.getByRole('button', { name: 'Preview changes' }).click();
+		await expect(modal).toContainText('Backup first, then Primary');
+		await page.getByRole('button', { name: 'Apply pending changes' }).click();
+
+		const routes = await page.evaluate(() => window.__mwan4Mock.getUci().mwan4.filter(section => section['.type'] == 'route' && section.generated_by == 'luci-overview')
+			.map(section => [ section.interface, section.metric ]));
+
+		expect(routes).toEqual([ [ 'wan_backup', '1' ], [ 'wan_primary', '2' ] ]);
+		expect((await ruleSection(page, 'default_rule_v4')).use_strategy).toBe('failover');
 	});
 
 	test('hides Import from PBR unless pbr_import reports policies and the session can write', async ({ page }) => {
@@ -1360,21 +1387,19 @@ test.describe('mocked mwan4 connection counting', () => {
 		await expect(page.locator('.modal [data-rule-connections]')).toHaveCount(0);
 	});
 
-	test('adds WAN, strategy, and header entry points that open a pre-filtered modal', async ({ page }) => {
+	test('adds WAN, rule, and header entry points that open a pre-filtered modal', async ({ page }) => {
 		await renderOverview(page, { uci: uciWithRules() });
 
 		await expect(page.locator('#mwan4-wan-workspace th').filter({ hasText: 'Active connections' })).toHaveCount(1);
 		await expect(page.locator('.mwan4-conn-metric')).toContainText('3');
-		await expect(page.locator('.mwan4-strategy-connections')).toContainText('failover: 5');
 
 		await page.locator('[data-interface="wan_backup"] .mwan4-conn-button').click();
 		await expect(page.locator('.modal .mwan4-connections select[name="interface"]')).toHaveValue('wan_backup');
 		await expect(page.locator('.modal .mwan4-conn-row')).toHaveCount(1);
 		await page.getByRole('button', { name: 'Close' }).click();
 
-		await page.getByRole('button', { name: 'View active connections of strategy failover' }).click();
-		await expect(page.locator('.modal .mwan4-connections select[name="strategy"]')).toHaveValue('failover');
-		await expect(page.locator('.modal .mwan4-conn-row')).toHaveCount(2);
+		await page.locator('[data-rule="streaming"] .mwan4-conn-button').click();
+		await expect(page.locator('.modal .mwan4-connections select[name="rule"]')).toHaveValue('streaming');
 		await page.getByRole('button', { name: 'Close' }).click();
 
 		await page.locator('.mwan4-conn-metric').click();
@@ -1584,9 +1609,12 @@ test.describe('mocked mwan4 unstable WAN handling', () => {
 		await expect(warning).toBeVisible();
 	});
 
-	test('edits strategy quality limits and explains the check_quality requirement', async ({ page }) => {
+	test('edits the quality limits of the default path and explains the check_quality requirement', async ({ page }) => {
+		const quality = () => page.locator('[data-rule="default_rule_v4"]').getByRole('button', { name: /Edit quality limits of/ });
+
 		await renderOverview(page, stable());
-		await page.getByRole('button', { name: 'Edit quality limits of strategy failover' }).click();
+		await expect(page.locator('[data-rule="default_rule_v4"] .mwan4-actions')).toContainText('Quality limits');
+		await quality().click();
 
 		const modal = page.locator('.modal');
 
@@ -1598,8 +1626,8 @@ test.describe('mocked mwan4 unstable WAN handling', () => {
 
 		expect(await uciSection(page, 'failover')).toMatchObject({ max_latency: '150', max_loss: '5' });
 
-		await expect(page.getByRole('button', { name: 'Edit quality limits of strategy failover' })).toHaveAttribute('title', 'latency 150 ms, loss 5%');
-		await page.getByRole('button', { name: 'Edit quality limits of strategy failover' }).click();
+		await expect(quality()).toHaveAttribute('title', 'latency 150 ms, loss 5%');
+		await quality().click();
 		await page.locator('.modal input[name="max_latency"]').fill('');
 		await applyPending(page);
 		expect((await uciSection(page, 'failover')).max_latency).toBeFalsy();
@@ -1630,7 +1658,7 @@ test.describe('mocked mwan4 unstable WAN handling', () => {
 		await expect(workspace.locator('[data-interface="wan_primary"]')).toBeVisible();
 		await expect(workspace.locator('th')).not.toContainText([ 'Flaps' ]);
 		await expect(workspace.getByRole('button', { name: /link history/ })).toHaveCount(0);
-		await expect(page.locator('.mwan4-held-chip, .mwan4-degraded-chip, .mwan4-strategy-quality button')).toHaveCount(0);
+		await expect(page.locator('.mwan4-held-chip, .mwan4-degraded-chip, [data-rule] .mwan4-actions button')).toHaveCount(0);
 
 		await page.getByRole('button', { name: 'Edit WAN link wan_primary' }).click();
 		await expect(page.locator('.modal .mwan4-stability-fields')).toHaveCount(0);

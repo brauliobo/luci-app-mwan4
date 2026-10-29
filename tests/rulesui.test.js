@@ -211,6 +211,19 @@ for (const item of groups.flatMap(group => group[1]))
 assert.deepEqual(ui.linkChoices(ctx), [ [ 'wan_tim', 'Tim (online)' ], [ 'wan_str', 'Str (offline)' ], [ 'wg_vpn', 'Vpn (online)' ] ]);
 assert.deepEqual(ui.linkChoices({ links }), links.map(link => [ link.key, `${link.label} (status unknown)` ]), 'without live status the state is unknown');
 
+// default routing plans
+const groups3 = [ [ 'wan_tim', 'wan_tim6' ], [ 'wan_str' ], [ 'wg_vpn' ] ];
+
+assert.deepEqual(ui.defaultRoutes('failover', 'wan_str', groups3).map(route => [ route.interface, route.metric ]),
+	[ [ 'wan_str', 1 ], [ 'wan_tim', 2 ], [ 'wan_tim6', 2 ], [ 'wg_vpn', 3 ] ], 'the main link first, its IPv4 and IPv6 siblings share a level');
+assert.deepEqual(ui.defaultRoutes('balanced', 'wan_str', groups3).map(route => [ route.interface, route.metric ]),
+	[ [ 'wan_tim', 1 ], [ 'wan_tim6', 1 ], [ 'wan_str', 1 ], [ 'wg_vpn', 1 ] ], 'balancing puts every link on one level');
+assert.deepEqual(ui.defaultRoutes('failover', 'wan_tim', []), [], 'no links, no routes');
+assert.equal(ui.defaultPath('failover', 'wan_str', groups3).text, 'Str first, then Tim, then Vpn; stops if none is available');
+assert.equal(ui.defaultPath('failover', 'wan_tim6', groups3).text, 'Tim first, then Str, then Vpn; stops if none is available', 'a sibling name picks its link');
+assert.equal(ui.defaultPath('balanced', 'wan_tim', groups3).text, 'Balanced across Tim, Str and Vpn; stops if none is available');
+assert.equal(ui.defaultPath('failover', 'wan_tim', []).kind, 'custom');
+
 // traffic tester
 assert.deepEqual(ui.testProblems({ destination: 'youtube.com' }), []);
 assert.deepEqual(ui.testProblems({ destination: '203.0.113.7', source: '192.168.1.20', port: '443' }), []);
