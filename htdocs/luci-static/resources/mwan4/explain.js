@@ -408,6 +408,20 @@ function interfaceText(group, status) {
 	return group.members.map((name, index) => _('%s interface %s').format(familyName(name), ups[index] ? _('up') : _('down'))).join(', ');
 }
 
+/* How each health check method is named everywhere a method is chosen. */
+function methodLabels() {
+	return {
+		ping:         _('Ping'),
+		httping:      _('Web page request (HTTP)'),
+		'nping-tcp':  _('TCP connection (nping)'),
+		'nping-udp':  _('UDP packet (nping)'),
+		'nping-icmp': _('ICMP packet (nping)'),
+		'nping-arp':  _('ARP request (nping)'),
+		arping:       _('ARP request (arping)'),
+		nslookup:     _('DNS lookup')
+	};
+}
+
 function glossary() {
 	return {
 		[_('WAN link')]:                         _('One internet connection. Its IPv4 and IPv6 addresses are shown together.'),
@@ -448,6 +462,7 @@ return baseclass.extend({
 	limitsLine:     limitsLine,
 	linkLabel:      linkLabel,
 	linkState:      linkState,
+	methodLabels:   methodLabels,
 	nowVia:         nowVia,
 	pathSummary:    pathSummary,
 	ruleParts:      ruleParts,

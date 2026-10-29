@@ -1,17 +1,18 @@
 'use strict';
 'require form';
-'require fs';
 'require rpc';
 'require ui';
 'require uci';
 'require view';
 'require mwan4.common as mwan4Common';
 'require mwan4.advanced as mwan4Advanced';
+'require mwan4.fields as mwan4Fields';
 'require mwan4.guide as mwan4Guide';
 
 var E = mwan4Common.element;
 /* global mwan4Common */
 /* global mwan4Advanced */
+/* global mwan4Fields */
 /* global mwan4Guide */
 
 const callDiagnostics = rpc.declare({
@@ -64,24 +65,6 @@ function diagnosticsPayload(result, section) {
 	return section ? diagnostics[section] || {} : diagnostics;
 }
 
-function validatePositiveInteger(section_id, value) {
-	if (value == null || value == '')
-		return true;
-
-	return /^[1-9][0-9]*$/.test(value)
-		? true
-		: _('Use a positive integer, or leave this empty for automatic assignment.');
-}
-
-function validateFirewallMark(section_id, value) {
-	if (value == null || value == '')
-		return true;
-
-	return /^(0x[0-9a-fA-F]+|[1-9][0-9]*)$/.test(value)
-		? true
-		: _('Use a positive decimal mark or hexadecimal mark such as 0x100.');
-}
-
 function validatePort(section_id, value) {
 	if (value == null || value == '')
 		return true;
@@ -103,7 +86,7 @@ function validateStrategyReference(section_id, value) {
 
 	return strategyNames().indexOf(value) >= 0
 		? true
-		: _('Choose an existing mwan4 strategy, or leave this empty until the strategy exists.');
+		: _('Choose an existing path, or leave this empty until the path exists.');
 }
 
 function enabledMwanInterfaces(family) {
@@ -359,7 +342,7 @@ function mwanInterfaceOptions() {
 
 function pbrStrategyTargetOptions() {
 	return strategyNames().map(function(name) {
-		return [ 'mwan4_strategy_' + name, _('mwan4 strategy: %s').format(name) ];
+		return [ 'mwan4_strategy_' + name, _('MultiWAN 4 path: %s').format(name) ];
 	});
 }
 
@@ -436,7 +419,7 @@ function showTunnelWorkflow() {
 			workflowInput(_('Endpoint host'), 'endpoint_host', '', { placeholder: '198.51.100.10' }),
 			workflowInput(_('Endpoint port'), 'endpoint_port', '', { placeholder: '51820' }),
 			workflowInput(_('Local endpoint/source'), 'local_endpoint', '', { placeholder: '198.51.100.2' }),
-			workflowSelect(_('Underlay strategy'), 'underlay_strategy', strategies.length ? strategies : [ '' ], strategies[0] || ''),
+			workflowSelect(_('Path for the tunnel endpoint'), 'underlay_strategy', strategies.length ? strategies : [ '' ], strategies[0] || ''),
 			workflowGroup([ 'wireguard' ], [
 				workflowInput(_('WireGuard private key'), 'private_key', '', { type: 'password', autocomplete: 'new-password' }),
 				workflowInput(_('WireGuard peer public key'), 'public_key', '', { placeholder: _('peer public key') }),
@@ -510,12 +493,12 @@ function showPbrWorkflow() {
 	let enabledInterfaces = enabledMwanInterfaces();
 	let targets = pbrStrategyTargetOptions();
 	showWorkflowModal(_('Configure PBR harmony'),
-		_('Update luci-app-pbr configuration so PBR can target mwan4 strategies without mark or interface drift.'), [
+		_('Update luci-app-pbr configuration so PBR can target MultiWAN 4 paths without mark or interface drift.'), [
 			workflowCheck(_('Enable PBR'), 'enabled', true),
 			workflowSelect(_('IPv4 uplink'), 'uplink_interface', interfaces.length ? interfaces : [ '' ], interfaces[0] || ''),
 			workflowSelect(_('IPv6 uplink'), 'uplink_interface6', interfaces.length ? interfaces : [ '' ], interfaces.find(function(name) { return /6$/.test(name); }) || interfaces[0] || ''),
 			workflowCheck(_('Add all enabled mwan4 WAN links to supported_interface'), 'supported_all', true),
-			workflowSelect(_('PBR policy target'), 'policy_target', targets.length ? targets : [ [ '', _('Create a mwan4 strategy first') ] ], targets[0] ? targets[0][0] : ''),
+			workflowSelect(_('PBR policy target'), 'policy_target', targets.length ? targets : [ [ '', _('Create a path first') ] ], targets[0] ? targets[0][0] : ''),
 			workflowInput(_('Policy name'), 'policy_name', 'mwan4_policy', { placeholder: 'work_vpn' }),
 			workflowInput(_('Source address'), 'src_addr', '', { placeholder: '192.168.1.0/24' }),
 			workflowInput(_('Destination address/domain'), 'dest_addr', '', { placeholder: 'example.com or 203.0.113.0/24' }),
@@ -530,7 +513,7 @@ function showPbrWorkflow() {
 				let policy = sanitizeSectionName(workflowValue('policy_name'), 'mwan4_policy');
 
 				if (!target)
-					throw new Error(_('Create a mwan4 strategy before applying a PBR policy target.'));
+					throw new Error(_('Create a path before applying a PBR policy target.'));
 
 				ensureSection('pbr', 'pbr', 'config');
 				uci.set('pbr', 'config', 'enabled', workflowValue('enabled'));
@@ -734,7 +717,7 @@ function renderAdvancedStatus(result, capabilities) {
 			_('Configure tunnel metadata on WAN links so mwan4 can keep tunnel endpoints on physical underlays and warn about recursion.'), [
 				renderMetric(_('Configured tunnels'), String(countItems(tunnels.interfaces)), _('Interfaces carrying tunnel metadata')),
 				renderMetric(_('Endpoint warnings'), String(warningCount(tunnels)), _('Underlay recursion or endpoint route warnings')),
-				renderMetric(_('Underlay strategies'), String(strategyNames().length), _('Available strategies for tunnel endpoint traffic'))
+				renderMetric(_('Tunnel endpoint paths'), String(strategyNames().length), _('Paths available for tunnel endpoint traffic'))
 			], [
 				E('button', { class: 'btn cbi-button cbi-button-action', click: showTunnelWorkflow }, [ _('Configure tunnel') ]),
 				controlButton(_('Generate WireGuard key'), 'wireguard_keygen', null, null, null, 'cbi-button-neutral'),
@@ -742,7 +725,7 @@ function renderAdvancedStatus(result, capabilities) {
 				E('a', { class: 'btn cbi-button cbi-button-neutral', href: L.url('admin/network/mwan4/diagnostics') }, [ _('Open tunnel diagnostics') ])
 			], [
 				renderGuidanceCard(_('Metadata and integration writes'), _('Choosing a tunnel transport writes type=tunnel plus transport_type in mwan4, and the workflow writes only the external UCI section needed by that selected transport.')),
-				renderGuidanceCard(_('Underlay validation'), _('The underlay strategy field accepts existing mwan4 strategies so diagnostics can check endpoint recursion against physical WAN paths.')),
+				renderGuidanceCard(_('Underlay validation'), _('The tunnel endpoint path field accepts existing paths so diagnostics can check endpoint recursion against physical WAN links.')),
 				renderGuidanceCard(_('Endpoint exemptions'), _('Host-route exemptions are applied only for numeric tunnel endpoints with a resolved physical underlay WAN.'))
 			]),
 		renderIntegrationPanel(_('MPTCP'), _('Multipath TCP'),
@@ -767,7 +750,7 @@ function renderAdvancedStatus(result, capabilities) {
 				renderGuidanceCard(_('BFD validation'), validationSummary(bfdValidation, _('No configured BFD metadata reported yet.')))
 			]),
 			renderIntegrationPanel(_('VRF and ownership'), _('Routing domains'),
-			_('Keep mwan4 table IDs and marks explicit before combining VRFs, source routing, and generated traffic policies.'), [
+			_('Keep mwan4 table IDs and marks explicit before combining VRFs, source routing, and generated routing rules.'), [
 				renderMetric(_('VRF devices'), String(countItems(vrf.devices)), _('VRF links reported by iproute2')),
 				renderMetric(_('Owned tables'), String(countItems(ownership.tables)), _('Routing tables owned by mwan4')),
 				renderMetric(_('Validation failures'), String(validationFailures(vrf.validation)), _('VRF live checks that need attention'))
@@ -788,9 +771,9 @@ function renderAdvancedStatus(result, capabilities) {
 				E('a', { class: 'btn cbi-button cbi-button-neutral', href: L.url('admin/services/pbr') }, [ _('Open PBR') ]),
 				E('a', { class: 'btn cbi-button cbi-button-neutral', href: L.url('admin/network/mwan4/diagnostics') }, [ _('Open PBR diagnostics') ])
 			], [
-				renderGuidanceCard(_('Strategy target helper'), strategyNames().length
-					? _('PBR policy targets must use mwan4 strategy names: %s. Direct mwan4 WAN links are uplinks/support entries, not policy targets.').format(joinDisplayList(strategyNames().map(function(name) { return 'mwan4_strategy_' + name; }), _('No strategies configured')))
-					: _('Create a mwan4 strategy before wiring PBR policies to a mwan4 target.')),
+				renderGuidanceCard(_('Path target helper'), strategyNames().length
+					? _('PBR policy targets must use MultiWAN 4 path names: %s. WAN links themselves are uplinks, not policy targets.').format(joinDisplayList(strategyNames().map(function(name) { return 'mwan4_strategy_' + name; }), _('No paths configured')))
+					: _('Create a path before wiring PBR policies to a MultiWAN 4 target.')),
 				renderGuidanceCard(_('PBR validation'), validationSummary(pbr.validation, _('No PBR validation rows reported yet.'))),
 				renderGuidanceCard(_('Supported-interface helper'), pbrEnabled
 					? (pbrMissingSupported.length
@@ -802,36 +785,9 @@ function renderAdvancedStatus(result, capabilities) {
 	]);
 }
 
-function helperAvailable(stats, index) {
-	return stats[index] && stats[index].type == 'file';
-}
+function addTunnelOptions(s) {
+	let o = s.option(form.ListValue, 'transport_type', _('Link type'));
 
-function addTrackMethodValues(option, stats) {
-	option.value('ping', _('ICMP ping'));
-	if (helperAvailable(stats, 0))
-		option.value('httping', _('HTTP probe'));
-	if (helperAvailable(stats, 1)) {
-		option.value('nping-tcp', _('TCP probe'));
-		option.value('nping-udp', _('UDP probe'));
-		option.value('nping-icmp', _('ICMP nping probe'));
-		option.value('nping-arp', _('ARP nping probe'));
-	}
-	if (helperAvailable(stats, 2))
-		option.value('arping', _('ARP probe'));
-	if (helperAvailable(stats, 3))
-		option.value('nslookup', _('DNS probe'));
-}
-
-function addInterfaceAdvancedSection(m, stats) {
-	let s = m.section(form.GridSection, 'interface', _('Advanced WAN link integrations'));
-	let o;
-
-	s.addremove = false;
-	s.anonymous = false;
-	s.nodescriptions = true;
-	s.description = _('Use these fields for tunnel metadata, explicit routing ownership, probe helpers, SLA thresholds, and source-routing safety.');
-
-	o = s.option(form.ListValue, 'transport_type', _('Transport'));
 	o.value('', _('Physical WAN'));
 	o.value('tunnel', _('Generic tunnel'));
 	o.value('gre', _('GRE'));
@@ -840,7 +796,7 @@ function addInterfaceAdvancedSection(m, stats) {
 	o.value('wireguard', _('WireGuard'));
 	o.value('openvpn', _('OpenVPN'));
 	o.value('ipsec', _('IPsec'));
-	o.description = _('Classify tunnel-like interfaces so diagnostics can explain endpoint underlay behavior. Choosing a tunnel transport writes type=tunnel plus transport_type metadata.');
+	o.description = _('Tells MultiWAN 4 whether this WAN link is a tunnel, so diagnostics can explain the tunnel and the connection under it. Choosing a tunnel type also marks the link as a tunnel. If left on Physical WAN, the link is treated as a normal connection.');
 	o.rmempty = false;
 	o.cfgvalue = function(section_id) {
 		return uci.get('mwan4', section_id, 'transport_type') ||
@@ -856,162 +812,71 @@ function addInterfaceAdvancedSection(m, stats) {
 		}
 	};
 
-	o = s.option(form.Value, 'underlay_strategy', _('Tunnel underlay strategy'));
-	o.placeholder = _('physical_wan_strategy');
+	o = s.option(form.Value, 'underlay_strategy', _('Path for the tunnel endpoint'));
+	o.placeholder = _('a path over regular WAN links');
 	strategyNames().forEach(function(strategy) { o.value(strategy); });
 	o.validate = validateStrategyReference;
-	o.description = _('Strategy that should carry tunnel endpoint traffic. Keep this on physical WAN routes to avoid recursion.');
+	o.description = _('The path that carries the packets of the tunnel itself to its remote end. Choose a path over regular WAN links, never one through the tunnel. If left empty, diagnostics cannot check where the tunnel endpoint is routed.');
 
 	o = s.option(form.Value, 'endpoint_host', _('Tunnel endpoint host'));
 	o.placeholder = '198.51.100.10';
 	o.datatype = 'host';
-	o.description = _('Remote endpoint host or address used for tunnel recursion and underlay route checks.');
+	o.description = _('Remote address or name of the tunnel, used to check that the tunnel does not route its own packets through itself. If left empty, the endpoint cannot be checked.');
 	o.modalonly = true;
 
 	o = s.option(form.Value, 'endpoint_port', _('Tunnel endpoint port'));
 	o.placeholder = '51820';
 	o.validate = validatePort;
+	o.description = _('Remote port of the tunnel, for example 51820 for WireGuard. If left empty, only the host is checked.');
 	o.modalonly = true;
 
-	o = s.option(form.Value, 'local_endpoint', _('Local tunnel endpoint'));
+	o = s.option(form.Value, 'local_endpoint', _('Local tunnel address'));
 	o.placeholder = _('optional source address');
 	o.datatype = 'ipaddr';
+	o.description = _('Address this router uses as the start of the tunnel. If left empty, the router picks it.');
 	o.modalonly = true;
 
-	o = s.option(form.ListValue, 'endpoint_fail_mode', _('Endpoint failure mode'));
-	o.value('', _('Use default behavior'));
-	o.value('hold', _('Hold tunnel traffic'));
-	o.value('fail_open', _('Fail open'));
-	o.value('fail_closed', _('Fail closed'));
-	o.description = _('Operational hint shown in diagnostics when endpoint underlay health fails.');
-	o.modalonly = true;
+	[ [ 'endpoint_fail_mode', _('When the tunnel endpoint cannot be reached'), _('Hold tunnel traffic') ],
+	  [ 'data_fail_mode', _('When the tunnel stops carrying data'), _('Hold data traffic') ] ].forEach(function(spec) {
+		o = s.option(form.ListValue, spec[0], spec[1]);
+		o.value('', _('Use the default'));
+		o.value('hold', spec[2]);
+		o.value('fail_open', _('Let traffic use another path'));
+		o.value('fail_closed', _('Stop the traffic'));
+		o.description = _('A note diagnostics shows about what should happen then. It does not change routing by itself. If left on Use the default, no particular behaviour is noted.');
+		o.modalonly = true;
+	});
 
-	o = s.option(form.ListValue, 'data_fail_mode', _('Data failure mode'));
-	o.value('', _('Use default behavior'));
-	o.value('hold', _('Hold data traffic'));
-	o.value('fail_open', _('Fail open'));
-	o.value('fail_closed', _('Fail closed'));
-	o.modalonly = true;
-
-	o = s.option(form.Flag, 'prevent_recursion', _('Prevent tunnel recursion'));
-	o.description = _('Warn when the tunnel endpoint would be routed through the tunnel itself.');
+	o = s.option(form.Flag, 'prevent_recursion', _('Warn about tunnel loops'));
+	o.description = _('Warn when the tunnel endpoint would be routed through the tunnel itself. On by default.');
 	o.default = '1';
-	o.modalonly = true;
-
-	o = s.option(form.ListValue, 'track_method', _('Advanced probe method'));
-	o.default = 'ping';
-	addTrackMethodValues(o, stats);
-	o.description = _('Probe helper used by mwan4 trackers for this link. Optional helpers appear only when installed.');
-
-	o = s.option(form.DynamicList, 'track_ip', _('Probe targets'));
-	o.datatype = 'host';
-	o.description = _('Targets sampled by the selected probe method.');
-
-	o = s.option(form.Flag, 'httping_ssl', _('HTTPS health checks'));
-	o.depends('track_method', 'httping');
-	o.modalonly = true;
-
-	o = s.option(form.Flag, 'check_quality', _('Also check latency and packet loss'));
-	o.default = '0';
-	o.description = _('Let latency or packet loss mark a link degraded or offline, not just probe reachability.');
-
-	[ [ 'failure_latency', _('Failure latency (ms)'), '1000', 'uinteger' ],
-	  [ 'failure_loss', _('Failure packet loss (%)'), '40', 'range(0,100)' ],
-	  [ 'recovery_latency', _('Recovery latency (ms)'), '500', 'uinteger' ],
-	  [ 'recovery_loss', _('Recovery packet loss (%)'), '10', 'range(0,100)' ] ].forEach(function(spec) {
-		o = s.option(form.Value, spec[0], spec[1]);
-		o.datatype = spec[3];
-		o.default = spec[2];
-		o.depends('check_quality', '1');
-		o.description = _('Failure values take the link down; recovery values bring it back after conditions improve.');
-		o.modalonly = true;
-	});
-
-	[ [ 'reliability', _('Required successful targets'), '1', 'range(1,100)' ],
-	  [ 'count', _('Probe count'), '1', 'range(1,20)' ],
-	  [ 'timeout', _('Probe timeout (seconds)'), '4', 'uinteger' ],
-	  [ 'interval', _('Healthy interval (seconds)'), '10', 'uinteger' ],
-	  [ 'failure_interval', _('Failure interval (seconds)'), '5', 'uinteger' ],
-	  [ 'recovery_interval', _('Recovery interval (seconds)'), '5', 'uinteger' ],
-	  [ 'down', _('Failures before down'), '5', 'uinteger' ],
-	  [ 'up', _('Successes before up'), '5', 'uinteger' ] ].forEach(function(spec) {
-		o = s.option(form.Value, spec[0], spec[1]);
-		o.datatype = spec[3];
-		o.default = spec[2];
-		o.modalonly = true;
-	});
-
-	o = s.option(form.Value, 'id', _('Stable interface ID'));
-	o.placeholder = _('automatic');
-	o.validate = validatePositiveInteger;
-	o.description = _('Keeps firewall marks and routing tables stable across reordering, VRFs, and policy rebuilds.');
-	o.modalonly = true;
-
-	o = s.option(form.Value, 'table_id', _('Routing table ID'));
-	o.placeholder = _('same as stable ID');
-	o.validate = validatePositiveInteger;
-	o.description = _('Explicit table used by generated route rules; reserve unique values when VRFs are present.');
-
-	o = s.option(form.Value, 'mark', _('Firewall mark'));
-	o.placeholder = _('derived from mask');
-	o.validate = validateFirewallMark;
-	o.description = _('Optional fwmark. It must fit inside the global firewall mark mask and not overlap PBR marks.');
 	o.modalonly = true;
 }
 
+function addInterfaceAdvancedSection(m, helpers) {
+	let s = m.section(form.GridSection, 'interface', _('Advanced WAN link settings'));
+
+	s.addremove = false;
+	s.anonymous = false;
+	s.nodescriptions = true;
+	s.description = _('Use these fields for tunnels, extra health check tools, latency and loss limits, and fixed marks and routing tables.');
+
+	addTunnelOptions(s);
+	mwan4Fields.addHealthOptions(s, form, helpers, [ 'track_method', 'track_ip', 'check_quality' ]);
+	mwan4Fields.addIdentityOptions(s, form, [ 'table_id' ]);
+}
+
 function addGlobalAdvancedSection(m) {
-	let s = m.section(form.NamedSection, 'globals', 'globals', _('Global advanced ownership'));
-	let o;
+	let s = m.section(form.NamedSection, 'globals', 'globals', _('Global advanced settings'));
 
-	s.description = _('These global controls affect every generated rule, mark, table lookup, and integration with PBR or VRF routing domains.');
-
-	o = s.option(form.Value, 'mmx_mask', _('Firewall mark mask'));
-	o.default = '0x3F00';
-	o.placeholder = '0x3F00';
-	o.validate = validateFirewallMark;
-	o.description = _('Mask used for mwan4 policy marks. Keep it separate from PBR fw_mask.');
-	o.rmempty = false;
-	o.cfgvalue = function(section_id) {
-		return uci.get('mwan4', section_id, 'mmx_mask') ||
-			uci.get('mwan4', section_id, 'mwan4.mmx_mask') || '0x3F00';
-	};
-	o.write = function(section_id, value) {
-		uci.set('mwan4', section_id, 'mmx_mask', value);
-	};
-
-	o = s.option(form.Flag, 'source_routing', _('Source routing'));
-	o.description = _('Create source-based rules alongside traffic policy marks. Enable this for MPTCP endpoint alignment or VRF-like source domains.');
-	o.default = '0';
-	o.cfgvalue = function(section_id) {
-		return uci.get('mwan4', section_id, 'source_routing') ||
-			uci.get('mwan4', section_id, 'mwan4.source_routing') || '0';
-	};
-	o.write = function(section_id, value) {
-		uci.set('mwan4', section_id, 'source_routing', value);
-	};
-
-	o = s.option(form.DynamicList, 'rt_table_lookup', _('Additional routing tables'));
-	o.description = _('Extra routing tables mwan4 should inspect in addition to the main routing table when explaining routes.');
-	o.datatype = 'or(uinteger,string)';
-	o.placeholder = _('100 200 vpn');
-
-	o = s.option(form.Flag, 'logging', _('Log matching traffic policies'));
-	o.description = _('Enable logging for policies that also have per-policy logging enabled.');
-	o.default = '0';
-
-	o = s.option(form.ListValue, 'loglevel', _('Log level'));
-	o.default = 'notice';
-	[ 'debug', 'info', 'notice', 'warning', 'err' ].forEach(function(value) { o.value(value); });
-	o.description = _('Syslog priority used for logged mwan4 policy matches and service messages.');
+	s.description = _('These settings apply to every WAN link, routing rule and hand-over to PBR or VRF routing domains.');
+	mwan4Fields.addGlobalOptions(s, form, _('Keep it separate from the PBR fw_mask.'));
 }
 
 return view.extend({
 	load: function() {
 		return Promise.all([
-			L.resolveDefault(fs.stat('/usr/bin/httping'), {}),
-			L.resolveDefault(fs.stat('/usr/bin/nping'), {}),
-			L.resolveDefault(fs.stat('/usr/bin/arping'), {}),
-			L.resolveDefault(fs.stat('/usr/bin/nslookup'), {}),
+			mwan4Fields.loadHelpers(),
 			uci.load('mwan4'),
 			L.resolveDefault(uci.load('network'), null),
 			L.resolveDefault(uci.load('pbr'), null),
@@ -1025,10 +890,9 @@ return view.extend({
 	},
 
 	render: function(data) {
-		let stats = data.slice(0, 4);
-		let diagnostics = data[10] || {};
-		let capabilities = data[11] || {};
-		hasAdvancedAccess = !!data[12];
+		let diagnostics = data[7] || {};
+		let capabilities = data[8] || {};
+		hasAdvancedAccess = !!data[9];
 		supportedAdvancedActions = {};
 		asArray(((capabilities || {}).advanced_control || {}).actions).forEach(function(action) {
 			supportedAdvancedActions[action] = true;
@@ -1040,7 +904,7 @@ return view.extend({
 			renderAdvancedStatus(diagnostics, capabilities)
 		]));
 
-		addInterfaceAdvancedSection(m, stats);
+		addInterfaceAdvancedSection(m, data[0]);
 		addGlobalAdvancedSection(m);
 
 		return m.render();

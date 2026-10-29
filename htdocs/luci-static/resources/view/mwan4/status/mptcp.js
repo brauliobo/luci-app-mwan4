@@ -271,20 +271,20 @@ function addMptcpKernelSection(m) {
 	let s = m.section(form.NamedSection, 'mptcp', 'mptcp', _('MPTCP kernel/sysctl state'));
 	let o;
 
-	s.description = _('mwan4 applies these values during service reload. Leave limits empty to keep the current kernel defaults.');
+	s.description = _('Values written to the kernel when the service reloads. If a limit is left empty, the kernel default is kept.');
 
 	o = s.option(form.Flag, 'enabled', _('Enable kernel MPTCP'));
-	o.description = _('Writes net.mptcp.enabled through the mwan4 backend when configuration is applied.');
+	o.description = _('Turn on MPTCP in the kernel (net.mptcp.enabled) when the configuration is applied. Off by default.');
 	o.default = '0';
 
-	o = s.option(form.Value, 'add_addr_accepted', _('Accepted ADD_ADDR limit'));
-	o.description = _('Maximum peer-announced addresses accepted by the kernel MPTCP path manager.');
+	o = s.option(form.Value, 'add_addr_accepted', _('Accepted extra addresses (ADD_ADDR limit)'));
+	o.description = _('How many extra addresses announced by the other side the kernel accepts. If left empty, the kernel default is kept.');
 	o.placeholder = _('kernel default');
 	o.validate = validateMptcpLimit;
 	o.modalonly = true;
 
 	o = s.option(form.Value, 'subflows', _('Additional subflow limit'));
-	o.description = _('Maximum additional subflows the kernel path manager may create.');
+	o.description = _('How many extra connections (subflows) the kernel may open for one MPTCP connection. If left empty, the kernel default is kept.');
 	o.placeholder = _('kernel default');
 	o.validate = validateMptcpLimit;
 }
@@ -296,34 +296,35 @@ function addMptcpEndpointSection(m) {
 	s.addremove = true;
 	s.anonymous = false;
 	s.nodescriptions = true;
-	s.description = _('Declare mwan4-owned endpoints only. Each endpoint needs a stable ID so mwan4 can remove the endpoint it created without flushing external MPTCP state.');
+	s.description = _('Declare only endpoints that MultiWAN 4 owns. Each needs an ID so MultiWAN 4 can remove what it created without touching other MPTCP settings.');
 
 	o = s.option(form.Flag, 'enabled', _('Enabled'));
 	o.default = '1';
+	o.description = _('Turn off to keep the endpoint configured but not applied. On by default.');
 
 	o = s.option(form.ListValue, 'interface', _('WAN link'));
 	uci.sections('mwan4', 'interface').forEach(function(section) {
 		o.value(section['.name']);
 	});
 	o.rmempty = false;
-	o.description = _('WAN link whose source address and device should own this endpoint.');
+	o.description = _('The WAN link whose address and device own this endpoint. Required.');
 
 	o = s.option(form.ListValue, 'family', _('Address family'));
 	o.value('', _('Auto from WAN'));
 	o.value('ipv4', _('IPv4'));
 	o.value('ipv6', _('IPv6'));
-	o.description = _('Select the family used when the endpoint address is derived from the WAN link.');
+	o.description = _('Which address version to use when the endpoint address is taken from the WAN link. If left empty, it follows the WAN link.');
 
 	o = s.option(form.Value, 'address', _('Endpoint address'));
 	o.datatype = 'ipaddr';
 	o.placeholder = _('auto from WAN source address');
-	o.description = _('Leave empty to use the live source address of the selected WAN link.');
+	o.description = _('Address announced for this endpoint. If left empty, the current address of the selected WAN link is used.');
 
 	o = s.option(form.Value, 'id', _('Endpoint ID'));
 	o.validate = validateEndpointId;
 	o.placeholder = '10';
 	o.rmempty = false;
-	o.description = _('Stable MPTCP endpoint ID. Required for safe mwan4 ownership and cleanup.');
+	o.description = _('A fixed endpoint number that lets MultiWAN 4 recognise and remove its own endpoint. Required.');
 
 	o = s.option(form.DynamicList, 'flag', _('Endpoint role'));
 	o.value('signal', _('Signal address'));
@@ -331,7 +332,7 @@ function addMptcpEndpointSection(m) {
 	o.value('backup', _('Backup path'));
 	o.value('fullmesh', _('Full mesh'));
 	o.rmempty = false;
-	o.description = _('Choose one or more kernel endpoint flags for this WAN.');
+	o.description = _('What the kernel may do with this endpoint: announce it to the other side, open extra connections from it, keep it as backup, or pair it with every address of the other side. Choose at least one. Required.');
 
 	o = s.option(form.Value, 'port', _('Signal port'));
 	o.validate = function(section_id, value) {
@@ -341,8 +342,9 @@ function addMptcpEndpointSection(m) {
 			? true
 			: _('Use a TCP port from 1 to 65535.');
 	};
+	o.placeholder = _('chosen by the kernel');
 	o.modalonly = true;
-	o.description = _('Optional MPTCP signal port. Most endpoint definitions should leave this empty.');
+	o.description = _('Port announced for this endpoint. If left empty, the kernel chooses it; most endpoints should leave it empty.');
 }
 
 return view.extend({

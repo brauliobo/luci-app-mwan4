@@ -35,6 +35,33 @@ test.describe('raw configuration tabs speak the overview vocabulary', () => {
 		});
 	}
 
+	test('WAN Links fields use the plain vocabulary, say what an empty field means and show their defaults', async ({ page }) => {
+		await renderRawTab(page, 'interfaces', { rpc: { 'mwan4.link_history': defaultLinkHistory() } });
+
+		const row = name => page.locator(`.cbi-value[data-name="${name}"]`);
+
+		await expect(row('track_ip')).toContainText('Health check targets');
+		await expect(row('track_ip')).toContainText('If left empty, the link is not tested');
+		await expect(row('interval').locator('input')).toHaveAttribute('placeholder', '10');
+		await expect(row('id').locator('input')).toHaveAttribute('placeholder', 'automatic');
+		await expect(row('flap_damping')).toContainText('Pause links that keep flipping');
+		await expect(row('recovery_hold')).toContainText('Wait this long after a link recovers before using it again');
+		await expect(row('recovery_hold').locator('input')).toHaveAttribute('placeholder', '30');
+		await expect(page.locator('.cbi-map')).not.toContainText(/Flap damping|track_ip|strategy|member|probe/i);
+	});
+
+	test('Paths and Routing rules speak of paths, link priorities and blocked traffic', async ({ page }) => {
+		await renderRawTab(page, 'strategies');
+		await expect(page.locator('.cbi-value[data-name="use_route"]')).toContainText('Link priorities');
+		await expect(page.locator('.cbi-value[data-name="last_resort"]')).toContainText('When no link in the path is available');
+		await expect(page.locator('.cbi-map')).not.toContainText(/fail(s|ed)? closed|strateg/i);
+
+		await renderRawTab(page, 'rules');
+		await expect(page.locator('.cbi-value[data-name="use_strategy"] .cbi-value-title')).toHaveText('Path');
+		await expect(page.locator('.cbi-value[data-name="family"]')).toContainText('if left empty, the rule applies to both');
+		await expect(page.locator('.cbi-map')).not.toContainText(/traffic polic|strateg/i);
+	});
+
 	test('Terms opens a sorted list of plain-language meanings and returns focus to the button', async ({ page }) => {
 		await renderRawTab(page, 'rules');
 

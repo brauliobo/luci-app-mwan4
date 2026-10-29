@@ -201,28 +201,33 @@ function effectiveDefault(name, globals) {
 
 function fieldLabels() {
 	return {
-		flap_damping:   _('Flap damping'),
-		flap_threshold: _('Flap threshold'),
-		flap_window:    _('Flap window (seconds)'),
-		flap_holddown:  _('Flap hold-down (seconds)'),
-		recovery_hold:  _('Failback hold (seconds)'),
-		flush_grace:    _('Connection flush grace (seconds)')
+		flap_damping:   _('Pause links that keep flipping'),
+		flap_threshold: _('Flips that count as unstable'),
+		flap_window:    _('Count flips over (seconds)'),
+		flap_holddown:  _('Pause an unstable link for (seconds)'),
+		recovery_hold:  _('Wait before reusing a recovered link (seconds)'),
+		flush_grace:    _('Keep connections of a downed link for (seconds)')
 	};
 }
 
 function fieldHelp() {
 	return {
-		flap_damping:   _('Keep a WAN out of routing strategies after repeated online/offline flips.'),
-		flap_threshold: _('Online to offline transitions inside the window that suppress the WAN.'),
-		flap_window:    _('Time span in which transitions are counted.'),
-		flap_holddown:  _('Healthy time required before a suppressed WAN is used again.'),
-		recovery_hold:  _('Healthy time required before a recovered WAN takes new connections (0 disables).'),
-		flush_grace:    _('Wait this long before flushing the connections of a downed WAN, so healthy flows survive a short outage (0 flushes immediately).')
+		flap_damping:   _('Keep a link out of use after repeated up/down flips, so traffic stays on steadier links.'),
+		flap_threshold: _('How many times a link may go from up to down inside the counting time before it is paused (at least 2).'),
+		flap_window:    _('The time over which those flips are counted (at least 30 seconds).'),
+		flap_holddown:  _('How long a paused link must stay healthy before it is used again.'),
+		recovery_hold:  _('Wait this long after a link recovers before using it again. 0 uses it at once.'),
+		flush_grace:    _('Keep the open connections of a link that just went down for this long, so a short outage does not break them. 0 drops them at once.')
 	};
 }
 
+/* What an empty stability field means: a WAN link falls back to the global setting, the global setting to the built-in value. */
+function inheritNote(globalDefaults) {
+	return globalDefaults ? _('Empty uses the built-in default.') : _('Empty inherits the global default.');
+}
+
 function qualityNote() {
-	return _('Latency and loss limits need "Also check latency and packet loss" (check_quality) turned on for the WAN links of this path.');
+	return _('Limits only work for WAN links that have "Also check latency and packet loss" turned on.');
 }
 
 function summary(values) {
@@ -231,12 +236,12 @@ function summary(values) {
 	return set.length ? set.join(', ') : _('Global defaults');
 }
 
-function formOption(section, form, name, globals, modalonly) {
+function formOption(section, form, name, globals, override) {
 	let labels = fieldLabels();
 	let o = section.option(name == 'flap_damping' ? form.ListValue : form.Value, name, labels[name]);
 
-	o.description = fieldHelp()[name];
-	o.modalonly = modalonly;
+	o.description = '%s %s'.format(fieldHelp()[name], inheritNote(!override));
+	o.modalonly = override;
 	o.optional = true;
 
 	if (name == 'flap_damping') {
@@ -252,19 +257,22 @@ function formOption(section, form, name, globals, modalonly) {
 	return o;
 }
 
-function addFormOptions(section, form, globals, modalonly) {
-	STABILITY.forEach(name => formOption(section, form, name, globals, modalonly));
+/* `override` is true on the WAN link tab, where an empty field inherits the global value; false for the global defaults themselves. */
+function addFormOptions(section, form, globals, override) {
+	STABILITY.forEach(name => formOption(section, form, name, globals, override));
 }
 
 function addQualityOptions(section, form) {
-	[ [ 'max_latency', _('Maximum latency (ms)'), 'min(1)' ], [ 'max_loss', _('Maximum packet loss (%)'), 'range(0,100)' ] ].forEach(spec => {
+	[ [ 'max_latency', _('Maximum latency (ms)'), 'min(1)', _('Skip links in this path whose reply time is above this; other paths keep using them. If left empty, there is no latency limit.') ],
+	  [ 'max_loss', _('Maximum packet loss (%)'), 'range(0,100)', _('Skip links in this path that lose more than this share of replies; other paths keep using them. If left empty, there is no loss limit.') ]
+	].forEach(spec => {
 		let o = section.option(form.Value, spec[0], spec[1]);
 
 		o.datatype = spec[2];
 		o.optional = true;
 		o.modalonly = true;
 		o.placeholder = _('no limit');
-		o.description = qualityNote();
+		o.description = '%s %s'.format(spec[3], qualityNote());
 	});
 }
 
@@ -287,6 +295,7 @@ return baseclass.extend({
 	flapsText:            flapsText,
 	formatPct:            formatPct,
 	hasStabilityData:     hasStabilityData,
+	inheritNote:          inheritNote,
 	heldInfo:             heldInfo,
 	historyEntry:         historyEntry,
 	isHistory:            isHistory,

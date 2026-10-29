@@ -36,6 +36,7 @@ const interfacesView = read('htdocs/luci-static/resources/view/mwan4/network/int
 const diagnosticsView = read('htdocs/luci-static/resources/view/mwan4/status/diagnostics.js');
 const mptcpView = read('htdocs/luci-static/resources/view/mwan4/status/mptcp.js');
 const commonView = read('htdocs/luci-static/resources/mwan4/common.js');
+const fieldsHelper = read('htdocs/luci-static/resources/mwan4/fields.js');
 const diagnosticsHelper = read('htdocs/luci-static/resources/mwan4/diagnostics.js');
 
 assert.deepEqual(keys(acl), [
@@ -185,7 +186,7 @@ assert.match(networkView, /mwan4Common\.renderRuntimeWarnings/,
 	'network overview should use shared runtime warning rendering');
 assert.match(networkView, /fs\.stat\('\/usr\/bin\/nslookup'\)/,
 	'network overview should discover the optional nslookup probe helper');
-assert.match(networkView, /add\('nslookup', _\('DNS probe'\), probeHelpers\.nslookup\)/,
+assert.match(networkView, /add\('nslookup', labels\.nslookup, probeHelpers\.nslookup\)/,
 	'network overview should expose nslookup in contextual WAN link editing');
 assert.match(networkView, /\[ 'dual', _\('IPv4 \+ IPv6'\) \]/,
 	'network overview should support dual-stack WAN link editing in the compact modal');
@@ -207,7 +208,7 @@ assert.doesNotMatch(advancedView, /method:\s*'control'/,
 	'advanced view should not use the runtime control ubus method for integration actions');
 assert.match(advancedView, /callSessionAccess\('access-group', 'luci-app-mwan4-advanced', 'write'\)/,
 	'advanced view should explicitly check the advanced ACL before privileged advanced actions');
-assert.match(advancedView, /Advanced WAN link integrations/,
+assert.match(advancedView, /Advanced WAN link settings/,
 	'advanced view should expose UCI-backed advanced interface controls');
 assert.match(advancedView, /Package readiness/,
 	'advanced view should expose package readiness for advanced workflow prerequisites');
@@ -223,10 +224,14 @@ assert.match(advancedView, /BFD and advanced probes/,
 	'advanced view should expose probe and BFD guidance');
 assert.match(advancedView, /Apply FRR\/BFD/,
 	'advanced view should expose constrained FRR\/BFD apply');
-assert.match(advancedView, /fs\.stat\('\/usr\/bin\/nslookup'\)/,
-	'advanced view should discover the optional nslookup probe helper');
-assert.match(advancedView, /option\.value\('nslookup', _\('DNS probe'\)\)/,
-	'advanced view should expose nslookup when the helper is available');
+assert.match(fieldsHelper, /fs\.stat\(helper\[1\]\)/,
+	'the shared field definitions should discover the optional probe helpers by stat');
+assert.match(fieldsHelper, /'\/usr\/bin\/nslookup'/,
+	'the shared field definitions should know the optional nslookup probe helper');
+assert.match(fieldsHelper, /\[ 'nslookup', 'nslookup' \]/,
+	'the shared field definitions should expose nslookup when the helper is available');
+assert.match(advancedView, /mwan4Fields\.loadHelpers\(\)/,
+	'advanced view should discover the optional probe helpers through the shared field definitions');
 assert.match(advancedView, /PBR harmony/,
 	'advanced view should expose PBR harmony guidance');
 assert.match(advancedView, /Metadata and integration writes/,
@@ -235,7 +240,7 @@ assert.match(advancedView, /uci\.set\('mwan4', section_id, 'type', 'tunnel'\)/,
 	'advanced view should persist the canonical type=tunnel marker when a tunnel transport is selected');
 assert.match(advancedView, /validateStrategyReference/,
 	'advanced view should validate tunnel underlay strategy references');
-assert.match(advancedView, /Strategy target helper/,
+assert.match(advancedView, /Path target helper/,
 	'advanced view should expose PBR strategy target helper copy');
 assert.match(advancedView, /Supported-interface helper/,
 	'advanced view should expose PBR supported-interface guidance');
@@ -267,10 +272,10 @@ assert.doesNotMatch(advancedView, /E\('details'|E\('summary'/,
 	'advanced view should not use expandable details blocks');
 assert.doesNotMatch(advancedView, /fs\.exec_direct|\/usr\/sbin\/mwan4|apk\s+(add|update)|opkg\s+(install|update)|wg\s+genkey|vtysh\s+-c|\/etc\/init\.d\/frr/,
 	'advanced view must not execute mwan4, package manager, WireGuard, or FRR commands directly');
-assert.match(interfacesView, /fs\.stat\('\/usr\/bin\/nslookup'\)/,
-	'interfaces view should discover the optional nslookup probe helper');
-assert.match(interfacesView, /o\.value\('nslookup', _\('DNS probe'\)\)/,
-	'interfaces view should expose nslookup when the helper is available');
+assert.match(interfacesView, /mwan4Fields\.loadHelpers\(\)/,
+	'interfaces view should discover the optional probe helpers through the shared field definitions');
+assert.match(interfacesView, /mwan4Fields\.addHealthOptions/,
+	'interfaces view should expose the health check methods through the shared field definitions');
 assert.match(statusView, /mwan4Common\.renderRuntimeWarnings/,
 	'status view should reuse shared runtime warning rendering for read-only users');
 assert.match(diagnosticsView, /method:\s*'diagnostics'/,

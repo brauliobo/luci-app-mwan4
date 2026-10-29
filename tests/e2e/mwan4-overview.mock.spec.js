@@ -456,7 +456,7 @@ test.describe('mocked mwan4 overview workspace', () => {
 
 		await expect(page.locator('#mwan4-diag-output')).toContainText('Requested tuple');
 		await expect(page.locator('#mwan4-diag-output')).toContainText('ipv4 tcp 192.0.2.10 -> 1.1.1.1:443');
-		await expect(page.locator('#mwan4-diag-output')).toContainText('Matched policy');
+		await expect(page.locator('#mwan4-diag-output')).toContainText('Matched rule');
 		await expect(page.locator('#mwan4-diag-output')).toContainText('speed_test');
 		await expect(page.locator('#mwan4-diag-output')).toContainText('Ingress interface');
 		await expect(page.locator('#mwan4-diag-output')).toContainText('streaming');
@@ -514,8 +514,8 @@ test.describe('mocked mwan4 overview workspace', () => {
 		await expect(page.locator('#mwan4-diag-output')).toContainText('WAN link diagnostics');
 		await page.getByRole('button', { name: 'Run Paths diagnostics', exact: true }).click();
 		await expect(page.locator('#mwan4-diag-output')).toContainText('Route table snapshot');
-		await page.getByRole('button', { name: 'Run Traffic policies diagnostics', exact: true }).click();
-		await expect(page.locator('#mwan4-diag-output')).toContainText('Traffic policy routing');
+		await page.getByRole('button', { name: 'Run Routing rules diagnostics', exact: true }).click();
+		await expect(page.locator('#mwan4-diag-output')).toContainText('Routing rule lookups');
 		await page.getByRole('button', { name: 'Run nftables diagnostics', exact: true }).click();
 		await expect(page.locator('#mwan4-diag-output')).toContainText('nftables runtime');
 		await page.getByRole('button', { name: 'Run Service diagnostics', exact: true }).click();
@@ -1803,7 +1803,7 @@ test.describe('mocked mwan4 unstable WAN handling', () => {
 
 		const modal = page.locator('.modal');
 
-		await expect(modal.locator('.mwan4-stability-fields')).toContainText('Flap damping');
+		await expect(modal.locator('.mwan4-stability-fields')).toContainText('Pause links that keep flipping');
 		await expect(modal.locator('input[name="flap_threshold"]')).toHaveAttribute('placeholder', '3');
 		await expect(modal.locator('input[name="flap_window"]')).toHaveAttribute('placeholder', '600');
 		await expect(modal.locator('input[name="flap_holddown"]')).toHaveAttribute('placeholder', '120');
@@ -1816,7 +1816,7 @@ test.describe('mocked mwan4 unstable WAN handling', () => {
 		await modal.locator('input[name="flap_threshold"]').fill('4');
 		await modal.locator('input[name="flush_grace"]').fill('0');
 		await page.getByRole('button', { name: 'Preview changes' }).click();
-		await expect(modal).toContainText('Flap threshold 4');
+		await expect(modal).toContainText('Flips that count as unstable 4');
 		await page.getByRole('button', { name: 'Apply pending changes' }).click();
 
 		const section = await uciSection(page, 'wan_primary');
@@ -1842,7 +1842,7 @@ test.describe('mocked mwan4 unstable WAN handling', () => {
 		await expect(warning).toBeVisible();
 	});
 
-	test('edits the quality limits of the default path and explains the check_quality requirement', async ({ page }) => {
+	test('edits the quality limits of the default path and explains the latency and loss check requirement', async ({ page }) => {
 		const quality = () => page.locator('[data-rule="default_rule_v4"]').getByRole('button', { name: /Edit quality limits of/ });
 
 		await renderOverview(page, stable());
@@ -1851,7 +1851,7 @@ test.describe('mocked mwan4 unstable WAN handling', () => {
 
 		const modal = page.locator('.modal');
 
-		await expect(modal).toContainText('check_quality');
+		await expect(modal).toContainText('Also check latency and packet loss');
 		await expect(modal).toContainText('No latency/loss data from: wan_backup');
 		await modal.locator('input[name="max_latency"]').fill('150');
 		await modal.locator('input[name="max_loss"]').fill('5');

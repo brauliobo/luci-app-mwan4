@@ -310,7 +310,8 @@ function helperAvailable(stat) {
 }
 
 function healthMethodOptions(selected) {
-	let values = [ [ 'ping', _('ICMP ping') ] ];
+	let labels = mwan4Explain.methodLabels();
+	let values = [ [ 'ping', labels.ping ] ];
 	let seen = { ping: true };
 
 	function add(value, label, available) {
@@ -321,13 +322,13 @@ function healthMethodOptions(selected) {
 		values.push([ value, available ? label : _('%s (helper missing)').format(label) ]);
 	}
 
-	add('httping', _('HTTP probe'), probeHelpers.httping);
-	add('nping-tcp', _('TCP probe'), probeHelpers.nping);
-	add('nping-udp', _('UDP probe'), probeHelpers.nping);
-	add('nping-icmp', _('ICMP nping probe'), probeHelpers.nping);
-	add('nping-arp', _('ARP nping probe'), probeHelpers.nping);
-	add('nslookup', _('DNS probe'), probeHelpers.nslookup);
-	add('arping', _('ARP probe'), probeHelpers.arping);
+	add('httping', labels.httping, probeHelpers.httping);
+	add('nping-tcp', labels['nping-tcp'], probeHelpers.nping);
+	add('nping-udp', labels['nping-udp'], probeHelpers.nping);
+	add('nping-icmp', labels['nping-icmp'], probeHelpers.nping);
+	add('nping-arp', labels['nping-arp'], probeHelpers.nping);
+	add('nslookup', labels.nslookup, probeHelpers.nslookup);
+	add('arping', labels.arping, probeHelpers.arping);
 
 	if (selected && !seen[selected])
 		values.push([ selected, _('%s (custom)').format(selected) ]);
@@ -799,7 +800,7 @@ function showInterfaceModal(name) {
 	);
 
 	if (stabilityEnabled())
-		fields.push(stabilitySection(_('Stability'), _('Hold back unstable WAN links so short flaps do not move or drop healthy connections.'), section || {}, getGlobalSection(), _('Empty inherits the global default.')));
+		fields.push(stabilitySection(_('Stability'), _('Hold back unstable WAN links so short flaps do not move or drop healthy connections.'), section || {}, getGlobalSection(), mwan4Stability.inheritNote(false)));
 
 	fields.push(pendingPreviewSlot());
 
@@ -2058,7 +2059,7 @@ function showGlobalsModal() {
 				modalCheck(_('Enable source routing'), 'source_routing', globalValue(section, 'mwan4.source_routing', 'source_routing', '0') == '1'),
 				modalCheck(_('Log matching rules'), 'logging', section.logging == '1')
 			]),
-			stabilityEnabled() ? stabilitySection(_('Link stability defaults'), _('Defaults for every WAN link; a WAN link can override each value.'), section, {}, _('Empty uses the built-in default.')) : null,
+			stabilityEnabled() ? stabilitySection(_('Link stability defaults'), _('Defaults for every WAN link; a WAN link can override each value.'), section, {}, mwan4Stability.inheritNote(true)) : null,
 			pendingPreviewSlot()
 		]),
 		previewModalActions(buildGlobalChange)

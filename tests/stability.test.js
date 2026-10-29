@@ -111,7 +111,7 @@ assert.equal(stability.singleTarget([]), false, 'no targets is a different probl
 assert.equal(stability.effectiveDefault('flap_window', { flap_window: '600' }), '600', 'a global value is the effective default');
 assert.equal(stability.effectiveDefault('flap_window', {}), '300', 'the built-in default applies without a global value');
 assert.equal(stability.summary({ flap_window: '', flush_grace: '' }), 'Global defaults');
-assert.match(stability.summary({ flap_window: '60' }), /Flap window \(seconds\) 60/);
+assert.match(stability.summary({ flap_window: '60' }), /Count flips over \(seconds\) 60/);
 
 const added = [];
 const form = { Value: 'Value', ListValue: 'ListValue' };
@@ -127,7 +127,8 @@ assert.ok(added.every(o => o.optional && o.modalonly), 'every stability option i
 added.length = 0;
 stability.addQualityOptions(section, form);
 assert.deepEqual(added.map(o => [ o.name, o.datatype ]), [ [ 'max_latency', 'min(1)' ], [ 'max_loss', 'range(0,100)' ] ]);
-assert.match(added[0].description, /check_quality/, 'the quality fields explain the check_quality requirement');
+assert.match(added[0].description, /Also check latency and packet loss/, 'the quality fields explain the latency and loss check requirement');
+assert.match(added[0].description, /If left empty, there is no latency limit/, 'and what an empty limit means');
 
 (async () => {
 	calls.length = 0;

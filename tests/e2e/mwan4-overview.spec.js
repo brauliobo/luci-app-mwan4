@@ -132,13 +132,13 @@ test('overview exposes pending change previews for high-impact modal flows', asy
 	expect(status).toContain("require mwan4.common as mwan4Common");
 	expect(diagnostics).toContain("require mwan4.common as mwan4Common");
 	expect(advanced).toContain('MultiWAN 4 - Advanced');
-	expect(advanced).toContain('Advanced WAN link integrations');
+	expect(advanced).toContain('Advanced WAN link settings');
 	expect(advanced).toContain('Tunnel steering');
 	expect(advanced).toContain('BFD and advanced probes');
 	expect(advanced).toContain('PBR harmony');
 	expect(advanced).toContain('Metadata and integration writes');
 	expect(advanced).toContain("uci.set('mwan4', section_id, 'type', 'tunnel')");
-	expect(advanced).toContain('Strategy target helper');
+	expect(advanced).toContain('Path target helper');
 	expect(advanced).toContain('Supported-interface helper');
 	expect(advanced).toContain('uci add_list pbr.config.supported_interface');
 	expect(advanced).toContain('function showPbrWorkflow');
@@ -368,7 +368,7 @@ test('DIAG-090 DIAG-091 diagnostics report surfaces are represented statically',
 	expect(diagnostics).toContain("[ 'summary', _('Summary') ]");
 	expect(diagnostics).toContain("[ 'all', _('Full diagnostics') ]");
 	expect(diagnostics).toContain("[ 'counters', _('Counters') ]");
-	expect(diagnostics).toContain("[ 'rules', _('Traffic policies') ]");
+	expect(diagnostics).toContain("[ 'rules', _('Routing rules') ]");
 	expect(diagnostics).toContain("[ 'nftables', _('nftables') ]");
 	expect(diagnostics).toContain("[ 'ownership', _('Ownership') ]");
 	expect(diagnostics).toContain("[ 'pbr', _('PBR') ]");

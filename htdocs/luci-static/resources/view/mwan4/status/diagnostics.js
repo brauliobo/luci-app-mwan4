@@ -195,7 +195,7 @@ function renderRouteExplainRequest(tuple) {
 		[ _('Destination address'), tuple.dest_ip || _('Any destination') ],
 		[ _('Destination port'), tuple.dest_port || _('Any destination port') ],
 		[ _('DNS or nft set'), tuple.ipset || _('No set') ],
-		[ _('Strategy override'), tuple.strategy || _('Matched policy strategy') ]
+		[ _('Path override'), tuple.strategy || _('Path of the matched rule') ]
 	]);
 }
 
@@ -242,7 +242,7 @@ function renderSummary(summary) {
 			renderKeyValues(_('Inventory'), [
 				[ _('WAN links'), joinList(summary.interfaces) ],
 				[ _('Enabled'), joinList(summary.enabled_interfaces) ],
-				[ _('Strategies'), joinList(summary.strategies) ]
+				[ _('Paths'), joinList(summary.strategies) ]
 			])
 		]),
 		renderStatusSummary(summary.status)
@@ -328,7 +328,7 @@ function renderGroupedCounters(counters) {
 			E('td', { colspan: 4 }, [ _('%d more counter(s) hidden; open Raw RPC response for the full list.').format(grouped.names.length - rows.length) ])
 		]));
 
-	return renderAdvancedSurface(_('Grouped counters'), _('Counters'), _('Counters are grouped by rules, strategies, WAN links, PBR, tunnels, and other runtime owners so policy hits are easier to audit.'), [
+	return renderAdvancedSurface(_('Grouped counters'), _('Counters'), _('Counters are grouped by routing rules, paths, WAN links, PBR, tunnels, and other runtime owners so rule matches are easier to audit.'), [
 		renderDiagnosticsWarnings(counters),
 		renderInsightGrid([
 			[ _('Total counters'), String(grouped.summary.total || grouped.names.length), _('All reported counter objects') ],
@@ -352,7 +352,7 @@ function renderGroupedCounters(counters) {
 		groups.length ? E('div', { class: 'mwan4-counter-groups' }, groups.map(function(group) {
 			let item = grouped.groups[group];
 			return renderInsightCard(group, _('%d counter(s)').format(item.count), _('%d packets / %d bytes').format(item.packets, item.bytes));
-		})) : E('p', [ _('No mwan4 counters reported. Generate traffic that should match a traffic policy, then run Counters again.') ]),
+		})) : E('p', [ _('No mwan4 counters reported. Generate traffic that should match a routing rule, then run Counters again.') ]),
 		grouped.names.length ? E('table', { class: 'table mwan4-counter-table mwan4-diag-table' }, [
 			E('tr', [ E('th', [ _('Group') ]), E('th', [ _('Counter') ]), E('th', [ _('Packets') ]), E('th', [ _('Bytes') ]) ])
 		].concat(rows)) : '',
@@ -587,25 +587,25 @@ function renderExplainDiagnostics(explain) {
 	let mark = selected.mark || decision.mark || firstValue(explain, [ 'fwmark', 'mark', 'mark_mask' ], null);
 	let table = selected.table_id || selected.table || firstValue(explain, [ 'route_table', 'table', 'rt_table' ], null);
 
-	return renderAdvancedSurface(_('Route decision explain'), _('Explain'), _('Show the tuple, matched policy, selected WAN, firewall mark, route table, and fallback behavior for a policy decision.'), [
+	return renderAdvancedSurface(_('Route decision explain'), _('Explain'), _('Show the tuple, matched rule, selected WAN link, firewall mark, route table, and fallback behavior for a routing decision.'), [
 		renderDiagnosticsWarnings(explain),
 		renderInsightGrid([
-			[ _('Matched policy'), matchedName || _('No policy matched'), _('The first policy that accepted the tuple') ],
+			[ _('Matched rule'), matchedName || _('No rule matched'), _('The first routing rule that accepted the tuple') ],
 			[ _('Selected WAN'), selectedWan || _('Not selected'), _('Effective WAN after health and fallback checks') ],
 			[ _('Firewall mark'), mark || _('Not reported'), _('Mark used before route-table lookup') ],
 			[ _('Route table'), table || _('Not reported'), _('Table selected for matching packets') ]
 		]),
 		renderKeyValues(_('Decision tuple'), [
 			[ _('Query tuple'), routeExplainTupleLabel(explain.input || explain) ],
-			[ _('Strategy'), decision.strategy || matched.use_strategy || firstValue(explain, [ 'strategy', 'use_strategy', 'path' ], _('Not reported')) ],
+			[ _('Path'), decision.strategy || matched.use_strategy || firstValue(explain, [ 'strategy', 'use_strategy', 'path' ], _('Not reported')) ],
 			[ _('Decision type'), firstValue(decision, [ 'type', 'status', 'selection' ], _('Not reported')) ],
 			[ _('Terminal behavior'), firstValue(decision, [ 'status', 'fallback', 'last_resort' ], _('Not reported')) ]
 		]),
-		renderRecordsTable(_('Skipped policies and trace'), [
-			[ _('Policy'), function(row) { return firstValue(row, [ 'rule', 'policy', 'name', 'id' ], _('Unnamed step')); } ],
-			[ _('Strategy'), function(row) { return firstValue(row, [ 'use_strategy', 'strategy' ], _('Not reported')); } ],
+		renderRecordsTable(_('Skipped rules and trace'), [
+			[ _('Rule'), function(row) { return firstValue(row, [ 'rule', 'policy', 'name', 'id' ], _('Unnamed step')); } ],
+			[ _('Path'), function(row) { return firstValue(row, [ 'use_strategy', 'strategy' ], _('Not reported')); } ],
 			[ _('Result'), function(row) { return row.matched ? _('Matched') : firstValue(row, [ 'result', 'decision', 'status' ], _('Skipped')); } ]
-		], skipped, _('No skipped-policy trace was reported.'))
+		], skipped, _('No skipped-rule trace was reported.'))
 	]);
 }
 
@@ -630,7 +630,7 @@ function renderPbrDiagnostics(pbr) {
 		renderInsightGrid([
 			[ _('PBR service'), pbr.service_running ? _('Running') : _('Not running'), _('Runtime state of the pbr service') ],
 			[ _('Mark mask'), firstValue(config, [ 'fw_mask' ], _('Not reported')), _('Mask overlap between mwan4 and PBR') ],
-			[ _('Rule priority'), firstValue(config, [ 'ip_rules_priority' ], _('Not reported')), _('Relative order of policy routing rules') ],
+			[ _('Rule priority'), firstValue(config, [ 'ip_rules_priority' ], _('Not reported')), _('Relative order of routing rule lookups') ],
 			[ _('IPv6 coverage'), config.ipv6_enabled ? firstValue(config, [ 'uplink_interface6' ], _('Missing uplink')) : _('Disabled'), _('Whether marked IPv6 has a matching route table') ]
 		]),
 		renderRecordsTable(_('PBR routing rules'), [
@@ -696,7 +696,7 @@ function renderTunnelDiagnostics(tunnels) {
 		return warning && typeof warning == 'object' ? warning : { message: warning };
 	});
 
-	return renderAdvancedSurface(_('Tunnel diagnostics'), _('Tunnels'), _('Show tunnel metadata, endpoint underlay routes, recursion risk, policy strategy, and data-plane reachability.'), [
+	return renderAdvancedSurface(_('Tunnel diagnostics'), _('Tunnels'), _('Show tunnel metadata, endpoint underlay routes, recursion risk, path, and data-plane reachability.'), [
 		renderDiagnosticsWarnings(tunnels),
 		renderInsightGrid([
 			[ _('Tunnels'), String(countItems(rows)), _('Detected tunnel interfaces or metadata rows') ],
@@ -781,7 +781,7 @@ function renderInterfacesDiagnostics(interfaces) {
 		renderDiagnosticsWarnings(interfaces),
 		renderInsightGrid([
 			[ _('WAN links'), String(countItems(rows)), _('Configured mwan4 interface sections') ],
-			[ _('Enabled'), String(rows.filter(function(row) { return row.enabled; }).length), _('Links enabled for policy routing') ],
+			[ _('Enabled'), String(rows.filter(function(row) { return row.enabled; }).length), _('Links enabled for routing rules') ],
 			[ _('Tunnel metadata'), String(rows.filter(function(row) { return row.tunnel; }).length), _('Links classified as tunnel transports') ]
 		]),
 		renderRecordsTable(_('WAN link ownership'), [
@@ -806,7 +806,7 @@ function renderRoutesDiagnostics(routes) {
 	routes = routes || {};
 	let rows = familyRows({ ipv4: routes.ipv4, ipv6: routes.ipv6 }, function(family, route) { return { family: family, route: route }; });
 
-	return renderAdvancedSurface(_('Route table snapshot'), _('Routes'), _('Show route lines copied or inspected by mwan4 before policy route generation.'), [
+	return renderAdvancedSurface(_('Route table snapshot'), _('Routes'), _('Show route lines copied or inspected by mwan4 before routes are generated.'), [
 		renderDiagnosticsWarnings(routes),
 		renderInsightGrid([
 			[ _('IPv4 routes'), String(countItems(routes.ipv4)), _('Routes reported by ip -4 route') ],
@@ -824,17 +824,17 @@ function renderRulesDiagnostics(rules) {
 	rules = rules || {};
 	let rows = familyRows({ ipv4: rules.ipv4, ipv6: rules.ipv6 }, function(family, rule) { return { family: family, rule: rule }; });
 
-	return renderAdvancedSurface(_('Traffic policy routing'), _('Rules'), _('Show live ip rule lines that steer marked traffic into mwan4-owned routing tables.'), [
+	return renderAdvancedSurface(_('Routing rule lookups'), _('Rules'), _('Show live ip rule lines that steer marked traffic into mwan4-owned routing tables.'), [
 		renderDiagnosticsWarnings(rules),
 		renderInsightGrid([
-			[ _('IPv4 rules'), String(countItems(rules.ipv4)), _('Traffic policies for IPv4') ],
-			[ _('IPv6 rules'), String(countItems(rules.ipv6)), _('Traffic policies for IPv6') ],
+			[ _('IPv4 rules'), String(countItems(rules.ipv4)), _('Routing rules for IPv4') ],
+			[ _('IPv6 rules'), String(countItems(rules.ipv6)), _('Routing rules for IPv6') ],
 			[ _('Total'), String(countItems(rows)), _('All reported rules') ]
 		]),
 		renderRecordsTable(_('Routing rule lines'), [
 			[ _('Family'), 'family' ],
 			[ _('Rule'), 'rule' ]
-		], rows, _('No policy routing rules were reported.'))
+		], rows, _('No routing rule lines were reported.'))
 	]);
 }
 
@@ -847,7 +847,7 @@ function renderNftablesDiagnostics(nftables) {
 		return Object.assign({ target: row.target }, row.value || {});
 	});
 
-	return renderAdvancedSurface(_('nftables runtime'), _('nftables'), _('Verify generated mwan4 nftables chains and installed rule files before debugging policy hits.'), [
+	return renderAdvancedSurface(_('nftables runtime'), _('nftables'), _('Verify generated mwan4 nftables chains and installed rule files before debugging rule matches.'), [
 		renderDiagnosticsWarnings(nftables),
 		renderInsightGrid([
 			[ _('Table'), firstValue(nftables, [ 'table' ], _('Not reported')), _('nftables table inspected by mwan4') ],
@@ -1110,7 +1110,7 @@ function renderRouteExplainForm() {
 			routeExplainInput(_('Destination port'), 'dest_port', '443', { placeholder: '443' }),
 			routeExplainInput(_('Ingress interface'), 'src_iface', '', { placeholder: 'lan' }),
 			routeExplainInput(_('DNS or nft set'), 'ipset', '', { placeholder: 'streaming' }),
-			routeExplainInput(_('Strategy override'), 'strategy', '', { placeholder: 'failover' })
+			routeExplainInput(_('Path override'), 'strategy', '', { placeholder: 'failover' })
 		]),
 		E('div', { class: 'mwan4-actions' }, [
 			E('button', {
@@ -1161,10 +1161,10 @@ function renderAdvancedWorkflows() {
 		renderWorkflowCard(_('MPTCP workflow'), _('Check endpoint roles, subflow limits, backup flags, and whether source routing keeps each subflow on the intended WAN.'), [
 			workflowAction(_('Run MPTCP'), 'mptcp')
 		]),
-		renderWorkflowCard(_('Quality and route explain'), _('Inspect latency/loss policy decisions, then explain the route choice for a representative traffic tuple.'), [
+		renderWorkflowCard(_('Quality and route explain'), _('Inspect latency and loss decisions, then explain the route choice for a representative traffic tuple.'), [
 			workflowAction(_('Run Quality'), 'quality')
 		], renderRouteExplainForm()),
-		renderWorkflowCard(_('Tunnels and underlay'), _('Review tunnel metadata, endpoint routes, recursion risk, underlay strategy, and data-plane reachability.'), [
+		renderWorkflowCard(_('Tunnels and underlay'), _('Review tunnel metadata, endpoint routes, recursion risk, tunnel endpoint path, and data-plane reachability.'), [
 			workflowAction(_('Run Tunnels'), 'tunnels')
 		]),
 		renderWorkflowCard(_('Ownership and cleanup'), _('Audit routing table, rule, chain, and counter ownership before cleanup or coexistence changes.'), [
@@ -1177,7 +1177,7 @@ function renderAdvancedWorkflows() {
 		renderWorkflowCard(_('PBR harmony'), _('Compare mark masks, route-table IDs, rule priorities, service state, and IPv6 uplink coverage between mwan4 and PBR.'), [
 			workflowAction(_('Run PBR'), 'pbr')
 		]),
-		renderWorkflowCard(_('Grouped counters'), _('Group rule, strategy, WAN, PBR, and tunnel counters so hit counts line up with the policy decision path.'), [
+		renderWorkflowCard(_('Grouped counters'), _('Group rule, path, WAN link, PBR, and tunnel counters so hit counts line up with the routing decision.'), [
 			workflowAction(_('Run Counters'), 'counters')
 		])
 	]);
@@ -1213,7 +1213,7 @@ return view.extend({
 			[ 'counters', _('Counters') ],
 			[ 'interfaces', _('WAN links') ],
 			[ 'routes', _('Paths') ],
-			[ 'rules', _('Traffic policies') ],
+			[ 'rules', _('Routing rules') ],
 			[ 'nftables', _('nftables') ],
 			[ 'service', _('Service') ],
 			[ 'tunnels', _('Tunnels') ],
