@@ -8,10 +8,12 @@
  * "Where would this traffic go?" Evaluates routing-rule drafts top to bottom like the backend (first match wins)
  * against a destination, protocol, port and device, using the live link health. Everything is pure.
  *
- * Match states are true, false or 'unknown'. Unknown is returned for what the browser cannot know: the address
- * behind a domain, the domain behind an address, the contents of an nft set, source ports and DSCP. Evaluation
- * stops at the first unknown rule and reports the outcome 'unknown'; `ifNot` then holds the result assuming
- * that rule does not apply. `local` is ignored: it only adds router-originated traffic, never removes LAN traffic.
+ * Match states are true, false or 'unknown'. Unknown is returned for what the browser cannot know: the domain behind
+ * an address, the contents of an nft set, source ports and DSCP. Evaluation stops at the first unknown rule and
+ * reports the outcome 'unknown'; `ifNot` then holds the result assuming that rule does not apply.
+ * A domain query against a rule that matches only addresses is the exception: that rule is assumed not to apply
+ * (a domain rarely resolves into a configured range) and listed in `assumptions`, so real configs stay testable.
+ * `local` is ignored: it only adds router-originated traffic, never removes LAN traffic.
  */
 
 const BUILTIN   = [ 'default', 'unreachable', 'blackhole' ];
@@ -197,7 +199,7 @@ function destinationOf(query) {
 
 function unresolved(dest, subject) {
 	if (dest.kind == 'none')
-		return verdict('unknown', _('no destination given'));
+		return verdict('unknown', _('depends on the destination, which was not given'));
 
 	return verdict('unknown', dest.kind == 'domain' ? _('depends on the address the domain resolves to') : subject);
 }
@@ -225,6 +227,8 @@ function destIpPart(rule, dest) {
 	}
 	if (dest.kind == 'domain' && rule.dest_ip.some(cidr => /\/0$/.test(cidr)))
 		return verdict(true, _('matches any address'));
+	if (dest.kind == 'domain' && !rule.domain.length && !rule.ipset)
+		return Object.assign(verdict(false, _('matches addresses, not names (assumed not to apply)')), { assumed: true });
 
 	return unresolved(dest, '');
 }
@@ -305,7 +309,11 @@ function matchRule(rule, query, dest) {
 	let parts = [ familyPart(rule, dest), domainPart(rule, dest), destIpPart(rule, dest), ipsetPart(rule, dest), protoPart(rule, query),
 		portPart(rule, query), srcPortPart(rule), dscpPart(rule, query) ].concat(sourceParts(rule, source));
 
-	return combine(parts.filter(Boolean));
+	let result = combine(parts.filter(Boolean));
+
+	result.assumed = parts.some(part => part && part.assumed) && combine(parts.filter(part => part && !part.assumed)).state !== false;
+
+	return result;
 }
 
 function joinList(items) {
@@ -372,19 +380,29 @@ function step(rules, index, matched, because) {
 
 function walk(rules, query, dest, stopAtUnknown) {
 	let steps = [];
+	let assumptions = [];
 
 	for (let index = 0; index < rules.length; index++) {
 		let rule = normalizeRule(rules[index]);
 		let result = isEnabled(rule) ? matchRule(rule, query, dest) : { state: false, because: [ _('disabled') ] };
 
 		steps.push(step(rules, index, result.state, result.because));
+		if (result.assumed)
+			assumptions.push({ rule: rules[index], index: index, entries: rule.dest_ip });
 		if (result.state === true)
-			return { steps: steps, hit: index };
+			return { steps: steps, assumptions: assumptions, hit: index };
 		if (result.state === 'unknown' && stopAtUnknown)
-			return { steps: steps, maybe: index };
+			return { steps: steps, assumptions: assumptions, maybe: index };
 	}
 
-	return { steps: steps };
+	return { steps: steps, assumptions: assumptions };
+}
+
+function assumptionText(assumptions) {
+	let names = assumptions.map(item => ruleName(item.rule));
+	let list = names.length > 3 ? _('%s and %d more').format(names.slice(0, 3).join(', '), names.length - 3) : joinList(names);
+
+	return assumptions.length ? ' ' + _('Assumes the site does not resolve into the address ranges of: %s.').format(list) : '';
 }
 
 function describe(rules, found, ctx) {
@@ -393,7 +411,7 @@ function describe(rules, found, ctx) {
 	let text = _('Matches rule "%s" (#%d) and %s.').format(ruleName(rule), found.hit + 1, path.how);
 
 	return { outcome: path.outcome, matched: { rule: rule, index: found.hit }, steps: found.steps, path: normalizeRule(rule).via,
-		usable: path.usable, text: text };
+		usable: path.usable, assumptions: found.assumptions, text: text + assumptionText(found.assumptions) };
 }
 
 function describeMaybe(rules, found) {
@@ -401,7 +419,7 @@ function describeMaybe(rules, found) {
 	let reasons = found.steps[found.maybe].because.join(', ');
 
 	return { outcome: 'unknown', matched: null, maybe: { rule: rule, index: found.maybe }, steps: found.steps, path: null, usable: [],
-		text: _('Cannot tell: rule "%s" (#%d) %s.').format(ruleName(rule), found.maybe + 1, reasons) };
+		assumptions: found.assumptions, text: _('Cannot tell: rule "%s" (#%d) %s.').format(ruleName(rule), found.maybe + 1, reasons) };
 }
 
 function decide(rules, query, ctx, stopAtUnknown) {
@@ -412,8 +430,12 @@ function decide(rules, query, ctx, stopAtUnknown) {
 	if (found.maybe != null)
 		return describeMaybe(rules, found);
 
-	return { outcome: 'normal', matched: null, steps: found.steps, path: 'default', usable: [],
-		text: _('No routing rule matches, so this traffic uses normal routing.') };
+	return { outcome: 'normal', matched: null, steps: found.steps, path: 'default', usable: [], assumptions: found.assumptions,
+		text: _('No routing rule matches, so this traffic uses normal routing.') + assumptionText(found.assumptions) };
+}
+
+function lowerFirst(text) {
+	return text.charAt(0).toLowerCase() + text.slice(1);
 }
 
 function evaluate(query, rules, strategies, routes, status) {
@@ -425,7 +447,8 @@ function evaluate(query, rules, strategies, routes, status) {
 		return result;
 
 	result.ifNot = decide(rules, query, ctx, false);
-	result.text = _('%s Otherwise: %s').format(result.text, result.ifNot.text);
+	result.text = _('Most likely: %s Rule "%s" (#%d) could change this because it %s.').format(lowerFirst(result.ifNot.text),
+		ruleName(result.maybe.rule), result.maybe.index + 1, result.steps[result.maybe.index].because.join(', '));
 
 	return result;
 }

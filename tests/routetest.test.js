@@ -168,10 +168,10 @@ assert.ok(result.steps[2].because[0].indexOf('only for aa:bb:cc:dd:ee:01, no dev
 result = run({ destination: 'example.com', source: { ip: '10.0.0.5' } });
 assert.equal(result.outcome, 'unknown', 'a MAC rule cannot be checked with only an IP address');
 assert.equal(result.maybe.rule.name, 'phone');
-assert.equal(result.text.indexOf('Cannot tell: rule "phone" (#3) depends on the MAC address of the device.'), 0, result.text);
+assert.equal(result.text, 'Most likely: matches rule "default_rule_v4" (#7) and goes through Str because Tim is offline. ' +
+	'Rule "phone" (#3) could change this because it depends on the MAC address of the device.');
 assert.equal(result.ifNot.outcome, 'link', 'ifNot assumes the unknown rule does not apply');
 assert.equal(result.ifNot.matched.rule.name, 'default_rule_v4');
-assert.ok(result.text.indexOf(' Otherwise: Matches rule "default_rule_v4"') > 0);
 result = run({ destination: 'example.com', source: { iface: 'guest', ip: '10.9.0.5', mac: 'aa:bb:cc:dd:ee:55' } }, [ rule('guest', { src_iface: 'guest', via: 'tim_first' }) ].concat(rules), allOnline);
 assert.equal(result.matched.rule.name, 'guest');
 result = run({ destination: 'example.com', source: { iface: 'lan', ip: '10.0.0.5', mac: 'aa:bb:cc:dd:ee:55' } }, [ rule('guest', { src_iface: 'guest', via: 'tim_first' }) ].concat(rules), allOnline);
@@ -231,16 +231,28 @@ assert.equal(result.matched.rule.name, 'default_rule_v6', 'icmp rules are IPv4 o
 result = run({ destination: '198.51.100.9', proto: 'tcp' }, ipRules);
 assert.equal(result.matched.rule.name, 'default_rule_v4');
 
-// domain vs address: what cannot be known
+// domain vs address-only rules: assumed not to apply, evaluation goes on
 result = run({ destination: 'example.com' }, [ rule('lan', { dest_ip: [ '203.0.113.0/24' ], via: 'wg_wan_only' }) ].concat(rules.slice(-2)));
-assert.equal(result.outcome, 'unknown');
-assert.equal(result.matched, null);
-assert.equal(result.maybe.rule.name, 'lan');
-assert.equal(result.steps.length, 1, 'evaluation stops at the unknown rule');
-assert.deepEqual(result.steps[0], { rule: result.maybe.rule, index: 0, matched: 'unknown', because: [ 'depends on the address the domain resolves to' ] });
-assert.equal(result.ifNot.matched.rule.name, 'default_rule_v4');
-assert.equal(result.ifNot.steps[0].matched, 'unknown');
-assert.equal(result.ifNot.outcome, 'link');
+assert.equal(result.outcome, 'link');
+assert.equal(result.matched.rule.name, 'default_rule_v4');
+assert.deepEqual(result.steps[0], { rule: result.steps[0].rule, index: 0, matched: false, because: [ 'matches addresses, not names (assumed not to apply)' ] });
+assert.deepEqual(result.assumptions.map(item => [ item.rule.name, item.index, item.entries ]), [ [ 'lan', 0, [ '203.0.113.0/24' ] ] ]);
+assert.equal(result.text, 'Matches rule "default_rule_v4" (#2) and goes through Str because Tim is offline. ' +
+	'Assumes the site does not resolve into the address ranges of: lan.');
+result = run({ destination: 'example.com' }, [ rule('a b', { dest_ip: [ '1.1.1.0/24' ] }), rule('b', { dest_ip: [ '2.2.2.0/24' ] }), rule('c', { dest_ip: [ '3.3.3.0/24' ] }) ]);
+assert.equal(result.outcome, 'normal');
+assert.equal(result.text, 'No routing rule matches, so this traffic uses normal routing. Assumes the site does not resolve into the address ranges of: a b, b and c.');
+result = run({ destination: 'example.com' }, [ 'a', 'b', 'c', 'd', 'e' ].map(name => rule(name, { dest_ip: [ '9.9.9.0/24' ] })).concat([ rules[6] ]));
+assert.equal(result.assumptions.length, 5);
+assert.ok(/ranges of: a, b, c and 2 more\.$/.test(result.text), result.text);
+result = run({ destination: 'example.com' }, [ rule('other-dev', { dest_ip: [ '9.9.9.0/24' ], src_mac: [ 'aa:bb:cc:dd:ee:01' ] }) ]);
+assert.deepEqual(result.assumptions, [], 'a rule that cannot match anyway for another reason is not an assumption');
+assert.ok(!/Assumes/.test(result.text));
+result = run({ destination: 'example.com' }, [ rule('mixed', { domain: [ 'example.com' ], dest_ip: [ '9.9.9.0/24' ] }) ]);
+assert.equal(result.outcome, 'unknown', 'a rule with a domain and an address range still depends on the resolved address');
+result = run({ destination: 'youtube.com' }, [ rule('vivo modem', { dest_ip: [ '192.168.15.1' ], via: 'default' }) ].concat(rules));
+assert.equal(result.matched.rule.name, 'youtube');
+assert.ok(/Assumes the site does not resolve into the address ranges of: vivo modem\.$/.test(result.text));
 result = run({ destination: 'example.com' }, [ rule('set', { ipset: 'streaming', via: 'str_first' }) ]);
 assert.equal(result.outcome, 'unknown');
 assert.equal(result.ifNot.outcome, 'normal');
@@ -255,7 +267,7 @@ assert.equal(result.ifNot.matched.rule.name, 'default_rule_v4', 'ifNot skips the
 result = run({ destination: '203.0.113.7', source: { mac: 'aa:bb:cc:dd:ee:99' } }, [ rules[2] ].concat(rules.slice(-2)));
 assert.equal(result.outcome, 'link');
 assert.equal(result.matched.rule.name, 'default_rule_v4');
-result = run({ destination: 'example.com', source: { ip: '10.0.0.149' } }, [ rule('hole', { dest_ip: [ '203.0.113.0/24' ] }), rule('dev', { src_ip: [ '10.0.0.0/24' ], via: 'tim_first' }) ]);
+result = run({ destination: 'example.com', source: { ip: '10.0.0.149' } }, [ rule('hole', { ipset: 'streaming' }), rule('dev', { src_ip: [ '10.0.0.0/24' ], via: 'tim_first' }) ]);
 assert.equal(result.outcome, 'unknown', 'a definite later match is not trusted past an unknown rule');
 assert.equal(result.ifNot.matched.rule.name, 'dev');
 result = run({ destination: 'example.com' }, [ rule('hole', { dest_ip: [ '0.0.0.0/0', '::/0' ], via: 'tim_first' }) ]);
@@ -265,7 +277,7 @@ assert.equal(result.matched.rule.name, 'phone', 'a device-only rule matches with
 result = run({}, rules.slice(0, 1));
 assert.equal(result.outcome, 'unknown');
 assert.equal(result.maybe.rule.name, 'youtube');
-assert.ok(result.steps[0].because[0].indexOf('no destination given') == 0);
+assert.ok(result.steps[0].because[0].indexOf('depends on the destination, which was not given') == 0);
 
 // DSCP and source port cannot be known
 result = run({ destination: 'example.com' }, [ rule('voice', { dscp: '46', via: 'tim_first' }) ]);
