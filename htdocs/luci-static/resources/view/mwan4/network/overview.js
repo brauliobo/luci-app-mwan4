@@ -2945,7 +2945,6 @@ return view.extend({
 			uci.load('network'),
 			L.resolveDefault(callStatus(), {}),
 			L.resolveDefault(callSessionAccess('access-group', 'luci-app-mwan4-operator', 'write'), false),
-			L.resolveDefault(callSessionAccess('access-group', 'luci-app-mwan4-advanced', 'write'), false),
 			L.resolveDefault(callSessionAccess('access-group', 'luci-app-mwan4-diagnostics', 'read'), false),
 			L.resolveDefault(callStatus('counters'), {}),
 			L.resolveDefault(fs.stat('/usr/bin/httping'), {}),

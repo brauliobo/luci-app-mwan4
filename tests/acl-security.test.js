@@ -406,3 +406,14 @@ assert.match(commonView, /warning\.check/,
 	'shared runtime warning renderer should show backend check hints');
 
 console.log('ACL security expectations passed');
+
+// The overview reads its load() results by position: one entry more or less in load() silently shifts every field in render().
+{
+	const source = fs.readFileSync(path.join(root, 'htdocs/luci-static/resources/view/mwan4/network/overview.js'), 'utf8');
+	const body = source.slice(source.indexOf('\tload: function() {'), source.indexOf('\trender: function(data)'));
+	const loaded = (body.match(/^\t\t\t(?:uci\.load|L\.resolveDefault|mwan4\w+\.probe)\(/gm) || []).length;
+	const render = source.slice(source.indexOf('\trender: function(data)'));
+	const used = Math.max(...[ ...render.matchAll(/\bdata\[(\d+)\]/g) ].map(match => Number(match[1])));
+
+	assert.equal(loaded, used + 1, 'overview load() fetches exactly what render() reads by index');
+}
